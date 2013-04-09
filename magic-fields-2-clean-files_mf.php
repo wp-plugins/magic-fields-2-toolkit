@@ -85,8 +85,9 @@ function get_unreferenced_image_files_in_folder_files_mf() {
       . 'noheader=true"><ol>' );
     foreach ( $unreferenced as $i => $unreference ) {
       echo( '<li><input type="checkbox" name="to-be-deleted-' . $i . '" value="'
-        . $unreference . '">&nbsp;&nbsp;"' . $unreference
-        . '"</li>' );
+        . $unreference . '">&nbsp;&nbsp;<a href="' . MF_FILES_URL . $unreference
+        . '" target="_blank"><span style="font-weight:bold;">&quot;'
+        . $unreference . '&quot;</span></a></li>' );
     }
     echo( '</ol><input type="submit" value="Delete Checked"></form></div>' );
   }
