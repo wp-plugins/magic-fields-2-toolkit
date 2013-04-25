@@ -4,7 +4,7 @@ Donate link:
 Tags: custom, post, copier, fields, shortcode
 Requires at least: 3.5.1
 Tested up to: 3.5.1
-Stable tag: 0.3
+Stable tag: 0.3.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Plugin adds some useful features to the Magic Fields 2 plugin.
@@ -60,6 +60,9 @@ Toolkit' menu item and select the features you want.
 
 == Changelog ==
 
+= 0.3.1 =
+Minor correction to 0.3
+
 = 0.3 =
 * Added a search widget for Magic Fields.
 * Added an alternate textbox field that allows you to select previously entered data.
@@ -79,3 +82,6 @@ This version provides new features and improvements to previous features.
 
 = 0.3 =
 This version provides new features.
+
+= 0.3.1 =
+A minor correction made.
