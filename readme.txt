@@ -4,7 +4,7 @@ Donate link:
 Tags: custom, post, copier, fields, shortcode
 Requires at least: 3.5.1
 Tested up to: 3.5.1
-Stable tag: 0.2
+Stable tag: 0.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Plugin adds some useful features to the Magic Fields 2 plugin.
@@ -22,8 +22,13 @@ easy to display a table of custom field names and their values.
    
    4. Provides an alternate related type field which uses multiple selection checkboxes instead of a single selection dropdown.
    
-Please visit the [Toolkit's online documentation](http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-2/) for more 
+   5. Provides a search widget that does searches based on Magic Fields 2 field values.
+   
+   6. Provides an alternate textbox field that allows you to select previously entered data.
+   
+Please visit the [Toolkit's online documentation](http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-3/) for more 
 details.
+This plugin requires at least PHP 5.4.
 
 == Installation ==
 1. Upload the `Magic Fields 2 Toolkit` folder to the `/wp-content/plugins/` directory
@@ -33,10 +38,10 @@ details.
 4. To copy a custom post open the "All Your Custom Post Type" menu item and click on "Create Copy" for 
    the entry of the desired post.
 5. To use shortcodes please see
-[the online documentation](http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-2/#shortcode).
+[the online documentation](http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-3/#shortcode).
 6. Other features are self-explanatory.
 7. The most current documentation is available at
-   [Toolkit's online documentation](http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-2/).
+   [Toolkit's online documentation](http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-3/).
 
 == Frequently Asked Questions ==
 
@@ -55,6 +60,10 @@ Toolkit' menu item and select the features you want.
 
 == Changelog ==
 
+= 0.3 =
+* Added a search widget for Magic Fields.
+* Added an alternate textbox field that allows you to select previously entered data.
+
 = 0.2 =
 * Added an alternate related type field which uses multiple selection checkboxes instead of a single selection
 dropdown.
@@ -67,3 +76,6 @@ dropdown.
 
 = 0.2 =
 This version provides new features and improvements to previous features.
+
+= 0.3 =
+This version provides new features.
