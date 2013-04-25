@@ -2,9 +2,9 @@
 
 /*
 Plugin Name: Magic Fields 2 Toolkit
-Plugin URI: http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-2/
+Plugin URI: http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-3/
 Description: custom post copier, custom fields shortcodes, ...
-Version: 0.2
+Version: 0.3
 Author: Magenta Cuda
 Author URI: http://magentacuda.wordpress.com
 License: GPL2
@@ -28,6 +28,10 @@ class Magic_Fields_2_Toolkit_Init {
             if ( array_key_exists( 'clean_files_mf', $options ) ) {
                 include( dirname(__FILE__)
                     . '/magic-fields-2-clean-files_mf.php' );
+            }
+            if ( array_key_exists( 'search_using_magic_fields', $options ) ) {
+                include( dirname(__FILE__)
+                    . '/search-by-custom-field.php' );
             }
         }
         add_action( 'plugins_loaded', function() {
