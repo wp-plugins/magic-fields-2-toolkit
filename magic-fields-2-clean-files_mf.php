@@ -28,7 +28,7 @@ function get_unreferenced_image_files_in_folder_files_mf() {
   global $wpdb;
   echo( '<h2>Unreferenced Files in Folder "wp-content/files_mf/"</h2>' );
   if ( $handle = opendir( MF_FILES_DIR ) ) {
-    $entries = [];
+    $entries = array();
     while ( false !== ($entry = readdir( $handle ) ) ) {
       if ( is_dir( MF_FILES_DIR . $entry ) ) { continue; }
       $entries[] = $entry;    
@@ -57,7 +57,7 @@ function get_unreferenced_image_files_in_folder_files_mf() {
       . 'margin:10px 20px;padding:5px;display:none;"><button style'
       . '="float:right;" onclick="this.parentNode.style.display=\'none\';'
       . 'return false;">X</button><ol>' );
-    $referenced = [];
+    $referenced = array();
     foreach ( $results as $result ) {
       if ( !$result['meta_value'] ) { continue; }
       $referenced[] = $result['meta_value'];

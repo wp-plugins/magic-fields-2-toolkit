@@ -29,8 +29,9 @@ add_action( 'admin_action_magic_fields_2_toolkit_copy_post', function() {
     global $wpdb;
     #error_log( '$_REQUEST=' . print_r( $_REQUEST, TRUE ) );
     try {
-        $post = $wpdb->get_results( 'SELECT * FROM ' . $wpdb->posts
-            . ' WHERE ID = ' . $_REQUEST['post'], ARRAY_A )[0];
+        $result = $wpdb->get_results( 'SELECT * FROM ' . $wpdb->posts
+            . ' WHERE ID = ' . $_REQUEST['post'], ARRAY_A );
+        $post = $result[0];
         #error_log( 'original $post=' . print_r( $post, TRUE ) );
         unset( $post['ID'] );
         $post['guid'] = '';
@@ -47,13 +48,13 @@ add_action( 'admin_action_magic_fields_2_toolkit_copy_post', function() {
             throw new Exception( '' );
         }
         $id = (int) $wpdb->insert_id; 
-        $wpdb->update( $wpdb->posts, [ 'guid' => get_permalink( $id ) ],
-            [ 'ID' => $id ] );
+        $wpdb->update( $wpdb->posts, array( 'guid' => get_permalink( $id ) ),
+            array( 'ID' => $id ) );
         #$post2 = $wpdb->get_results( 'SELECT * FROM ' . $wpdb->posts
         #    . ' WHERE ID = ' . $id, ARRAY_A )[0];
         #error_log( 'copied $post2=' . print_r( $post2, TRUE ) );
         
-        $new_meta_id = [];
+        $new_meta_id = array();
         foreach( $wpdb->get_results( 'SELECT * FROM ' . $wpdb->postmeta
             . ' WHERE post_id = ' . $_REQUEST['post'], ARRAY_A ) as $row ) {
             if ( $row['meta_key'] == 'edit_last'
@@ -82,11 +83,12 @@ add_action( 'admin_action_magic_fields_2_toolkit_copy_post', function() {
             $row['object_id'] = $id;
             #error_log( 'term_relationships row=' . print_r( $row, TRUE ) );
             $wpdb->insert( $wpdb->term_relationships, $row );
-            $count = $wpdb->get_col( 'SELECT count FROM ' . $wpdb->term_taxonomy
-                . ' WHERE term_taxonomy_id = ' . $row['term_taxonomy_id'] )[0];
+            $result = $wpdb->get_col( 'SELECT count FROM ' . $wpdb->term_taxonomy
+                . ' WHERE term_taxonomy_id = ' . $row['term_taxonomy_id'] );
+            $count = $result[0];
             #error_log( 'count=' . print_r( $count, TRUE ) );
-            $wpdb->update( $wpdb->term_taxonomy, [ 'count' => ( $count + 1 ) ],
-               [ 'term_taxonomy_id' => $row['term_taxonomy_id'] ] );
+            $wpdb->update( $wpdb->term_taxonomy, array( 'count' => ( $count + 1 ) ),
+               array( 'term_taxonomy_id' => $row['term_taxonomy_id'] ) );
         }
         
         wp_redirect( admin_url( 'post.php?action=edit&post=' . $id ) );

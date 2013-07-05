@@ -2,7 +2,7 @@
 
 /*
  * Description:   Widget for searching by Magic Fields 2 custom fields and custom taxonomies.
- * Documentation: http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-2/#search
+ * Documentation: http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4/#search
  * Author:        Magenta Cuda
  * License:       GPL2
  */
@@ -16,19 +16,24 @@ class Search_Using_Magic_Fields_Widget extends WP_Widget {
 		parent::__construct(
             'search_magic_fields',
             __( 'Search using Magic Fields' ),
-            [
+            array(
                 'classname' => 'search_magic_fields_widget',
                 'description' => __( "Search for Custom Posts using Magic Fields" )
-            ]
+            )
         );
 	}
 
 	public function widget( $args, $instance ) {
         global $wpdb;
         extract( $args );
+        #error_log( '##### Search_Using_Magic_Fields_Widget::widget():$instance=' . print_r( $instance, TRUE ) );
 ?>
-<form id="search-using-magic-fields" method="get" action="<?php echo esc_url( home_url( '/' ) ); ?>">
-<input id="magic_fields_form" name="magic_fields_form" type="hidden" value="magic-fields-search">
+<form id="search-using-magic-fields-<?php echo $this->number; ?>" method="get" action="<?php echo esc_url( home_url( '/' ) ); ?>">
+<input id="magic_fields_search_form" name="magic_fields_search_form" type="hidden" value="magic-fields-search">
+<input id="magic_fields_search_widget_option" name="magic_fields_search_widget_option" type="hidden"
+    value="<?php echo $this->option_name; ?>">
+<input id="magic_fields_search_widget_number" name="magic_fields_search_widget_number" type="hidden"
+    value="<?php echo $this->number; ?>">
 <h2>Search:</h2>
 <div class="magic-field-parameter" style="padding:5px 10px;border:2px solid black;margin:5px;">
 <h3>post type:</h3>
@@ -39,7 +44,10 @@ class Search_Using_Magic_Fields_Widget extends WP_Widget {
             . ' GROUP BY post_type ORDER BY count(*) DESC LIMIT ' . Search_Using_Magic_Fields_Widget::$sql_limit, ARRAY_A );
         foreach ( $results as $result ) {
             $name = $result['post_type'];
-            if ( $name === 'attachment' || $name === 'revision' || $name === 'nav_menu_item' ) { continue; }
+            if ( $name === 'attachment' || $name === 'revision' || $name === 'nav_menu_item' || $name === 'content_macro' ) {
+                continue;
+            }
+            if ( !in_array( $name, array_keys( $instance ) ) ) { continue; }
 ?>      
 <option value="<?php echo $name; ?>"><?php echo $name . ' (' . $result['count(*)'] . ')'; ?></option>
 <?php
@@ -51,17 +59,22 @@ class Search_Using_Magic_Fields_Widget extends WP_Widget {
 <input type="submit" value="Search">
 </form>
 <script>
-jQuery("form#search-using-magic-fields select#post_type").change(function(){
+jQuery("form#search-using-magic-fields-<?php echo $this->number; ?> select#post_type").change(function(){
     //console.log("select#post_type change");
     jQuery.post(
         '<?php echo admin_url( 'admin-ajax.php' ); ?>',
         {
             action : '<?php echo Search_Using_Magic_Fields_Widget::$get_form_for_post_type; ?>',
-            post_type: jQuery("form#search-using-magic-fields select#post_type option:selected").val()
+            post_type: jQuery("form#search-using-magic-fields-<?php echo $this->number; ?> select#post_type option:selected")
+                .val(),
+            magic_fields_search_widget_option:
+                jQuery("form#search-using-magic-fields-<?php echo $this->number; ?> input#magic_fields_search_widget_option").val(),
+            magic_fields_search_widget_number:
+                jQuery("form#search-using-magic-fields-<?php echo $this->number; ?> input#magic_fields_search_widget_number").val()
         },
         function(response){
             //console.log(response);
-            jQuery("form#search-using-magic-fields div#magic-fields-parameters").html(response);
+            jQuery("form#search-using-magic-fields-<?php echo $this->number; ?> div#magic-fields-parameters").html(response);
         }
     );
 });
@@ -69,6 +82,57 @@ jQuery("form#search-using-magic-fields select#post_type").change(function(){
 <?php
 	}
     
+    public function update( $new, $old ) {
+        #error_log( '##### Search_Using_Magic_Fields_Widget::update():backtrace='
+        #    . print_r( debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS ), TRUE ) );
+        #error_log( '##### Search_Using_Magic_Fields_Widget::update():$_POST=' . print_r( $_POST, TRUE ) );    
+        #error_log( '##### Search_Using_Magic_Fields_Widget::update():$old=' . print_r( $old, TRUE ) );
+        #error_log( '##### Search_Using_Magic_Fields_Widget::update():$new=' . print_r( $new, TRUE ) );
+        return array_map( function( $values ) { return array_map( strip_tags, $values ); }, $new );
+    }
+    
+    public function form( $instance ) {
+        global $wpdb;
+        #error_log( '##### Search_Using_Magic_Fields_Widget::form():$instance=' . print_r( $instance, TRUE ) );
+        $results = $wpdb->get_results( 'SELECT post_type, count(*) FROM ' . $wpdb->posts . ' WHERE post_status = "publish"'
+            . ' GROUP BY post_type ORDER BY count(*) DESC LIMIT ' . Search_Using_Magic_Fields_Widget::$sql_limit, ARRAY_A );
+        foreach ( $results as $result ) {
+            $name = $result['post_type'];
+            if ( $name === 'attachment' || $name === 'revision' || $name === 'nav_menu_item' || $name === 'content_macro' ) {
+                continue;
+            }
+            $selected = $instance[$name];
+?>
+<h4>Select Search Fields for <?php echo $name . ' (' . $result['count(*)'] . ')'; ?></h4>
+<select id="<?php echo $this->get_field_id( $name ); ?>" name="<?php echo $this->get_field_name( $name ); ?>[]"
+    multiple size="4" style="width:100%;">
+<?php
+            foreach ( get_taxonomies( '', 'objects' ) as $taxonomy ) {
+                #error_log( '##### $taxonomy=' . print_r( $taxonomy, TRUE ) );
+                if ( !in_array( $name, $taxonomy->object_type ) ) { continue; }
+                $tax_type = ( $taxonomy->hierarchical ) ? 'tax-cat-' : 'tax-tag-';
+                $tax_label = ( $taxonomy->hierarchical ) ? ' (category)' : ' (tag)';
+?>
+<option value="<?php echo $tax_type . $taxonomy->name; ?>"
+    <?php echo ( $selected && in_array( $tax_type . $taxonomy->name, $selected ) ) ? ' selected' : ''; ?>>
+    <?php echo $taxonomy->name . $tax_label; ?></option>
+<?php
+            }    
+            $fields = $wpdb->get_results( 'SELECT name, label FROM ' . MF_TABLE_CUSTOM_FIELDS
+                . ' WHERE post_type = "' . $name . '" ORDER BY custom_group_id, display_order', OBJECT_K );
+            $fields['pst-std-post_content'] = (object) array( 'label' => 'Post Content' );
+            foreach ( $fields as $meta_key => $field ) {
+?>
+<option value="<?php echo $meta_key; ?>"
+    <?php echo ( $selected && in_array( $meta_key, $selected ) ) ? ' selected' : ''; ?>>
+    <?php echo $field->label . ' (field)'; ?></option>
+<?php
+            }
+?>
+</select>
+<?php
+        }
+    }
 }
 
 add_action(
@@ -91,19 +155,38 @@ if ( is_admin() ) {
         'wp_ajax_nopriv_' . Search_Using_Magic_Fields_Widget::$get_form_for_post_type,
         function() {
             global $wpdb;
-            #error_log( '##### wp_ajax_nopriv_' . Search_Using_Magic_Fields_Widget::$get_form_for_post_type . ' called.' );
+            #error_log( '##### wp_ajax_nopriv_' . Search_Using_Magic_Fields_Widget::$get_form_for_post_type . ':$_REQUEST='
+            #    . print_r( $_REQUEST, TRUE ) );
+            $option = get_option( $_REQUEST['magic_fields_search_widget_option'] );
+            #error_log( '##### wp_ajax_nopriv_' . Search_Using_Magic_Fields_Widget::$get_form_for_post_type . ':$option='
+            #    . print_r( $option, TRUE ) );
+            $number = $_REQUEST['magic_fields_search_widget_number'];
+            $selected = $option[$_REQUEST['magic_fields_search_widget_number']][$_REQUEST['post_type']];
+            #error_log( '##### wp_ajax_nopriv_' . Search_Using_Magic_Fields_Widget::$get_form_for_post_type . ':$selected='
+            #    . print_r( $selected, TRUE ) );
             foreach ( get_taxonomies( '', 'objects' ) as $taxonomy ) {
                 #error_log( '##### $taxonomy=' . print_r( $taxonomy, TRUE ) );
                 if ( in_array( $_REQUEST['post_type'], $taxonomy->object_type ) ) {
                     $tax_type = ( $taxonomy->hierarchical ) ? 'tax-cat-' : 'tax-tag-';
-                    $cloud = wp_tag_cloud( [ 'format' => 'array', 'taxonomy' => $taxonomy->name ] );
+                    if ( !in_array( $tax_type . $taxonomy->name, $selected ) ) { continue; }
+                    #$cloud = wp_tag_cloud( [ 'format' => 'array', 'taxonomy' => $taxonomy->name ] );
                     #error_log( '##### $cloud=' . print_r( $cloud, TRUE ) );
-                    $terms = [];
-                    foreach ( $cloud as $term ) {
-                        $terms[substr( $term, strpos( $term, '>' ) + 1, -4 )]
-                            = sscanf( substr( $term, strpos( $term, 'title=\'' ) + 7 ), '%d' )[0];
-                    }
-                    arsort( $terms, SORT_NUMERIC );
+                    #$terms = [];
+                    #foreach ( $cloud as $term ) {
+                    #    $terms[substr( $term, strpos( $term, '>' ) + 1, -4 )]
+                    #        = sscanf( substr( $term, strpos( $term, 'title=\'' ) + 7 ), '%d' )[0];
+                    #}
+                    #arsort( $terms, SORT_NUMERIC );
+                    #error_log( '##### $terms=' . print_r( $terms, TRUE ) );
+                    $results = $wpdb->get_results( 'SELECT t.name, COUNT(*) from '
+                        . $wpdb->term_relationships . ' r, ' . $wpdb->term_taxonomy . ' x, ' . $wpdb->terms . ' t, '
+                        . $wpdb->posts . ' p WHERE r.term_taxonomy_id = x.term_taxonomy_id AND x.term_id = t.term_id '
+                        . 'AND r.object_id = p.ID AND x.taxonomy = "' . $taxonomy->name . '" AND p.post_type = "'
+                        . $_REQUEST['post_type'] .'" GROUP BY t.term_id ORDER BY COUNT(*) DESC LIMIT '
+                        . Search_Using_Magic_Fields_Widget::$sql_limit, ARRAY_A );
+                    #error_log( '##### $results=' . print_r( $results, TRUE ) );
+                    $terms = array();
+                    foreach ( $results as $result ) { $terms[$result['name']] = $result['COUNT(*)']; }
                     #error_log( '##### $terms=' . print_r( $terms, TRUE ) );
 ?>
 <div class="magic-field-parameter" style="padding:5px 10px;border:2px solid black;margin:5px;">
@@ -132,10 +215,11 @@ if ( is_admin() ) {
             #    . 'WHERE m.post_id = p.ID AND p.post_type = "' . $_REQUEST['post_type'] .'"' );
             $fields = $wpdb->get_results( 'SELECT name, type, label FROM ' . MF_TABLE_CUSTOM_FIELDS
                 . ' WHERE post_type = "' . $_REQUEST['post_type'] . '" ORDER BY custom_group_id, display_order', OBJECT_K );
-            $fields['pst-std-post_content'] = (object) [ 'type' => 'multiline', 'label' => 'Post Content' ];
+            $fields['pst-std-post_content'] = (object) array( 'type' => 'multiline', 'label' => 'Post Content' );
             foreach ( $fields as $meta_key => $field ) {
                 #if ( $meta_key === '_edit_last' || $meta_key === '_edit_lock' ) { continue; }
                 #error_log( '##### $meta_key=' . $meta_key );
+                if ( !in_array( $meta_key, $selected ) ) { continue; } 
 ?>
 <div class="magic-field-parameter" style="padding:5px 10px;border:2px solid black;margin:5px;">
 <h3><?php echo $field->label ?>:</h3>
@@ -161,7 +245,7 @@ if ( $field->type === 'file' || $field->type === 'image' || $field->type === 'au
 ?>">
 <option value="no-selection" selected>--no <?php echo $field->label ?> selected--</option>
 <?php
-                $values = [];
+                $values = array();
                 foreach ( $results as $result ) {
                     if ( !$result['meta_value'] ) { continue; }
                     #error_log( '##### ' . $meta_key . ': ' . print_r( $result, TRUE ) );
@@ -224,7 +308,7 @@ if ( $field->type === 'file' || $field->type === 'image' || $field->type === 'au
             }
 ?>
 <script type="text/javascript">
-jQuery("form#search-using-magic-fields div.magic-field-parameter select").change(function(){
+jQuery("form#search-using-magic-fields-<?php echo $number; ?> div.magic-field-parameter select").change(function(){
     //console.log(jQuery("option:selected",this).text());
     if(jQuery("option:selected:last",this).text()=="--Enter New Search Value--"){
         jQuery(this).css("display","none");
@@ -233,7 +317,7 @@ jQuery("form#search-using-magic-fields div.magic-field-parameter select").change
         input.select();
     }
 });
-jQuery("form#search-using-magic-fields div.magic-field-parameter input.for-select").change(function(){
+jQuery("form#search-using-magic-fields-<?php echo $number; ?> div.magic-field-parameter input.for-select").change(function(){
     //console.log(jQuery(this).val());
     //console.log(jQuery(this).text());
     var value=jQuery(this).val();
@@ -252,11 +336,15 @@ jQuery("form#search-using-magic-fields div.magic-field-parameter input.for-selec
     jQuery(this).css("display","none");
     //jQuery(this).val("*enter new value*");
 });
-jQuery("form#search-using-magic-fields div.magic-field-parameter input.for-select").blur(function(){
+jQuery("form#search-using-magic-fields-<?php echo $number; ?> div.magic-field-parameter input.for-select")
+    .blur(function(){
     jQuery(this).change();
 });
-jQuery("form#search-using-magic-fields div.magic-field-parameter input.for-input").focus(function(){this.select();});
-jQuery("form#search-using-magic-fields").on('keypress',function(e){if(e.which==13){e.preventDefault();return false;}});
+//jQuery("form#search-using-magic-fields div.magic-field-parameter input.for-input").focus(function(){this.select();});
+jQuery("form#search-using-magic-fields-<?php echo $number; ?> div.magic-field-parameter input.for-select")
+    .keydown(function(e){
+    if(e.keyCode==13){jQuery(this).blur();return false;}
+});
 </script>
 <?php
             die();
@@ -291,18 +379,24 @@ jQuery("form#search-using-magic-fields").on('keypress',function(e){if(e.which==1
         'posts_where',
         function( $where, $query ) {
             global $wpdb;
-            if ( $query->is_main_query() && array_key_exists( 'magic_fields_form', $_REQUEST ) ) {
+            if ( $query->is_main_query() && array_key_exists( 'magic_fields_search_form', $_REQUEST ) ) {
                 #error_log( '##### posts_where:$_REQUEST=' . print_r( $_REQUEST, TRUE ) );
                 #error_log( 'posts_where:$where=' . $where );
                 $sql = 'SELECT p.ID FROM ' . $wpdb->posts . ' p WHERE p.post_type = "' . $_REQUEST['post_type'] . '"';
                 foreach ( $_REQUEST as $key => $values ) {
-                    $prefix = substr( $key, 0, 8 );
-                    if ( !is_array( $values) ) {
-                        if ( $values ) { $values = [ $values ]; }
-                        else { $values = []; }
+                    if ( $key === 'magic_fields_search_form' || $key === 'magic_fields_search_widget_option'
+                        || $key === 'magic_fields_search_widget_number' || $key === 'post_type' ) {
+                        continue;
                     }
-                    if ( $key === 'magic_fields_form' || $key === 'post_type' || !$values || $values[0] === 'no-selection'
-                        || $prefix === 'tax-cat-' || $prefix === 'tax-tag-' || $prefix === 'pst-std-' ) {
+                    $prefix = substr( $key, 0, 8 );
+                    if ( $prefix === 'tax-cat-' || $prefix === 'tax-tag-' || $prefix === 'pst-std-' ) {
+                        continue;
+                    }
+                    if ( !is_array( $values) ) {
+                        if ( $values ) { $values = array( $values ); }
+                        else { $values = array(); }
+                    }
+                    if ( !$values || $values[0] === 'no-selection' ) {
                         continue;
                     }
                     $sql .= ' AND EXISTS ( SELECT * FROM ' . $wpdb->postmeta . ' w INNER JOIN ' . MF_TABLE_POST_META
@@ -317,12 +411,19 @@ jQuery("form#search-using-magic-fields").on('keypress',function(e){if(e.which==1
                 $ids0 = $wpdb->get_col( $sql );
                 $sql = 'SELECT ID FROM ' . $wpdb->posts . ' p WHERE p.post_type = "' . $_REQUEST['post_type'] . '"';
                 foreach ( $_REQUEST as $key => $values ) {
-                    $prefix = substr( $key, 0, 8 );
-                    if ( !is_array( $values) ) {
-                        if ( $values ) { $values = [ $values ]; }
-                        else { $values = []; }
+                    if ( $key === 'magic_fields_search_form' || $key === 'magic_fields_search_widget_option'
+                        || $key === 'magic_fields_search_widget_number' || $key === 'post_type' ) {
+                        continue;
                     }
-                    if ( ( $prefix !== 'tax-cat-' && $prefix !== 'tax-tag-' ) || !$values || $values[0] === 'no-selection' ) {
+                    $prefix = substr( $key, 0, 8 );
+                    if ( $prefix !== 'tax-cat-' && $prefix !== 'tax-tag-' ) {
+                        continue;
+                    }
+                    if ( !is_array( $values) ) {
+                        if ( $values ) { $values = array( $values ); }
+                        else { $values = array(); }
+                    }
+                    if ( !$values || $values[0] === 'no-selection' ) {
                         continue;
                     }
                     $taxonomy = substr( $key, 8 );
@@ -330,6 +431,7 @@ jQuery("form#search-using-magic-fields").on('keypress',function(e){if(e.which==1
                     foreach ( $values as $value ) {
                         if ( $value !== $values[0] ) { $sql .= ' OR '; }
                         $term = get_term_by( 'name', $value, $taxonomy, OBJECT );
+                        #error_log( '##### posts_where:$value=' . $value . ', $term=' . print_r( $term, TRUE ) );
                         $sql .= 'term_taxonomy_id = ' . $term->term_taxonomy_id; 
                     }
                     $sql .= ') AND object_id = p.ID )';
