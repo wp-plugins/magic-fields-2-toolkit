@@ -1,6 +1,7 @@
 <?php
 /*
  * This code derived from "textbox_field.php" of Magic Fields 2 by Hunk and Gnuget
+ * License: GPL2
  */
  
 // initialisation
@@ -28,7 +29,7 @@ class alt_textbox_field extends mf_custom_fields {
 
   public function _update_description(){
     global $mf_domain;
-    $this->description = __("Alternate Simple Textbox input",$mf_domain);
+    $this->description = __("Textbox with dropdown",$mf_domain);
   }
   
   public function _options(){
@@ -117,6 +118,15 @@ EOD;
     if(!jQuery(this).val()){
         jQuery(this).css("display","none");
         jQuery("select",this.parentNode.parentNode).css("display","inline-block");
+    }
+});
+EOD;
+    $output .= 'jQuery("div#' . $div_id . ' input").keydown(function(e){';
+    $output .= <<<'EOD'
+    if(e.keyCode==13){
+        //console.log('keydown:e.keyCode='+e.keyCode);
+        jQuery(this).blur();
+        return false;
     }
 });
 EOD;

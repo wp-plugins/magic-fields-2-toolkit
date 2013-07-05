@@ -1,8 +1,8 @@
 <?php
-// This code should be in a file named "alt_related_type_field.php" in the folder "field_types" of Magic-Fields-2
-// You also need to provide icon_color.png, icon_gray.png and preview.png which you can temporarily borrow 
-// from its siblings for now.
-
+/*
+ * This code derived from "related_type_field.php" of Magic Fields 2 by Hunk and Gnuget
+ * License: GPL2
+ */
 
 // initialisation
 global $mf_domain;
