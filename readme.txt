@@ -2,9 +2,9 @@
 Contributors: Magenta Cuda
 Donate link:
 Tags: custom, post, copier, fields, shortcodes, macros
-Requires at least: 3.5.1
-Tested up to: 3.5.2
-Stable tag: 0.4
+Requires at least: 3.6
+Tested up to: 3.6.1
+Stable tag: 0.4.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Plugin adds some useful features to the Magic Fields 2 plugin.
@@ -51,7 +51,7 @@ This plugin requires at least PHP 5.4.
 [the online documentation](http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4/#macros).
 7. Other features are self-explanatory.
 8. The most current documentation is available at
-   [Toolkit's online documentation](http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4/).
+   [Toolkit's online documentation](http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4-1/).
 
 == Frequently Asked Questions ==
 
@@ -69,6 +69,18 @@ Toolkit' menu item and select the features you want.
 == Screenshots ==
 
 == Changelog ==
+
+= 0.4.1 =
+* added support for ordering fields first by group index then by field name
+* added support for excluding fields by class name, e.g. -alpha means exclude fields of class alpha
+* added support for injecting class name into field prefixes and suffixes using the html comment <!--$class-->
+* added support for a psuedo parent field __parent so that the parent post can be referenced in a recursion
+* added support for wildcarding the group name, e.g. *_*<*,*> is now valid
+* added support for a special group member field mf2tk_key which will specify the group index as text and whose class is the group class
+* added support for indexing groups by name instead of integers using mf2tk_key, e.g. alpha_beta<gamma,*> instead of alpha_beta<1,*>
+* added support for assigning classes to groups using the class of mf2tk_key which can be used to include/exclude groups
+* added support for group_before/group_after with replacement of html comments <!--$Group-->, <!--$class-->, <!--$group-->
+* changed search from using multiple select html element to multiple select html checkboxes
 
 = 0.4 =
 * Added new features: macros for post content, an alternative dropdown field, an alternative HTML5 compatible 
@@ -103,3 +115,6 @@ A minor correction made.
 
 = 0.4 =
 This version adds some new features and improves the shortcode and search features.
+
+= 0.4.1 =
+Many small and some significant enhancements were added to existing features.

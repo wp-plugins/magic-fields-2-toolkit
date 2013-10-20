@@ -2,10 +2,15 @@
 
 class Magic_Fields_2_Toolkit_Settings {
     public static function do_field_type_option( $field, $input ) {
+        # make the reality (filesystem) match the options for alt_*
         #error_log( '##### Magic_Fields_2_Toolkit_Settings:$input='
         #    . print_r( $input, TRUE ) );
+        if ( $input === NULL ) { $input = array(); }
         $new = array_key_exists( $field . '_field', $input );
         $options = get_option( 'magic_fields_2_toolkit_enabled' );
+        #error_log( '##### Magic_Fields_2_Toolkit_Settings:$options='
+        #    . print_r( $options, TRUE ) );
+        if ( $options === FALSE ) { $options = array(); }
         $old = array_key_exists( $field . '_field', $options );
         if ( defined( 'MF_PATH' ) ) {
             $mf_dir = MF_PATH . '/field_types/' . $field . '_field/';
@@ -268,7 +273,7 @@ class Magic_Fields_2_Toolkit_Settings {
                         . 'font-weight:bold;">'
                         . 'For usage instructions please visit '
                         . '<a href="http://magicfields17.wordpress.com/'
-                        . 'magic-fields-2-toolkit-0-4/">'
+                        . 'magic-fields-2-toolkit-0-4-1/">'
                         . ' the online documentation</a>.</div>' );
             } );
         }, 11);
@@ -276,5 +281,3 @@ class Magic_Fields_2_Toolkit_Settings {
 }
 
 new Magic_Fields_2_Toolkit_Settings();
-
-?>

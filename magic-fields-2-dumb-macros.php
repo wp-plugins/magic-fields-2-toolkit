@@ -7,6 +7,22 @@
  * License:       GPL2
  */
 
+/*  Copyright 2013  Magenta Cuda  (email:magenta.cuda@yahoo.com)
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License, version 2, as 
+    published by the Free Software Foundation.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+*/
+
 class Magic_Fields_2_Toolkit_Dumb_Macros {
     public function __construct() {
         add_action( 'init', function() {
@@ -22,14 +38,20 @@ class Magic_Fields_2_Toolkit_Dumb_Macros {
                 'menu_position' => 50
             ) );
         } );
+        add_filter( 'post_row_actions', function( $actions, $post ) {
+            #error_log( '###### action:post_row_actions:$actions=' . print_r( $actions, TRUE ) );
+            if ( get_post_type( $post ) == 'content_macro' ) { unset( $actions['view'] ); }
+            return $actions;
+        }, 10, 2 );
         add_shortcode( 'show_macro', function( $atts ) {
             global $wpdb;
             #error_log( '##### shortcode:show_macro:$atts=' . print_r( $atts, TRUE ) );
             $macro = $wpdb->get_var( "SELECT post_content from $wpdb->posts WHERE post_type = 'content_macro' "
                 . "AND post_name = '$atts[macro]'" );
-            if ( !$macro ) { return ''; }
+            if ( !$macro ) { return "show_macro error: \"$atts[macro]\" is not a valid macro name - should be the slug of the macro definition."; }
             #error_log( '##### shortcode:show_macro:$macro=' . print_r( $macro, TRUE ) );
             unset( $atts['macro'] );
+            # first handle conditional text inclusion
             $if_count = preg_match_all( '/#if\(\s*\$#([\w-]+)#\s*\)#/', $macro, $if_matches,
                 PREG_SET_ORDER | PREG_OFFSET_CAPTURE );
             #error_log( '##### shortcode:show_macro:$if_matches=' . print_r( $if_matches, TRUE ) );
@@ -46,8 +68,9 @@ class Magic_Fields_2_Toolkit_Dumb_Macros {
                     }
                     if ( --$i < 0 ) {
                         # error
-                        error_log( '##### shortcode:show_macro:Error: unmatched "#endif"' );
-                        break;
+                        #error_log( '##### shortcode:show_macro:Error: unmatched "#endif"' );
+                        return 'show_macro:Error: unmatched "#endif"';
+                        #break;
                     }
                     $include = TRUE;
                     for ( $j = 0; $j <= $i; ++$j ) { if ( !$includes[$j] ) { $include = FALSE; break; } }
@@ -79,13 +102,16 @@ class Magic_Fields_2_Toolkit_Dumb_Macros {
                     for ( $j = 0; $j < count( $end_matches ); ++$j ) { $end_matches[$j][0][1] += $offset; }
                 }
                 if ( $if_matches || $end_matches ) {
-                    error_log( '##### shortcode:show_macro:Error: unmatched "#if" or "#endif"' );
                     # error
+                    #error_log( '##### shortcode:show_macro:Error: unmatched "#if" or "#endif"' );
+                    return 'show_macro:Error: unmatched "#if" or "#endif"';
                 }
             } else if ( $if_count || $end_count ) {
-                error_log( '##### shortcode:show_macro:Error: count of "#if" not equal count of "#endif"' );
                 # error
+                #error_log( '##### shortcode:show_macro:Error: count of "#if" not equal count of "#endif"' );
+                return 'show_macro:Error: count of "#if" not equal count of "#endif"';
             }
+            # finally do macro replacements
             foreach ( $atts as $att => $val ) {
                 $macro = str_replace( '$#' . $att . '#', $val, $macro );
             }

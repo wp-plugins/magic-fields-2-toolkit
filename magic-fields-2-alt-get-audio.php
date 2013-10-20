@@ -41,6 +41,3 @@ function alt_get_audio( $field_name, $group_index=1, $field_index=1, $post_id=NU
 
   return $player;
 }
-
-?>
-

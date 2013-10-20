@@ -26,6 +26,8 @@ class alt_related_type_field extends mf_custom_fields {
     $posttypes = $this->mf_get_post_types();
     $select = array();
     foreach($posttypes as $k => $v){
+      #error_log('##### alt_related_type_field::_options():$v='.print_r($v,TRUE));
+      if(in_array($v->name,array('revision','nav_menu_item','content_macro'))){continue;}
       $select[$k] = $v->label;
     }
 
