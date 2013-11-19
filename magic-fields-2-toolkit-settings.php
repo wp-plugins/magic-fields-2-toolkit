@@ -77,7 +77,7 @@ class Magic_Fields_2_Toolkit_Settings {
                         . __( ' Enabled', 'magic-fields-2-toolkit' )
                         . '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
                         . '<a href="http://magicfields17.wordpress.com/'
-                        . 'magic-fields-2-toolkit-0-4/#copy">'
+                        . 'magic-fields-2-toolkit-0-4-2/#copy">'
                         . __( 'Documentation', 'magic-fields-2-toolkit' )
                         . '</a>'
                     );
@@ -95,7 +95,7 @@ class Magic_Fields_2_Toolkit_Settings {
                         . __( ' Enabled', 'magic-fields-2-toolkit' )
                         . '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
                         . '<a href="http://magicfields17.wordpress.com/'
-                        . 'magic-fields-2-toolkit-0-4/#shortcode">'
+                        . 'magic-fields-2-toolkit-0-4-2/#shortcode">'
                         . __( 'Documentation', 'magic-fields-2-toolkit' )
                         . '</a>'
                     );
@@ -113,7 +113,7 @@ class Magic_Fields_2_Toolkit_Settings {
                         . __( ' Enabled', 'magic-fields-2-toolkit' )
                         . '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
                         . '<a href="http://magicfields17.wordpress.com/'
-                        . 'magic-fields-2-toolkit-0-4/#macros">'
+                        . 'magic-fields-2-toolkit-0-4-2/#macros">'
                         . __( 'Documentation', 'magic-fields-2-toolkit' )
                         . '</a>'
                     );
@@ -131,7 +131,7 @@ class Magic_Fields_2_Toolkit_Settings {
                         . __( ' Enabled', 'magic-fields-2-toolkit' )
                         . '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
                         . '<a href="http://magicfields17.wordpress.com/'
-                        . 'magic-fields-2-toolkit-0-4/#search">'
+                        . 'magic-fields-2-toolkit-0-4-2/#search">'
                         . __( 'Documentation', 'magic-fields-2-toolkit' )
                         . '</a>'
                     );
@@ -149,7 +149,7 @@ class Magic_Fields_2_Toolkit_Settings {
                         . __( ' Enabled', 'magic-fields-2-toolkit' )
                         . '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
                         . '<a href="http://magicfields17.wordpress.com/'
-                        . 'magic-fields-2-toolkit-0-4/#unreferenced">'
+                        . 'magic-fields-2-toolkit-0-4-2/#unreferenced">'
                         . __( 'Documentation', 'magic-fields-2-toolkit' )
                         . '</a>'
                     );
@@ -167,7 +167,7 @@ class Magic_Fields_2_Toolkit_Settings {
                         . __( ' Enabled', 'magic-fields-2-toolkit' )
                         . '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
                         . '<a href="http://magicfields17.wordpress.com/'
-                        . 'magic-fields-2-toolkit-0-4/#alt_related">'
+                        . 'magic-fields-2-toolkit-0-4-2/#alt_related">'
                         . __( 'Documentation', 'magic-fields-2-toolkit' )
                         . '</a>'
                     );
@@ -185,7 +185,7 @@ class Magic_Fields_2_Toolkit_Settings {
                         . __( ' Enabled', 'magic-fields-2-toolkit' )
                         . '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
                         . '<a href="http://magicfields17.wordpress.com/'
-                        . 'magic-fields-2-toolkit-0-4/#alt_textbox">'
+                        . 'magic-fields-2-toolkit-0-4-2/#alt_textbox">'
                         . __( 'Documentation', 'magic-fields-2-toolkit' )
                         . '</a>'
                     );
@@ -203,7 +203,7 @@ class Magic_Fields_2_Toolkit_Settings {
                         . __( ' Enabled', 'magic-fields-2-toolkit' )
                         . '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
                         . '<a href="http://magicfields17.wordpress.com/'
-                        . 'magic-fields-2-toolkit-0-4/#alt_dropdown">'
+                        . 'magic-fields-2-toolkit-0-4-2/#alt_dropdown">'
                         . __( 'Documentation', 'magic-fields-2-toolkit' )
                         . '</a>'
                     );
@@ -222,7 +222,7 @@ class Magic_Fields_2_Toolkit_Settings {
                         . __( ' Enabled', 'magic-fields-2-toolkit' )
                         . '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
                         . '<a href="http://magicfields17.wordpress.com/'
-                        . 'magic-fields-2-toolkit-0-4/#alt_audio">'
+                        . 'magic-fields-2-toolkit-0-4-2/#alt_audio">'
                         . __( 'Documentation', 'magic-fields-2-toolkit' )
                         . '</a>'
                     );
@@ -241,7 +241,7 @@ class Magic_Fields_2_Toolkit_Settings {
                         . __( ' Enabled', 'magic-fields-2-toolkit' )
                         . '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
                         . '<a href="http://magicfields17.wordpress.com/'
-                        . 'magic-fields-2-toolkit-0-4/#utility_functions">'
+                        . 'magic-fields-2-toolkit-0-4-2/#utility_functions">'
                         . __( 'Documentation', 'magic-fields-2-toolkit' )
                         . '</a>'
                     );
@@ -273,7 +273,7 @@ class Magic_Fields_2_Toolkit_Settings {
                         . 'font-weight:bold;">'
                         . 'For usage instructions please visit '
                         . '<a href="http://magicfields17.wordpress.com/'
-                        . 'magic-fields-2-toolkit-0-4-1/">'
+                        . 'magic-fields-2-toolkit-0-4-2/">'
                         . ' the online documentation</a>.</div>' );
             } );
         }, 11);

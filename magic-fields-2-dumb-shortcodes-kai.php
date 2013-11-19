@@ -24,7 +24,11 @@
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+include_once( dirname( __FILE__ ) . '/magic-fields-2-group-key.php' );
+include_once( dirname( __FILE__ ) . '/magic-fields-2-post-filter.php' );
+
 class Magic_Fields_2_Toolkit_Dumb_Shortcodes {
+    use Magic_Fields_2_Toolkit_Post_Filters;
 	public static $recursion_separator = '>';
     public function __construct() {
         # wrapper for the individual values of a field
@@ -74,12 +78,15 @@ class Magic_Fields_2_Toolkit_Dumb_Shortcodes {
             $content = '';
             $the_fields = $the_names;
             if ( !substr_compare( $the_fields, '{', 0, 1 ) ) { $the_fields = trim( $the_fields, '{}' ); }
-            #preg_match_all( '/(([^{};]+)(.{[^{}]+})?)(;|$)/', $the_fields, $fields );
+            # field parameter is of the form: field_specifier1;field_specifier2;field_specifier3 ...
             preg_match_all( '/(([^{};]+)(\.{[^{}]+})?)(;|$)/', $the_fields, $fields );
             $the_fields = $fields[1];
             #error_log( '##### $show_custom_field():$the_fields=' . print_r( $the_fields, TRUE ) );
             foreach ( $the_fields as $the_name ) {
+                # do one field specifier of a field parameter of the form: field_specifier1;field_specifier2;field_specifier3 ...
+                # first separate field specifier into path components
                 $names = explode( '.', $the_name, 2 );
+                # do first path component
                 $field = $names[0];
                 if ( !preg_match( '/((\*_\*)|([\w-]+(\*)?))(<(\*|[\w\s]+)((,|><)(\*|\d+))?>)?(g|f)?(:((\*?-?[a-zA-Z0-9_]+),?)+)?/',
 					$field, $matches ) || $matches[0] != $field ) {
@@ -221,6 +228,7 @@ class Magic_Fields_2_Toolkit_Dumb_Shortcodes {
 								if ( $not_magic_field ) {
 									if ( !$the_classes ) {
 										if ( $field == '__parent' ) {
+                                            # handle the psuedo field __parent
 											if ( array_key_exists( 1, $names ) ) {
 												#error_log( '##### $show_custom_field():$names=' . print_r( $names, TRUE ) );
 												$parent_ids1 = $parent_ids;
@@ -235,9 +243,16 @@ class Magic_Fields_2_Toolkit_Dumb_Shortcodes {
 												$recursion = TRUE;
 											} else {
 												$field_value .= $wrap_value( end( $parent_ids ), $field, 'related_type', $filter, $before,
-													$after, $separator, $classes );
+													$after, $separator );
 												reset( $parent_ids );
 											}
+                                        } else if ( $field == '__post_title' ) {
+                                            # handle the psuedo field __post_title as a related_type if url_to_link is available
+                                            $url_to_link_available = in_array( 'url_to_link', explode( ';', $filter ) );
+                                            $field_value .= $wrap_value( ( $url_to_link_available ? $post_id
+                                                : get_the_title( $post_id ) ), $field, ( $url_to_link_available ? 'related_type'
+                                                : 'textbox' ), $filter, $before, $after, $separator );
+                                            $label = "Post";
 										} else if ( ( $terms = get_the_terms( $post_id, $field ) ) && is_array( $terms ) ) {
 											foreach ( wp_list_pluck( $terms, 'name' ) as $term ) {
 												$field_value .= $wrap_value( $term, $field, 'taxonomy', $filter, $before, $after,
@@ -401,7 +416,7 @@ class Magic_Fields_2_Toolkit_Dumb_Shortcodes {
 						}
 					} # foreach ( $fields1 as $field1 => $label1 ) { # results in $content
 				} # foreach ( $group_names as $group_name ) {
-            }
+            } # foreach ( $the_fields as $the_name ) {
             if ( $finals !== NULL ) {
                 foreach( explode( ';', $finals ) as $final ) {
                     $content = call_user_func( $final, $content, $the_names );
@@ -432,7 +447,9 @@ class Magic_Fields_2_Toolkit_Dumb_Shortcodes {
                 'group_separator' => '',
                 'group_rename' => '',
                 'final' => NULL,
-                'post_id' => NULL
+                'post_id' => NULL,
+                'post_before' => '',
+                'post_after' => ''
             ), $atts ) );
             if ( $post_id === NULL ) { $post_id = $post->ID; }
             if ( $multi_before === NULL ) { $multi_before = $before; }
@@ -441,10 +458,24 @@ class Magic_Fields_2_Toolkit_Dumb_Shortcodes {
             #error_log( '##### show_custom_field:' . print_r( compact( 'field', 'before', 'after', 'filter', 'separator',
             #    'field_before', 'field_after', 'field_separator', 'post_id' ), TRUE ) );
             if ( is_numeric( $post_id) ) {
+                # single numeric post id
                 return $show_custom_field( $post_id, $field, $before, $after, $separator, $filter, $field_before, $field_after,
 					$field_separator, $field_rename, $group_before, $group_after, $group_separator, $group_rename, $multi_before,
 					$multi_after, $multi_separator, $final, '' );
             } else {
+                # handle multiple posts
+                # first get list of post ids
+                $post_ids = Magic_Fields_2_Toolkit_Dumb_Shortcodes::get_posts_with_spec( $post_id );
+                $rtn = '';
+                foreach ( $post_ids as $post_id ) {
+                    # do each post accumulating the output in $rtn
+                    if ( $post_before ) { $rtn .= $post_before; }
+                    $rtn .= $show_custom_field( $post_id, $field, $before, $after, $separator, $filter, $field_before, $field_after,
+                        $field_separator, $field_rename, $group_before, $group_after, $group_separator, $group_rename, $multi_before,
+                        $multi_after, $multi_separator, $final, '' );
+                    if ( $post_after ) { $rtn .= $post_after; }
+                }
+                return $rtn;
             }
         } );
         remove_filter( 'the_content', 'wpautop' );
