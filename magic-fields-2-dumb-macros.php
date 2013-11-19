@@ -43,14 +43,44 @@ class Magic_Fields_2_Toolkit_Dumb_Macros {
             if ( get_post_type( $post ) == 'content_macro' ) { unset( $actions['view'] ); }
             return $actions;
         }, 10, 2 );
-        add_shortcode( 'show_macro', function( $atts ) {
+        add_shortcode( 'show_macro', function( $atts, $macro ) {
             global $wpdb;
+            static $saved_inline_macros = array();
             #error_log( '##### shortcode:show_macro:$atts=' . print_r( $atts, TRUE ) );
-            $macro = $wpdb->get_var( "SELECT post_content from $wpdb->posts WHERE post_type = 'content_macro' "
-                . "AND post_name = '$atts[macro]'" );
-            if ( !$macro ) { return "show_macro error: \"$atts[macro]\" is not a valid macro name - should be the slug of the macro definition."; }
-            #error_log( '##### shortcode:show_macro:$macro=' . print_r( $macro, TRUE ) );
+            if ( !$macro ) {
+                if ( !empty( $atts['macro'] ) ) {
+                    if ( !empty( $saved_inline_macros[$atts['macro']] ) ) {
+                        # saved inline macro defintions have priority over Content Macro definitions
+                        $macro = $saved_inline_macros[$atts['macro']];
+                    } else {
+                        $macro = $wpdb->get_var( "SELECT post_content from $wpdb->posts WHERE post_type = 'content_macro' "
+                            . "AND post_name = '$atts[macro]'" );
+                        if ( !$macro ) {
+                            return '<div style="border:2px solid red;color:red;padding:5px;">'
+                                . "show_macro error: \"$atts[macro]\" is not the slug of a Content Macro.</div>";
+                        }
+                    }
+                } else {
+                    return '<div style="border:2px solid red;color:red;padding:5px;">show_macro error: no macro specified.</div>';
+                }
+            } else {
+                # There is an inline macro definition
+                #error_log( '##### shortcode:show_macro:$macro=' . print_r( $macro, TRUE ) );
+                if ( !empty( $atts['save_inline_macro_as'] ) ) {
+                    # save inline macro defintion for later use in the same session
+                    $saved_inline_macros[$atts['save_inline_macro_as']] = $macro;
+                }
+            }
             unset( $atts['macro'] );
+            # scan for defaults of the form <!-- $#alpha# = "beta"; --> or <!-- $#alpha# = 'beta'; -->
+            preg_match_all( '/<!--\s*\$#([\w-]+)#\s*=\s*(("([^"]+)")|(\'([^\']+)\'));\s*-->/', $macro, $assignments, PREG_SET_ORDER );
+            #error_log( '##### shortcode:show_macro:$assignments=' . print_r( $assignments, TRUE ) );
+            foreach ( $assignments as $assignment ) {
+                if ( !array_key_exists( $assignment[1], $atts ) ) {
+                    $atts[$assignment[1]] = trim( $assignment[2], '"\'' );
+                    #error_log( '##### shortcode:show_macro:$atts[\'' . $assignment[1] . '\']=\'' . $atts[$assignment[1]] . '\';' );
+                }
+            }
             # first handle conditional text inclusion
             $if_count = preg_match_all( '/#if\(\s*\$#([\w-]+)#\s*\)#/', $macro, $if_matches,
                 PREG_SET_ORDER | PREG_OFFSET_CAPTURE );
@@ -63,6 +93,7 @@ class Magic_Fields_2_Toolkit_Dumb_Macros {
                 }, $if_matches );
                 $i = 0;
                 while ( $if_matches && $end_matches ) {
+                    # find if that matches the first endif
                     while ( $if_matches[$i][0][1] < $end_matches[0][0][1] ) {
                         if ( ++$i == count( $if_matches ) ) { break; }
                     }
@@ -78,27 +109,41 @@ class Magic_Fields_2_Toolkit_Dumb_Macros {
                     $start0 = $if_matches[$i][0][1];
                     $length0 = ( $end_matches[0][0][1] + strlen( $end_matches[0][0][0] ) ) - $start0;
                     #error_log( '##### shortcode:show_macro:to be replaced="' . substr( $macro, $start0, $length0 ) . '"');
+                    $start1 = $if_matches[$i][0][1] + strlen( $if_matches[$i][0][0] );
+                    $length1 = $end_matches[0][0][1] - $start1;
+                    if ( ( $start2 = strpos( $macro, '#else#', $start1 ) ) !== FALSE ) {
+                        $length1 = $start2 - $start1;
+                        $start2 += 6;
+                        $length2 = $end_matches[0][0][1] - $start2;
+                    } else {
+                        $start2 = $start1;   # irrelevant since $length2 == 0
+                        $length2 = 0;
+                    }
                     if ( $include ) {
-                        $start1 = $if_matches[$i][0][1] + strlen( $if_matches[$i][0][0] );
-                        $length1 = $end_matches[0][0][1] - $start1;
+                        # replace with #if($#...#)# clause
                         #error_log( '##### shortcode:show_macro:replacement="' . substr( $macro, $start1, $length1 ) . '"');
                         $macro = substr_replace( $macro, substr( $macro, $start1, $length1 ), $start0, $length0 );
                         $offset = $length1 - $length0;
                     } else if ( !$exclude_by_parent ) {
+                        # replace with #else# clause
                         #error_log( '##### shortcode:show_macro:replacement=""');
-                        $macro = substr_replace( $macro, '', $start0, $length0 );
-                        $offset = -$length0;
+                        $macro = substr_replace( $macro, substr( $macro, $start2, $length2 ), $start0, $length0 );
+                        $offset = $length2 - $length0;
                     } else {
                         $offset = 0;
                     }
+                    # remove the matched if
                     array_splice( $if_matches, $i, 1 );
                     array_splice( $includes, $i, 1 );
+                    # adjust offsets after text replacement
                     for ( $j = $i; $j < count( $if_matches ); ++$j ) {
                         $if_matches[$j][0][1] += $offset;
                         $if_matches[$j][1][1] += $offset;
                     }
                     if ( $i ) { --$i; }
+                    #remove the matched endif
                     array_shift( $end_matches );
+                    # adjust offsets after text replacement
                     for ( $j = 0; $j < count( $end_matches ); ++$j ) { $end_matches[$j][0][1] += $offset; }
                 }
                 if ( $if_matches || $end_matches ) {

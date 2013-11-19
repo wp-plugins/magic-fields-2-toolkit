@@ -2,15 +2,15 @@
 
 /*
 Plugin Name: Magic Fields 2 Toolkit
-Plugin URI: http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4-1/
+Plugin URI: http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4-2/
 Description: custom post copier, custom fields shortcodes, ...
-Version: 0.4.1
+Version: 0.4.2.5
 Author: Magenta Cuda
 Author URI: http://magentacuda.wordpress.com
 License: GPL2
 */
 
-/*  Copyright 2013  Magenta Cuda  (email:magenta.cuda@yahoo.com)
+/*  Copyright 2013  Magenta Cuda
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License, version 2, as 
@@ -39,10 +39,8 @@ class Magic_Fields_2_Toolkit_Init {
                     . '/magic-fields-2-custom-post-copier.php' );
             }
             if ( array_key_exists( 'dumb_shortcodes', $options ) ) {
-                include( dirname(__FILE__)
-                    . '/magic-fields-2-dumb-shortcodes-kai.php' );
                 include_once( dirname(__FILE__)
-                    . '/magic-fields-2-group-key.php' );
+                    . '/magic-fields-2-dumb-shortcodes-kai.php' );
             }
             if ( array_key_exists( 'dumb_macros', $options ) ) {
                 #include( dirname(__FILE__)
@@ -69,16 +67,34 @@ EOD
 						'post_title' => 'Table',
 						'post_status' => 'publish',
 						'post_content' => <<<'EOD'
-<!-- Show table of all custom fields in default ordering.
-     This macro has one parameter: macro.
+<!--
+     Show table of fields.
+     This macro has one required parameter: macro.
      macro is the slug of this post - table.
-     For best results mf2tk_key needs to be defined. -->
+     This macro has one optional parameter: fields.
+     fields is a list of field names in show_custom_field's
+     field parameter format. If not specified "*_*<*,*> is used.
+     For best results mf2tk_key needs to be defined. This macro has 
+     an example of #if($#alpha#)# ... #else# ... #endif# and
+     examples of default parameters.
+-->
+
+<!-- $#fields# = "__default_*<*,*>"; -->
+<!-- $#fields# = '__default_*<*,*>'; -->
+
 <table>
+#if($#fields#)#
+[show_custom_field field="$#fields#"
+    field_before="<tr><td><!--$Field--></td><td>"
+    field_after="</td></tr>"
+    separator=", " filter="url_to_link"]
+#else#
 [show_custom_field field="*_*<*,*>"
     group_before="<tr><td><!--$Group--></td><td>&nbsp;</td></tr>"
     field_before="<tr><td><!--$Field--></td><td>"
     field_after="</td></tr>"
     separator=", " filter="url_to_link"]
+#endif#
 </table>
 EOD
 					) );
@@ -210,6 +226,85 @@ EOD
         <!--$Group-->:</div>"
     group_after="</div>"
     filter="url_to_link"]                        
+EOD
+					) );
+				}
+                if ( !$wpdb->get_var( <<<EOD
+                    SELECT COUNT(*) FROM $wpdb->posts WHERE post_type = 'content_macro'
+                        AND post_title = 'Table of Posts' AND post_status = 'publish'
+EOD
+                ) ) {
+					wp_insert_post( array(
+						'post_type' => 'content_macro',
+						'post_name' => 'table-of-posts',
+						'post_title' => 'Table of Posts',
+						'post_status' => 'publish',
+						'post_content' => <<<'EOD'
+<!--
+     Show a table of posts.
+     This macro has three parameters: macro, posts and fields.
+     macro is the slug of this post - table-of-posts.
+     posts is a post specification
+          a list of post ids or a post tag pattern
+     fields is a field specification
+          a list of field names or a field name pattern
+--> 
+<table>
+[show_custom_field
+    post_id="$#posts##1"
+    field="$#fields#"
+    before="<span style='display:none;'>"
+    after="</span>"
+    field_before="<td><!--$Field-->"
+    field_after="</td>
+    post_before="<tr>"
+    post_after="</tr>"]
+[show_custom_field
+    post_id="$#posts#"
+    field="$#fields#"
+    separator=", "
+    field_before="<td>"
+    field_after="</td>
+    post_before="<tr>"
+    post_after="</tr>"
+    filter="url_to_link"]
+</table>
+EOD
+					) );
+				}
+                if ( !$wpdb->get_var( <<<EOD
+                    SELECT COUNT(*) FROM $wpdb->posts WHERE post_type = 'content_macro'
+                        AND post_title = 'Horizontal Table' AND post_status = 'publish'
+EOD
+                ) ) {
+					wp_insert_post( array(
+						'post_type' => 'content_macro',
+						'post_name' => 'horizontal-table',
+						'post_title' => 'Horizontal Table',
+						'post_status' => 'publish',
+						'post_content' => <<<'EOD'
+<!--
+     Show custom fields horizontally with labels on top.
+     This macro has two parameters: macro and fields.
+     macro is the slug of this post - horizontal-table.
+     fields is a field list specification which has a default of
+     __default_<*,*>
+     The labels are generated from the field labels.
+--> 
+<!-- $#fields# = "__default_*<*,*>"; -->
+<table>
+<!-- to show just the field names hide field values with display:none -->
+<tr>[show_custom_field field="$#fields#"
+    field_before="<td><!--$Field-->"
+    before="<span style='display:none'>" after="</span>"
+    field_after="</td>"
+]</tr>
+<tr>[show_custom_field field="$#fields#"
+    field_before="<td>"
+    filter="url_to_link" separator=", "
+    field_after="</td>"
+]</tr>
+</table>
 EOD
 					) );
 				}

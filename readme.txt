@@ -3,8 +3,8 @@ Contributors: Magenta Cuda
 Donate link:
 Tags: custom, post, copier, fields, shortcodes, macros
 Requires at least: 3.6
-Tested up to: 3.6.1
-Stable tag: 0.4.1
+Tested up to: 3.7.1
+Stable tag: 0.4.2.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Plugin adds some useful features to the Magic Fields 2 plugin.
@@ -15,8 +15,7 @@ The current features are:
 
    1. Create a copy of a Magic Fields 2 custom post copying all of the Magic Fields' custom fields, groups and taxonomies.
    
-   2. Supports a shortcode for showing Magic Fields 2 custom fields and taxonomies. In particular, the shortcodes makes it 
-easy to display a table of custom field names and their values.
+   2. Supports a shortcode for showing Magic Fields 2 custom fields and taxonomies. In particular, the shortcodes makes it easy to display a table of custom field names and their values.
    
    3. Identify and delete unreferenced files in folder files_mf.
 
@@ -34,57 +33,69 @@ easy to display a table of custom field names and their values.
 
    10. Provides some Magic Fields 2 utility functions for PHP programmers.
    
-Please visit the [Toolkit's online documentation](http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4/) for more 
-details.
+Please visit the [Toolkit's online documentation](http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4-2/) for more details.
 This plugin requires at least PHP 5.4.
 
 == Installation ==
 1. Upload the `Magic Fields 2 Toolkit` folder to the `/wp-content/plugins/` directory
 2. Activate the plugin through the 'Plugins' menu in WordPress
-3. Open 'Settings->Magic Fields 2 Toolkit' menu item and enable specific features - all features are
-   not enabled by default.
-4. To copy a custom post open the "All Your Custom Post Type" menu item and click on "Create Copy" for 
-   the entry of the desired post.
-5. To use shortcodes please see
-[the online documentation](http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4/#shortcode).
-6. To use content macros please see
-[the online documentation](http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4/#macros).
+3. Open 'Settings->Magic Fields 2 Toolkit' menu item and enable specific features - all features are not enabled by default.
+4. To copy a custom post open the "All Your Custom Post Type" menu item and click on "Create Copy" for the entry of the desired post.
+5. To use shortcodes please see [the online documentation](http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4-2/#shortcode).
+6. To use content macros please see [the online documentation](http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4-2/#macros).
 7. Other features are self-explanatory.
-8. The most current documentation is available at
-   [Toolkit's online documentation](http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4-1/).
+8. The most current documentation is available at [Toolkit's online documentation](http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4-2/).
 
 == Frequently Asked Questions ==
 
 = Does this plugin require Magic Fields 2 to be installed? =
 
-Some features of this plugin will also work with standard WordPress custom post types and custom fields  
-but its significance is that it will also work with the non-standard Magic Fields 2 implementation where 
-generic utilities would probably not work.
+This plugin is designed to work with Magic Fields 2's custom post types and custom fields which have a non-standard implementation where generic utilities would probably not work.
 
 = I have installed the plugin without errors but the plugin does nothing. =
 
-You must enable specific features - all features are not enabled by default. Open 'Settings->Magic Fields 2 
-Toolkit' menu item and select the features you want.
+You must enable specific features - all features are not enabled by default. Open 'Settings->Magic Fields 2 Toolkit' menu item and select the features you want.
 
 == Screenshots ==
 
 == Changelog ==
 
+= 0.4.2.5 =
+fix error in macro definition
+
+= 0.4.2.4 =
+fix a bad uri.
+
+= 0.4.2.3 =
+corrected version number errors again.
+
+= 0.4.2.2 =
+corrected version number errors.
+
+= 0.4.2.1 =
+corrected errors in this readme.
+
+= 0.4.2 =
+* show_custom_fields now can iterate over a list of posts making a table of data from multiple posts easy to do
+* macro shortcode now understands inline macros so you do not have to create a content macro post
+* macro conditionals can now have a #else# block
+* macros can now have default arguments
+* added psuedo field __post_title
+
 = 0.4.1 =
-* added support for ordering fields first by group index then by field name
-* added support for excluding fields by class name, e.g. -alpha means exclude fields of class alpha
-* added support for injecting class name into field prefixes and suffixes using the html comment <!--$class-->
-* added support for a psuedo parent field __parent so that the parent post can be referenced in a recursion
-* added support for wildcarding the group name, e.g. *_*<*,*> is now valid
-* added support for a special group member field mf2tk_key which will specify the group index as text and whose class is the group class
-* added support for indexing groups by name instead of integers using mf2tk_key, e.g. alpha_beta<gamma,*> instead of alpha_beta<1,*>
-* added support for assigning classes to groups using the class of mf2tk_key which can be used to include/exclude groups
-* added support for group_before/group_after with replacement of html comments <!--$Group-->, <!--$class-->, <!--$group-->
-* changed search from using multiple select html element to multiple select html checkboxes
+* ordering fields first by group index then by field name
+* excluding fields by class name, e.g. -alpha means exclude fields of class alpha
+* injecting the class name into field prefixes and suffixes using the html comment &lt;!&#8211;$class&#8211;&gt;
+* a psuedo parent field __parent so that the parent post can be referenced in a recursion
+* wildcarding the group name, e.g. *_*&lt;*,*&gt; is now valid
+* a special group member field mf2tk_key which will specify the group index as text and whose class is the group class
+* indexing groups by name instead of integers using the value of the mf2tk_key, e.g. alpha_beta&lt;gamma,*&gt; instead of alpha_beta&lt;1,*&gt;
+* classes for groups using the class of the mf2tk_key which can be used to include/exclude groups
+* group_before/group_after with replacement of html comments &lt;!&#8211;$Group&#8211;&gt;, &lt;!&#8211;$class&#8211;&gt;, &lt;!&#8211;$group&#8211;&gt;
+* changed search from using the multiple select html element to multiple select html checkboxes
 
 = 0.4 =
-* Added new features: macros for post content, an alternative dropdown field, an alternative HTML5 compatible 
-get_audio() function and utility functions.
+* Added new features: macros for post content, an alternative dropdown field, an alternative HTML5 compatible get_audio() function and utility functions.
 * Enhanced the shortcode feature with more parameters and the search feature with configurable parameters.
  
 = 0.3.1 =
@@ -95,8 +106,7 @@ get_audio() function and utility functions.
 * Added an alternative textbox field that allows you to select previously entered data.
 
 = 0.2 =
-* Added an alternative related type field which uses multiple selection checkboxes instead of a single selection
-dropdown.
+* Added an alternative related type field which uses multiple selection checkboxes instead of a single selection dropdown.
 * Enhanced shortcodes to make it easier to display a table of field names and their values.
   
 = 0.1 =
@@ -118,3 +128,21 @@ This version adds some new features and improves the shortcode and search featur
 
 = 0.4.1 =
 Many small and some significant enhancements were added to existing features.
+
+= 0.4.2 =
+This version completes the feature set that I envisioned for this toolkit.
+
+= 0.4.2.1 =
+correct errors in this readme.
+
+= 0.4.2.2 =
+corrected version number errors.
+
+= 0.4.2.3 =
+corrected version number errors again.
+
+= 0.4.2.4 =
+fix a bad uri.
+
+= 0.4.2.5 =
+fix error in macro definition
