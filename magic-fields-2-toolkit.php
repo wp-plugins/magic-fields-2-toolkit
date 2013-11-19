@@ -4,13 +4,13 @@
 Plugin Name: Magic Fields 2 Toolkit
 Plugin URI: http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4-2/
 Description: custom post copier, custom fields shortcodes, ...
-Version: 0.4.2.4
+Version: 0.4.2.5
 Author: Magenta Cuda
 Author URI: http://magentacuda.wordpress.com
 License: GPL2
 */
 
-/*  Copyright 2013  Magenta Cuda  (email:magenta.cuda@yahoo.com)
+/*  Copyright 2013  Magenta Cuda
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License, version 2, as 
@@ -75,7 +75,7 @@ EOD
      fields is a list of field names in show_custom_field's
      field parameter format. If not specified "*_*<*,*> is used.
      For best results mf2tk_key needs to be defined. This macro has 
-     an example of #if($#alpha#)# ... #else# ... #endif# --> and
+     an example of #if($#alpha#)# ... #else# ... #endif# and
      examples of default parameters.
 -->
 
