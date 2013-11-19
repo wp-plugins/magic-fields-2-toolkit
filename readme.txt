@@ -4,7 +4,7 @@ Donate link:
 Tags: custom, post, copier, fields, shortcodes, macros
 Requires at least: 3.6
 Tested up to: 3.7.1
-Stable tag: 0.4.2
+Stable tag: 0.4.2.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Plugin adds some useful features to the Magic Fields 2 plugin.
@@ -60,7 +60,10 @@ You must enable specific features - all features are not enabled by default. Ope
 
 == Changelog ==
 
-= 0.4.1.2 =
+= 0.4.2.1 =
+corrected errors in this readme
+
+= 0.4.2 =
 * show_custom_fields now can iterate over a list of posts making a table of data from multiple posts easy to do
 * macro shortcode now understands inline macros so you do not have to create a content macro post
 * macro conditionals can now have a #else# block
@@ -116,3 +119,7 @@ Many small and some significant enhancements were added to existing features.
 
 = 0.4.2 =
 This version completes the feature set that I envisioned for this toolkit.
+
+= 0.4.2.1 =
+correct errors in this readme.
+
