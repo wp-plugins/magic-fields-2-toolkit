@@ -60,8 +60,11 @@ You must enable specific features - all features are not enabled by default. Ope
 
 == Changelog ==
 
+= 0.4.2.2 =
+corrected version number errors.
+
 = 0.4.2.1 =
-corrected errors in this readme
+corrected errors in this readme.
 
 = 0.4.2 =
 * show_custom_fields now can iterate over a list of posts making a table of data from multiple posts easy to do
@@ -123,3 +126,5 @@ This version completes the feature set that I envisioned for this toolkit.
 = 0.4.2.1 =
 correct errors in this readme.
 
+= 0.4.2.2 =
+corrected version number errors.
