@@ -4,7 +4,7 @@
 Plugin Name: Magic Fields 2 Toolkit
 Plugin URI: http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4-2/
 Description: custom post copier, custom fields shortcodes, ...
-Version: 0.4.5.1
+Version: 0.4.5.2
 Author: Magenta Cuda (PHP), Black Charger (JavaScript)
 Author URI: http://magentacuda.wordpress.com
 License: GPL2
@@ -30,7 +30,7 @@ class Magic_Fields_2_Toolkit_Init {
     public function __construct() {
         global $wpdb;
         list( $major, $minor ) = sscanf( phpversion(), '%D.%D' );
-        error_log( '##### Magic_Fields_2_Toolkit_Init::__construct():phpversion()=' . $major . ',' . $minor );
+        #error_log( '##### Magic_Fields_2_Toolkit_Init::__construct():phpversion()=' . $major . ',' . $minor );
         $tested_major = 5;
         $tested_minor = 4;
         if ( !( $major > $tested_major || ( $major == $tested_major && $minor >= $tested_minor ) ) ) {

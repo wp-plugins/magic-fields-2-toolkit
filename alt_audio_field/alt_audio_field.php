@@ -2,7 +2,7 @@
 // initialisation
 global $mf_domain;
 
-error_log( '##### alt_audio_field.php:backtrace=' . print_r( debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS ), true ) );
+#error_log( '##### alt_audio_field.php:backtrace=' . print_r( debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS ), true ) );
 
 if ( is_admin() ) {
     wp_enqueue_script( 'mf2tk_alt_media_admin', plugins_url( 'magic-fields-2-toolkit/js/mf2tk_alt_media_admin.js' ),
@@ -124,7 +124,7 @@ EOD
         $media_type = 'audio';
         $wp_media_shortcode = 'wp_audio_shortcode';
         $output = include WP_PLUGIN_DIR . '/magic-fields-2-toolkit/magic-fields-2-alt-media-template.php';
-        error_log( '##### alt_audio_field::display_field():$output=' . print_r( $output, true ) );
+        #error_log( '##### alt_audio_field::display_field():$output=' . print_r( $output, true ) );
         return $output;
     }
   
@@ -135,8 +135,8 @@ EOD
         $height = !empty( $atts['height'] ) ? $atts['height'] : $data['options']['max_height'];
         $invalid_atts = array( 'width' => true, 'height' => true, 'poster' => true );
         include WP_PLUGIN_DIR . '/magic-fields-2-toolkit/magic-fields-2-alt-media-get-template.php';
-        error_log( '##### alt_audio_field::get_audio():$html=' . $html );
-       # attach optional poster image
+        #error_log( '##### alt_audio_field::get_audio():$html=' . $html );
+        # attach optional poster image
         if ( $poster ) {
             $html = <<<EOD
                 <div style="display:inline-block;width:{$width}px;padding:0px;">
@@ -152,7 +152,7 @@ EOD;
             $html = img_caption_shortcode( array( 'width' => $width, 'align' => $data['options']['align'], 'caption' => $caption ),
                 $html );
         }
-        error_log( '##### alt_audio_field::get_audio():$html=' . $html );
+        #error_log( '##### alt_audio_field::get_audio():$html=' . $html );
         return $html;
     }  
 }

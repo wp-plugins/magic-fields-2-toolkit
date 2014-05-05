@@ -1,6 +1,6 @@
 <?php
-    error_log( '##### magic-fields-2-alt-media-template.php:$field=' . print_r( $field, true ) );
-    error_log( '##### magic-fields-2-alt-media-template.php:$mf_post_values=' . print_r( $mf_post_values, true ) );
+    #error_log( '##### magic-fields-2-alt-media-template.php:$field=' . print_r( $field, true ) );
+    #error_log( '##### magic-fields-2-alt-media-template.php:$mf_post_values=' . print_r( $mf_post_values, true ) );
     $width = $field['options']['max_width'];
     if ( !$width ) { $width = 320; }
     $height = $field['options']['max_height'];
@@ -22,7 +22,7 @@
     $fallback_input_name = "magicfields[$fallback_field_name][$group_index][$field_index]";
     $fallback_input_value = ( !empty( $mf_post_values[$fallback_field_name][$group_index][$field_index] ) )
         ? $mf_post_values[$fallback_field_name][$group_index][$field_index] : '';
-    error_log( '##### magic-fields-2-alt-media-template.php:$fallback_input_value=' . print_r( $fallback_input_value, true ) );
+    #error_log( '##### magic-fields-2-alt-media-template.php:$fallback_input_value=' . print_r( $fallback_input_value, true ) );
     if ( $fallback_input_value ) {
         $fallback_media_shortcode = call_user_func( $wp_media_shortcode,
             array_merge( array( 'src' => $fallback_input_value ), $dimensions ) );
@@ -35,13 +35,13 @@
     $alternate_fallback_input_name = "magicfields[$alternate_fallback_field_name][$group_index][$field_index]";
     $alternate_fallback_input_value = ( !empty( $mf_post_values[$alternate_fallback_field_name][$group_index][$field_index] ) )
         ? $mf_post_values[$alternate_fallback_field_name][$group_index][$field_index] : '';
-    error_log( '##### magic-fields-2-alt-media-template.php:$alternate_fallback_input_value='
-        . print_r( $alternate_fallback_input_value, true ) );
+    #error_log( '##### magic-fields-2-alt-media-template.php:$alternate_fallback_input_value='
+    #    . print_r( $alternate_fallback_input_value, true ) );
     if ( $alternate_fallback_input_value ) {
         $alternate_fallback_media_shortcode = call_user_func( $wp_media_shortcode,
             array_merge( array( 'src' => $alternate_fallback_input_value ), $dimensions ) );
-        error_log( '##### magic-fields-2-alt-media-template.php:$alternate_fallback_media_shortcode='
-            . $alternate_fallback_media_shortcode );
+        #error_log( '##### magic-fields-2-alt-media-template.php:$alternate_fallback_media_shortcode='
+        #    . $alternate_fallback_media_shortcode );
     } else {
         $alternate_fallback_media_shortcode = '';
     }
@@ -57,7 +57,7 @@
     $poster_input_name = "magicfields[$poster_field_name][$group_index][$field_index]";
     $poster_input_value = ( !empty( $mf_post_values[$poster_field_name][$group_index][$field_index] ) )
         ? $mf_post_values[$poster_field_name][$group_index][$field_index] : '';
-    error_log( '##### magic-fields-2-alt-media-template.php:$poster_input_value=' . print_r( $poster_input_value, true ) );
+    #error_log( '##### magic-fields-2-alt-media-template.php:$poster_input_value=' . print_r( $poster_input_value, true ) );
     $poster_input_value = str_replace( '"', '&quot;', $poster_input_value );
     $ucfirst_media_type = ucfirst( $media_type );
     # generate and return the HTML

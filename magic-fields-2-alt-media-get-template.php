@@ -5,7 +5,7 @@ if ( !function_exists( '_mf2tk_get_optional_field' ) ) {
 }
 
 $data = get_data( $field_name, $group_index, $field_index, $post_id );
-error_log( '##### magic-fields-2-alt-media-get-template.php:$data=' . print_r( $data, true ) );
+#error_log( '##### magic-fields-2-alt-media-get-template.php:$data=' . print_r( $data, true ) );
 $src = $data['meta_value'];
 
 # get optional fallback
@@ -25,14 +25,14 @@ if ( !$fallback ) {
     $extensions = call_user_func( $wp_get_media_extensions );
     $regex = '/\.(' . implode( '|', $extensions ) . ')($|\?)/';
     preg_match( $regex, $src, $matches );
-    error_log( '##### magic-fields-2-alt-media-get-template.php:$matches=' . print_r( $matches, true ) );
+    #error_log( '##### magic-fields-2-alt-media-get-template.php:$matches=' . print_r( $matches, true ) );
     $srcs[$matches[1]] = $src;
     preg_match( $regex, $fallback, $matches );
-    error_log( '##### magic-fields-2-alt-media-get-template.php:$matches=' . print_r( $matches, true ) );
+    #error_log( '##### magic-fields-2-alt-media-get-template.php:$matches=' . print_r( $matches, true ) );
     $srcs[$matches[1]] = $fallback;
     if ( $alternate_fallback ) {
         preg_match( $regex, $alternate_fallback, $matches );
-        error_log( '##### magic-fields-2-alt-media-get-template.php:$matches=' . print_r( $matches, true ) );
+        #error_log( '##### magic-fields-2-alt-media-get-template.php:$matches=' . print_r( $matches, true ) );
         $srcs[$matches[1]] = $alternate_fallback;
     }
 }
@@ -52,7 +52,7 @@ $atts = array_merge( $srcs, array( 'width'  => $width, 'height' => $height, 'loo
 if ( $poster ) { $atts['poster'] = $poster; }
 $atts = array_diff_key( $atts, $invalid_atts );
 $atts = array_filter( $atts, function( $v ) { return $v !== 'off'; } );
-error_log( '##### magic-fields-2-alt-media-get-template.php:$atts=' . print_r( $atts, true ) );
+#error_log( '##### magic-fields-2-alt-media-get-template.php:$atts=' . print_r( $atts, true ) );
 $html =  call_user_func( $wp_media_shortcode, $atts );
 
 ?>

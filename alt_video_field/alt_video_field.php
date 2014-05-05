@@ -2,7 +2,7 @@
 // initialisation
 global $mf_domain;
 
-error_log( '##### alt_video_field.php:backtrace=' . print_r( debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS ), true ) );
+#error_log( '##### alt_video_field.php:backtrace=' . print_r( debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS ), true ) );
 
 if ( is_admin() ) {
     wp_enqueue_script( 'mf2tk_alt_media_admin', plugins_url( 'magic-fields-2-toolkit/js/mf2tk_alt_media_admin.js' ),
@@ -124,7 +124,7 @@ EOD
         $media_type = 'video';
         $wp_media_shortcode = 'wp_video_shortcode';
         $output = include WP_PLUGIN_DIR . '/magic-fields-2-toolkit/magic-fields-2-alt-media-template.php';
-        error_log( '##### alt_audio_field::display_field():$output=' . print_r( $output, true ) );
+        #error_log( '##### alt_audio_field::display_field():$output=' . print_r( $output, true ) );
         return $output;
     }
   
@@ -134,14 +134,14 @@ EOD
         $wp_media_shortcode = 'wp_video_shortcode';
         $invalid_atts = array();
         include WP_PLUGIN_DIR . '/magic-fields-2-toolkit/magic-fields-2-alt-media-get-template.php';
-        error_log( '##### alt_video_field::get_video():$html=' . $html );
+        #error_log( '##### alt_video_field::get_video():$html=' . $html );
         if ( $caption ) {
             $width = !empty( $atts['width'] ) ? $atts['width'] : $data['options']['max_width'];
             if ( !$width ) { $width = 160; }
             $html = img_caption_shortcode( array( 'width' => $width, 'align' => $data['options']['align'], 'caption' => $caption ),
                 $html );
         }
-        error_log( '##### alt_video_field::get_video():$html=' . $html );        
+        #error_log( '##### alt_video_field::get_video():$html=' . $html );        
         return $html;
     }  
 }

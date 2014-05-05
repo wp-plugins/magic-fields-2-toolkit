@@ -112,7 +112,6 @@ class alt_dropdown_field extends mf_custom_fields {
     $output .= '</div></div><script type="text/javascript">';
     $output .= 'jQuery("div#' . $div_id . ' select").change(function(){';
     $output .= <<<'EOD'
-    //console.log(jQuery("option:selected",this).text());
     if(jQuery("option:selected:last",this).text()=="--Enter New Value--"){
         jQuery(this).css("display","none");
         var input=jQuery("input",this.parentNode.parentNode).css("display","inline").val("").get(0);
@@ -123,8 +122,6 @@ class alt_dropdown_field extends mf_custom_fields {
 EOD;
     $output .= 'jQuery("div#' . $div_id . ' input").change(function(){';
     $output .= <<<'EOD'
-    //console.log(jQuery(this).val());
-    //console.log(jQuery(this).text());
     var value=jQuery(this).val();
     var select=jQuery("select",this.parentNode.parentNode);
     jQuery("option:last",select).prop("selected",false);
@@ -136,7 +133,6 @@ EOD;
     $output .= 'jQuery("div#' . $div_id . ' input").keydown(function(e){';
     $output .= <<<'EOD'
     if(e.keyCode==13){
-        //console.log('keydown:e.keyCode='+e.keyCode);
         jQuery(this).blur();
         return false;
     }

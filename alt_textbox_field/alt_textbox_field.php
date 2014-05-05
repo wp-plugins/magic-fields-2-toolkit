@@ -103,7 +103,6 @@ class alt_textbox_field extends mf_custom_fields {
     $output .= 'jQuery("div#' . $div_id . ' select").change(function(){';
     $output .= <<<'EOD'
     var value=jQuery("option:selected",this).text();
-    //console.log('value='+value);
     jQuery("option:selected",this).prop('selected',false);
     jQuery(this).css("display","none");
     if(value==="--Enter New Value--"){value="";}
@@ -114,7 +113,6 @@ class alt_textbox_field extends mf_custom_fields {
 EOD;
     $output .= 'jQuery("div#' . $div_id . ' input").change(function(){';
     $output .= <<<'EOD'
-    //console.log('jQuery(this).val()='+jQuery(this).val());
     if(!jQuery(this).val()){
         jQuery(this).css("display","none");
         jQuery("select",this.parentNode.parentNode).css("display","inline-block");
@@ -124,7 +122,6 @@ EOD;
     $output .= 'jQuery("div#' . $div_id . ' input").keydown(function(e){';
     $output .= <<<'EOD'
     if(e.keyCode==13){
-        //console.log('keydown:e.keyCode='+e.keyCode);
         jQuery(this).blur();
         return false;
     }

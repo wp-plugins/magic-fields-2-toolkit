@@ -2,7 +2,7 @@
 // initialisation
 global $mf_domain;
 
-error_log( '##### alt_audio_field.php:backtrace=' . print_r( debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS ), true ) );
+#error_log( '##### alt_audio_field.php:backtrace=' . print_r( debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS ), true ) );
 
 if ( is_admin() ) {
     wp_enqueue_script( 'mf2tk_alt_media_admin', plugins_url( 'magic-fields-2-toolkit/js/mf2tk_alt_media_admin.js' ),
@@ -79,7 +79,7 @@ EOD
 
     public function display_field( $field, $group_index = 1, $field_index = 1 ) {
         global $mf_domain, $post, $mf_post_values;
-        error_log( '##### alt_image_field::display_field():$field=' . print_r( $field, true ) );
+        #error_log( '##### alt_image_field::display_field():$field=' . print_r( $field, true ) );
         # setup main field
         $field_id = "mf2tk-$field[name]-$group_index-$field_index";
         $input_value = str_replace( '"', '&quot;', $field['input_value'] );
@@ -138,13 +138,13 @@ EOD
 </div>
 <br>
 EOD;
-        error_log( '##### alt_image_field::display_field():$output=' . $output );
+        #error_log( '##### alt_image_field::display_field():$output=' . $output );
         return $output;
     }
   
     static function get_image( $field_name, $group_index = 1, $field_index = 1, $post_id = NULL, $atts = array() ) {
         $data = get_data( $field_name, $group_index, $field_index, $post_id );
-        error_log( '##### alt_image_field::get_image():$data=' . print_r( $data, true ) );
+        #error_log( '##### alt_image_field::get_image():$data=' . print_r( $data, true ) );
         $width  = !empty( $atts['width'] )  ? $atts['width']  : $data['options']['max_width'];
         $height = !empty( $atts['height'] ) ? $atts['height'] : $data['options']['max_height'];
         # get optional caption
@@ -158,14 +158,14 @@ EOD;
                 $html
             </div>
 EOD;
-        error_log( '##### alt_image_field::get_image():$html=' . $html );
+        #error_log( '##### alt_image_field::get_image():$html=' . $html );
         # attach optional caption
         if ( $caption ) {
             if ( !$width ) { $width = 160; }
             $html = img_caption_shortcode( array( 'width' => $width, 'align' => $data['options']['align'], 'caption' => $caption ),
                 $html );
         }
-        error_log( '##### alt_image_field::get_image():$html=' . $html );
+        #error_log( '##### alt_image_field::get_image():$html=' . $html );
         return $html;
     }  
 }

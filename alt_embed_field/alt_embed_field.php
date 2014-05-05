@@ -2,7 +2,7 @@
 // initialisation
 global $mf_domain;
 
-error_log( '##### alt_embed_field.php:backtrace=' . print_r( debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS ), true ) );
+#error_log( '##### alt_embed_field.php:backtrace=' . print_r( debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS ), true ) );
 
 if ( is_admin() ) {
     wp_enqueue_script( 'mf2tk_alt_media_admin', plugins_url( 'magic-fields-2-toolkit/js/mf2tk_alt_media_admin.js' ),
@@ -137,7 +137,7 @@ EOD;
             include WP_PLUGIN_DIR . '/magic-fields-2-toolkit/magic-fields-2-get-optional-field.php';
         }
         $caption = _mf2tk_get_optional_field( $field_name, $group_index, $field_index, $post_id, self::$suffix_caption );
-        error_log( '##### embed_field::get_embed():$caption=' . $caption );
+        #error_log( '##### embed_field::get_embed():$caption=' . $caption );
         if ( !$max_width  ) { $max_width  = $data['options']['max_width'];  }
         if ( !$max_height ) { $max_height = $data['options']['max_height']; }
         # If value is not an URL
