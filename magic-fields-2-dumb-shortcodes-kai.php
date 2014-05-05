@@ -8,7 +8,7 @@
  * License:       GPL2
  */
 
-/*  Copyright 2013  Magenta Cuda  (email:magenta.cuda@yahoo.com)
+/*  Copyright 2013  Magenta Cuda
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License, version 2, as 
@@ -24,6 +24,8 @@
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+#error_log( '__FILE__ =' . __FILE__ );
+
 include_once( dirname( __FILE__ ) . '/magic-fields-2-group-key.php' );
 include_once( dirname( __FILE__ ) . '/magic-fields-2-post-filter.php' );
 
@@ -32,11 +34,12 @@ class Magic_Fields_2_Toolkit_Dumb_Shortcodes {
 	public static $recursion_separator = '>';
     public function __construct() {
         # wrapper for the individual values of a field
-        $wrap_value = function( $value, $field, $type, $filters, $before, $after, $separator, $classes = array() ) {
+        $wrap_value = function( $value, $field, $type, $filters, $before, $after, $separator, $classes = array(),
+            $group_index = 0, $field_index = 0, $post_id = 0 ) {
             if ( $filters !== NULL ) {
                 foreach( explode ( ';', $filters ) as $filter) {
                     if ( function_exists( $filter ) ) {
-                        $value = call_user_func( $filter, $value, $field, $type, $classes );
+                        $value = call_user_func( $filter, $value, $field, $type, $classes, $group_index, $field_index, $post_id );
                     }
                 }
             }
@@ -102,6 +105,7 @@ class Magic_Fields_2_Toolkit_Dumb_Shortcodes {
                 if ( array_key_exists( 9, $matches ) ) { $the_field_index = $matches[9]; }
                 else { $the_field_index = 1; }
                 $fields_by_group = ( array_key_exists( 10, $matches ) && $matches[10] == 'f' ) ? FALSE : TRUE;
+                #error_log( '##### $show_custom_field:$fields_by_group=' . $fields_by_group );
 				$the_group_excludes = array();
 				$the_group_classes = array();
 				$the_excludes = array();
@@ -164,7 +168,7 @@ class Magic_Fields_2_Toolkit_Dumb_Shortcodes {
 						#error_log( 'results=' . print_r( $results, TRUE ) );
 						$fields = array_map( function( $row ) { return $row->label; }, $the_field_data );
 						if ( array_key_exists( $mf2tk_key_name, $fields ) ) { unset( $fields[$mf2tk_key_name] ); }
-						#error_log( 'fields=' . print_r( $fields, TRUE ) );
+						#error_log( '##### $show_custom_field():fields=' . print_r( $fields, TRUE ) );
 					} else {
 						$the_field_data = $wpdb->get_results( 'SELECT name, label, description, type FROM '
 							. MF_TABLE_CUSTOM_FIELDS . " WHERE name IN ( '$the_field', '$mf2tk_key_name' ) AND post_type = '"
@@ -176,7 +180,7 @@ class Magic_Fields_2_Toolkit_Dumb_Shortcodes {
 							$fields = array( $the_field => $the_field );
 							$not_magic_field = TRUE;
 						}
-						#error_log( 'fields=' . print_r( $fields, TRUE ) );
+						#error_log( '##### $show_custom_field():fields=' . print_r( $fields, TRUE ) );
 					}
 					if ( $mf2tk_key_data = (array) $the_field_data[$mf2tk_key_name] ) {
 						preg_match( '/\[\*([a-zA-Z0-9_]+,?)+\*\]/', $mf2tk_key_data['description'], $mf2tk_key_classes );
@@ -292,7 +296,7 @@ class Magic_Fields_2_Toolkit_Dumb_Shortcodes {
 										#error_log( '##### $field=' . $field . ', $post_id=' . $post_id
 										#    . ', $datax[\'type\']=' . $datax['type']
 										#    . ', $datax[\'description\']=' . $datax['description'] );
-										$value = get( $field, $group_index, $field_index, $post_id );
+                                        $value = get( $field, $group_index, $field_index, $post_id );
 										#error_log( '##### $value=' . $value );
 										#error_log( '##### $field=' . $field . ', $data[\'description\']=' . $data['description'] );
 										preg_match( '/\[\*([a-zA-Z0-9_]+,?)+\*\]/', $data['description'], $classes );
@@ -350,7 +354,7 @@ class Magic_Fields_2_Toolkit_Dumb_Shortcodes {
 												}
 											} else {
 												$field_value .= $wrap_value( $value, $field, $data['type'], $filter, $before, $after,
-													$separator, $classes );
+													$separator, $classes, $group_index, $field_index, $post_id );
 											}
 										}
 										#error_log( '##### $show_custom_field:$field_value="' . $field_value . '"' );
@@ -366,6 +370,7 @@ class Magic_Fields_2_Toolkit_Dumb_Shortcodes {
 									}
 									$fields_value .= $wrap_field_value( $field_value, $field_before, $field_after, $field_separator,
 										$label, $field, is_array( $classes ) ? implode( ' ', $classes ) : '', $field_rename, $path );
+                                    #error_log( '##### $show_custom_field:$fields_value="' . $fields_value . '"' );
 								} else {
 									$fields_value .= $field_value;
 								}
@@ -416,7 +421,13 @@ class Magic_Fields_2_Toolkit_Dumb_Shortcodes {
 						}
 					} # foreach ( $fields1 as $field1 => $label1 ) { # results in $content
 				} # foreach ( $group_names as $group_name ) {
+                $content .= $field_separator;
             } # foreach ( $the_fields as $the_name ) {
+            # remove trailing field separator
+            if ( $field_separator && substr_compare( $content, $field_separator, -strlen( $field_separator ),
+                strlen( $field_separator ) ) === 0 ) {
+                $content = substr( $content, 0, - strlen( $field_separator ) );
+            }
             if ( $finals !== NULL ) {
                 foreach( explode( ';', $finals ) as $final ) {
                     $content = call_user_func( $final, $content, $the_names );
@@ -459,9 +470,14 @@ class Magic_Fields_2_Toolkit_Dumb_Shortcodes {
             #    'field_before', 'field_after', 'field_separator', 'post_id' ), TRUE ) );
             if ( is_numeric( $post_id) ) {
                 # single numeric post id
-                return $show_custom_field( $post_id, $field, $before, $after, $separator, $filter, $field_before, $field_after,
+                $rtn = '';
+                if ( $post_before ) { $rtn .= $post_before; }
+                $rtn .= $show_custom_field( $post_id, $field, $before, $after, $separator, $filter, $field_before, $field_after,
 					$field_separator, $field_rename, $group_before, $group_after, $group_separator, $group_rename, $multi_before,
 					$multi_after, $multi_separator, $final, '' );
+                if ( $post_after ) { $rtn .= $post_after; }
+                #error_log( '##### show_custom_field:$rtn=' . $rtn );
+                return $rtn;
             } else {
                 # handle multiple posts
                 # first get list of post ids
@@ -469,12 +485,14 @@ class Magic_Fields_2_Toolkit_Dumb_Shortcodes {
                 $rtn = '';
                 foreach ( $post_ids as $post_id ) {
                     # do each post accumulating the output in $rtn
+                    #error_log( '##### show_custom_field:$post_id=' . $post_id );
                     if ( $post_before ) { $rtn .= $post_before; }
                     $rtn .= $show_custom_field( $post_id, $field, $before, $after, $separator, $filter, $field_before, $field_after,
                         $field_separator, $field_rename, $group_before, $group_after, $group_separator, $group_rename, $multi_before,
                         $multi_after, $multi_separator, $final, '' );
                     if ( $post_after ) { $rtn .= $post_after; }
                 }
+                #error_log( '##### show_custom_field:$rtn=' . $rtn );
                 return $rtn;
             }
         } );
@@ -494,4 +512,27 @@ function url_to_link( $value, $field, $type ) {
     return $value;
 }
 
+# filter for alt media fields
+
+function url_to_media( $value, $field, $type, $classes, $group_index, $field_index, $post_id ) {
+    if ( !$post_id || !$group_index || !$field_index ) { return $value; }
+    if ( $type === 'alt_embed' ) {
+        $value = alt_embed_field::get_embed( $field, $group_index, $field_index, $post_id );
+    } else if ( $type === 'alt_video' ) {
+        $value = alt_video_field::get_video( $field, $group_index, $field_index, $post_id );
+    } else if ( $type === 'alt_audio' ) {
+        $value = alt_audio_field::get_audio( $field, $group_index, $field_index, $post_id );
+    } else if ( $type === 'alt_image' ) {
+        $value = alt_image_field::get_image( $field, $group_index, $field_index, $post_id );
+    }
+    return $value;
+}
+
+function media_url_to_link( $value, $field, $type ) {
+    if ( $type === 'alt_embed' || $type === 'alt_video' || $type === 'alt_audio' || $type === 'alt_image' ) {
+        return '<a href="' . $value . '">' . $value . '</a>';
+    }
+    return $value;
+}
+    
 ?>

@@ -4,8 +4,8 @@
 Plugin Name: Magic Fields 2 Toolkit
 Plugin URI: http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4-2/
 Description: custom post copier, custom fields shortcodes, ...
-Version: 0.4.2.5
-Author: Magenta Cuda
+Version: 0.4.5.1
+Author: Magenta Cuda (PHP), Black Charger (JavaScript)
 Author URI: http://magentacuda.wordpress.com
 License: GPL2
 */
@@ -29,6 +29,21 @@ License: GPL2
 class Magic_Fields_2_Toolkit_Init {
     public function __construct() {
         global $wpdb;
+        list( $major, $minor ) = sscanf( phpversion(), '%D.%D' );
+        error_log( '##### Magic_Fields_2_Toolkit_Init::__construct():phpversion()=' . $major . ',' . $minor );
+        $tested_major = 5;
+        $tested_minor = 4;
+        if ( !( $major > $tested_major || ( $major == $tested_major && $minor >= $tested_minor ) ) ) {
+            add_action( 'admin_notices', function() use ( $major, $minor, $tested_major, $tested_minor ) {
+                echo <<<EOD
+<div style="padding:10px 20px;border:2px solid red;margin:50px 20px;font-weight:bold;">
+    Magic Fields 2 Toolkit will not work with PHP version $major.$minor;
+    Please uninstall it or upgrade your PHP version to $tested_major.$tested_minor or later.
+</div>
+EOD;
+            } );
+            return;
+        }
         include( dirname(__FILE__) . '/magic-fields-2-toolkit-settings.php' );
         $options = get_option( 'magic_fields_2_toolkit_enabled' );
         #error_log( '##### Magic_Fields_2_Toolkit_Init:$options='
@@ -311,7 +326,7 @@ EOD
                 
             } else {
 			}
-            if ( array_key_exists( 'clean_files_mf', $options ) ) {
+            if ( array_key_exists( 'clean_files_mf', $options ) && is_admin() ) {
                 include( dirname(__FILE__)
                     . '/magic-fields-2-clean-files_mf.php' );
             }
@@ -362,6 +377,17 @@ EOD
             if ( array_key_exists( 'utility_functions', $options ) ) {
                 include( dirname(__FILE__)
                     . '/magic-fields-2-utility-functions.php' );
+            }
+            if ( is_admin() && array_key_exists( 'alt_embed_field', $options ) ) {
+                add_action( 'wp_ajax_' . 'mf2tk_alt_embed_admin_refresh', function() {
+                    include dirname(__FILE__) . '/mf2tk_alt_embed_admin_refresh.php';
+                } );
+            }
+            if ( is_admin()
+                && ( array_key_exists( 'alt_video_field', $options ) || array_key_exists( 'alt_video_field', $options ) ) ) {
+                add_action( 'wp_ajax_' . 'mf2tk_alt_media_admin_refresh', function() {
+                    include dirname(__FILE__) . '/mf2tk_alt_media_admin_refresh.php';
+                } );
             }
         }
         #add_filter( 'plugin_row_meta', function( $plugin_meta, $plugin_file, $plugin_data, $status ) {

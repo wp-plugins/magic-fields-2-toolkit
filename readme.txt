@@ -3,8 +3,8 @@ Contributors: Magenta Cuda
 Donate link:
 Tags: custom, post, copier, fields, shortcodes, macros
 Requires at least: 3.6
-Tested up to: 3.7.1
-Stable tag: 0.4.2.5
+Tested up to: 3.9
+Stable tag: 0.4.5.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Plugin adds some useful features to the Magic Fields 2 plugin.
@@ -33,8 +33,12 @@ The current features are:
 
    10. Provides some Magic Fields 2 utility functions for PHP programmers.
    
+   11. Provides a field for WordPress's embed shortcode.
+   
+   12. Provides a field for WordPress's video and audio shortcodes.
+   
 Please visit the [Toolkit's online documentation](http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4-2/) for more details.
-This plugin requires at least PHP 5.4.
+**This plugin works with Magic Fields 2.2.2 and requires at least PHP 5.4.**
 
 == Installation ==
 1. Upload the `Magic Fields 2 Toolkit` folder to the `/wp-content/plugins/` directory
@@ -59,6 +63,13 @@ You must enable specific features - all features are not enabled by default. Ope
 == Screenshots ==
 
 == Changelog ==
+
+= 0.4.5.1 =
+* optionally display seach results using a content macro
+* supports drag and drop to change order of search fields
+* for searches optionally set query type to is_search so only excerpts are displayed for applicable themes
+* provides a field for WordPress's embed shortcode.
+* rovides a field for WordPress's video and audio shortcodes.
 
 = 0.4.2.5 =
 fix error in macro definition
@@ -146,3 +157,7 @@ fix a bad uri.
 
 = 0.4.2.5 =
 fix error in macro definition
+
+= 0.4.5.1 =
+added new search features
+added fields for embed, audio and video

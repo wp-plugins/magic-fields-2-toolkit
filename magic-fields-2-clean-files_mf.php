@@ -24,6 +24,8 @@
  * appropiate lines to enable it after verifing the correctness of this.
  */
 
+ wp_enqueue_script( 'mf2tk_clean_mf_files', plugins_url( 'magic-fields-2-toolkit/js/mf2tk_clean_mf_files.js' ), array( 'jquery' ) );
+
 function get_unreferenced_image_files_in_folder_files_mf() {
   global $wpdb;
   echo( '<h2>Unreferenced Files in Folder "wp-content/files_mf/"</h2>' );
@@ -82,14 +84,18 @@ function get_unreferenced_image_files_in_folder_files_mf() {
       . 'return false;">X</button><ol>' );
     echo( '<form method="post" action="' . get_option('siteurl')
       . '/wp-admin/options-general.php?page=get_unreferenced_files_mc&amp;'
-      . 'noheader=true"><ol>' );
+      . 'noheader=true"><button class="mf2tk-delete-mf-files">Select All</button>'
+      . '&nbsp;&nbsp;<button class="mf2tk-delete-mf-files">Clear All</button><br>'
+      . '<hr><ol>' );
     foreach ( $unreferenced as $i => $unreference ) {
-      echo( '<li><input type="checkbox" name="to-be-deleted-' . $i . '" value="'
-        . $unreference . '">&nbsp;&nbsp;<a href="' . MF_FILES_URL . $unreference
+      echo( '<li><input type="checkbox" class="mf2tk-delete-mf-files" '
+        . 'name="to-be-deleted-' . $i . '" value="' . $unreference
+        . '">&nbsp;&nbsp;<a href="' . MF_FILES_URL . $unreference
         . '" target="_blank"><span style="font-weight:bold;">&quot;'
         . $unreference . '&quot;</span></a></li>' );
     }
-    echo( '</ol><input type="submit" value="Delete Checked"></form></div>' );
+    echo( '</ol><hr><br><input type="submit" value="Delete Checked">'
+        . '</form></div>' );
   }
 }
 
