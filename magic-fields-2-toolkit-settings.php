@@ -235,8 +235,8 @@ class Magic_Fields_2_Toolkit_Settings {
             add_settings_field( 'magic_fields_2_toolkit_alt_image_field', 
                 __( 'Alt Image Field', 'magic-fields-2-toolkit' ),
                 function() use ( $options) {
-                    error_log( '##### add_settings_field:callback():options='
-                        . print_r( $options, true ) );
+                    #error_log( '##### add_settings_field:callback():options='
+                    #    . print_r( $options, true ) );
                     echo( '<input name="magic_fields_2_toolkit_enabled['
                         . 'alt_image_field]" type="checkbox" '
                         . 'value="enabled"' . ( ( is_array( $options )

@@ -515,7 +515,7 @@ if ( is_admin() ) {
         #    . print_r( $_POST, TRUE ) );
         if ( !isset( $_POST['mf2tk_get_form_nonce'] ) || !wp_verify_nonce( $_POST['mf2tk_get_form_nonce'],
             Search_Using_Magic_Fields_Widget::GET_FORM_FOR_POST_TYPE ) ) {
-            error_log( '##### action:wp_ajax_nopriv_' . Search_Using_Magic_Fields_Widget::GET_FORM_FOR_POST_TYPE . ':nonce:die' );
+            #error_log( '##### action:wp_ajax_nopriv_' . Search_Using_Magic_Fields_Widget::GET_FORM_FOR_POST_TYPE . ':nonce:die' );
             die;
         }
         $option = get_option( $_REQUEST['magic_fields_search_widget_option'] );

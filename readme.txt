@@ -4,7 +4,7 @@ Donate link:
 Tags: custom, post, copier, fields, shortcodes, macros
 Requires at least: 3.6
 Tested up to: 3.9
-Stable tag: 0.4.5.1
+Stable tag: 0.4.5.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Plugin adds some useful features to the Magic Fields 2 plugin.
@@ -63,6 +63,9 @@ You must enable specific features - all features are not enabled by default. Ope
 == Screenshots ==
 
 == Changelog ==
+
+= 0.4.5.2 =
+* 0.4.5.1 was the wrong version
 
 = 0.4.5.1 =
 * optionally display seach results using a content macro
@@ -161,3 +164,6 @@ fix error in macro definition
 = 0.4.5.1 =
 added new search features
 added fields for embed, audio and video
+
+= 0.4.5.2 =
+0.4.5.1 was the wrong version
