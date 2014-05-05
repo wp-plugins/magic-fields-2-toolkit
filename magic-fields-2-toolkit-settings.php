@@ -56,6 +56,10 @@ class Magic_Fields_2_Toolkit_Settings {
                 $input = Magic_Fields_2_Toolkit_Settings::do_field_type_option( 'alt_textbox', $input );
                 $input = Magic_Fields_2_Toolkit_Settings::do_field_type_option( 'alt_related_type', $input );
                 $input = Magic_Fields_2_Toolkit_Settings::do_field_type_option( 'alt_dropdown', $input );
+                $input = Magic_Fields_2_Toolkit_Settings::do_field_type_option( 'alt_embed', $input );
+                $input = Magic_Fields_2_Toolkit_Settings::do_field_type_option( 'alt_video', $input );
+                $input = Magic_Fields_2_Toolkit_Settings::do_field_type_option( 'alt_audio', $input );
+                $input = Magic_Fields_2_Toolkit_Settings::do_field_type_option( 'alt_image', $input );
                 return $input;
             } );
             add_settings_section( 'magic_fields_2_toolkit_settings_sec', '',
@@ -157,7 +161,7 @@ class Magic_Fields_2_Toolkit_Settings {
                 'magic-fields-2-toolkit-page',
                 'magic_fields_2_toolkit_settings_sec' );		
             add_settings_field( 'magic_fields_2_toolkit_alt_related_type_field', 
-                __( 'Alt Related Type', 'magic-fields-2-toolkit' ),
+                __( 'Alt Related Type Field', 'magic-fields-2-toolkit' ),
                 function() use ( $options) {
                     echo( '<input name="magic_fields_2_toolkit_enabled['
                         . 'alt_related_type_field]" type="checkbox" '
@@ -174,8 +178,82 @@ class Magic_Fields_2_Toolkit_Settings {
                 },
                 'magic-fields-2-toolkit-page',
                 'magic_fields_2_toolkit_settings_sec' );		
+            add_settings_field( 'magic_fields_2_toolkit_alt_embed_field', 
+                __( 'Alt Embed Field', 'magic-fields-2-toolkit' ),
+                function() use ( $options) {
+                    echo( '<input name="magic_fields_2_toolkit_enabled['
+                        . 'alt_embed_field]" type="checkbox" '
+                        . 'value="enabled"' . ( ( is_array( $options )
+                        && array_key_exists( 'alt_embed_field', $options ) )
+                        ? ' checked' : '' ) . '>'
+                        . __( ' Enabled', 'magic-fields-2-toolkit' )
+                        . '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+                        . '<a href="http://magicfields17.wordpress.com/'
+                        . 'magic-fields-2-toolkit-0-4-2/#embed">'
+                        . __( 'Documentation', 'magic-fields-2-toolkit' )
+                        . '</a>'
+                    );
+                },
+                'magic-fields-2-toolkit-page',
+                'magic_fields_2_toolkit_settings_sec' );
+            add_settings_field( 'magic_fields_2_toolkit_alt_video_field', 
+                __( 'Alt Video Field', 'magic-fields-2-toolkit' ),
+                function() use ( $options) {
+                    echo( '<input name="magic_fields_2_toolkit_enabled['
+                        . 'alt_video_field]" type="checkbox" '
+                        . 'value="enabled"' . ( ( is_array( $options )
+                        && array_key_exists( 'alt_video_field', $options ) )
+                        ? ' checked' : '' ) . '>'
+                        . __( ' Enabled', 'magic-fields-2-toolkit' )
+                        . '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+                        . '<a href="http://magicfields17.wordpress.com/'
+                        . 'magic-fields-2-toolkit-0-4-2/#video">'
+                        . __( 'Documentation', 'magic-fields-2-toolkit' )
+                        . '</a>'
+                    );
+                },
+                'magic-fields-2-toolkit-page',
+                'magic_fields_2_toolkit_settings_sec' );
+            add_settings_field( 'magic_fields_2_toolkit_alt_audio_field', 
+                __( 'Alt Audio Field', 'magic-fields-2-toolkit' ),
+                function() use ( $options) {
+                    echo( '<input name="magic_fields_2_toolkit_enabled['
+                        . 'alt_audio_field]" type="checkbox" '
+                        . 'value="enabled"' . ( ( is_array( $options )
+                        && array_key_exists( 'alt_audio_field', $options ) )
+                        ? ' checked' : '' ) . '>'
+                        . __( ' Enabled', 'magic-fields-2-toolkit' )
+                        . '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+                        . '<a href="http://magicfields17.wordpress.com/'
+                        . 'magic-fields-2-toolkit-0-4-2/#audio">'
+                        . __( 'Documentation', 'magic-fields-2-toolkit' )
+                        . '</a>'
+                    );
+                },
+                'magic-fields-2-toolkit-page',
+                'magic_fields_2_toolkit_settings_sec' );
+            add_settings_field( 'magic_fields_2_toolkit_alt_image_field', 
+                __( 'Alt Image Field', 'magic-fields-2-toolkit' ),
+                function() use ( $options) {
+                    error_log( '##### add_settings_field:callback():options='
+                        . print_r( $options, true ) );
+                    echo( '<input name="magic_fields_2_toolkit_enabled['
+                        . 'alt_image_field]" type="checkbox" '
+                        . 'value="enabled"' . ( ( is_array( $options )
+                        && array_key_exists( 'alt_image_field', $options ) )
+                        ? ' checked' : '' ) . '>'
+                        . __( ' Enabled', 'magic-fields-2-toolkit' )
+                        . '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+                        . '<a href="http://magicfields17.wordpress.com/'
+                        . 'magic-fields-2-toolkit-0-4-2/#image">'
+                        . __( 'Documentation', 'magic-fields-2-toolkit' )
+                        . '</a>'
+                    );
+                },
+                'magic-fields-2-toolkit-page',
+                'magic_fields_2_toolkit_settings_sec' );
             add_settings_field( 'magic_fields_2_toolkit_alt_textbox_field', 
-                __( 'Alt Textbox', 'magic-fields-2-toolkit' ),
+                __( 'Alt Textbox Field', 'magic-fields-2-toolkit' ),
                 function() use ( $options) {
                     echo( '<input name="magic_fields_2_toolkit_enabled['
                         . 'alt_textbox_field]" type="checkbox" '
@@ -193,7 +271,7 @@ class Magic_Fields_2_Toolkit_Settings {
                 'magic-fields-2-toolkit-page',
                 'magic_fields_2_toolkit_settings_sec' );
             add_settings_field( 'magic_fields_2_toolkit_alt_dropdown_field', 
-                __( 'Alt Dropdown', 'magic-fields-2-toolkit' ),
+                __( 'Alt Dropdown Field', 'magic-fields-2-toolkit' ),
                 function() use ( $options) {
                     echo( '<input name="magic_fields_2_toolkit_enabled['
                         . 'alt_dropdown_field]" type="checkbox" '
@@ -212,7 +290,7 @@ class Magic_Fields_2_Toolkit_Settings {
                 'magic_fields_2_toolkit_settings_sec'
             );
             add_settings_field( 'magic_fields_2_toolkit_alt_audio', 
-                __( 'Alt Audio', 'magic-fields-2-toolkit' ),
+                __( 'Alt Get Audio', 'magic-fields-2-toolkit' ),
                 function() use ( $options) {
                     echo( '<input name="magic_fields_2_toolkit_enabled['
                         . 'alt_get_audio]" type="checkbox" '
