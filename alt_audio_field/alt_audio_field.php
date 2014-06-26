@@ -104,10 +104,10 @@ EOD
                     'name'        =>  'mf_field[option][align]',
                     'default'     => '',
                     'options'     => array(
-                                        'alignnone'   => 'None',
                                         'aligncenter' => 'Center',
                                         'alignright'  => 'Right',
                                         'alignleft'   => 'Left',
+                                        'alignnone'   => 'None',
                                     ),
                     'add_empty'   => false,
                     'description' => '',
