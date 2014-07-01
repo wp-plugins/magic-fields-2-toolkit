@@ -4,7 +4,7 @@ Donate link:
 Tags: custom, post, copier, fields, shortcodes, macros
 Requires at least: 3.6
 Tested up to: 3.9
-Stable tag: 0.4.5.3
+Stable tag: 0.4.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Plugin adds some useful features to the Magic Fields 2 plugin.
@@ -63,6 +63,9 @@ You must enable specific features - all features are not enabled by default. Ope
 == Screenshots ==
 
 == Changelog ==
+= 0.4.6 =
+The search results table of posts is now a sortable table
+
 = 0.4.5.3 =
 * fix pagination bug for search results output
 * added psuedo file __post_author
@@ -180,3 +183,6 @@ added fields for embed, audio and video
 * added search by post author
 * added support for post type specific css file for alternate search result output
 * omit select post type if there is only one post type
+
+= 0.4.6 =
+The search results table of posts is now a sortable table
