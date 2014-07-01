@@ -4,7 +4,7 @@ Donate link:
 Tags: custom, post, copier, fields, shortcodes, macros
 Requires at least: 3.6
 Tested up to: 3.9
-Stable tag: 0.4.6
+Stable tag: 0.4.6.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Plugin adds some useful features to the Magic Fields 2 plugin.
@@ -60,11 +60,18 @@ This plugin is designed to work with Magic Fields 2's custom post types and cust
 
 You must enable specific features - all features are not enabled by default. Open 'Settings->Magic Fields 2 Toolkit' menu item and select the features you want.
 
+= After upgrading to version 0.4.6 the search results table of post is not sortable. =
+
+Version 0.4.6 has a new default content macro for sortable tables. However, the toolkit will not automatically replace an existing content macro - because you may have customized it. However, you can restore the default content macro by completely erasing the content macro definition.
+   
 == Screenshots ==
 
 == Changelog ==
+= 0.4.6.1 =
+* upgrade a utility file to current version
+
 = 0.4.6 =
-The search results table of posts is now a sortable table
+* The search results table of posts is now a sortable table. Note that this requires a manual upgrade of search widget's content macro.
 
 = 0.4.5.3 =
 * fix pagination bug for search results output
@@ -185,4 +192,7 @@ added fields for embed, audio and video
 * omit select post type if there is only one post type
 
 = 0.4.6 =
-The search results table of posts is now a sortable table
+* The search results table of posts is now a sortable table. Note that this requires a manual upgrade of search widget's content macro.
+
+= 0.4.6.1 =
+* upgrade a utility file to current version
