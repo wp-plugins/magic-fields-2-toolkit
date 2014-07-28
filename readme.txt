@@ -4,7 +4,7 @@ Donate link:
 Tags: custom, post, copier, fields, shortcodes, macros
 Requires at least: 3.6
 Tested up to: 3.9
-Stable tag: 0.4.6.2
+Stable tag: 0.4.6.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Plugin adds some useful features to the Magic Fields 2 plugin.
@@ -67,6 +67,11 @@ Version 0.4.6 has a new default content macro for sortable tables. However, the 
 == Screenshots ==
 
 == Changelog ==
+= 0.4.6.3 =
+* fix drag and drop problem on search widgets administrator's interface for older versions of Internet Explorer
+* added style sheet for the search widget
+* several small enhancements and bug fixes for the search widget
+
 = 0.4.6.2 =
 * no changes; just synced readme and plugin version numbers
 
@@ -202,3 +207,8 @@ added fields for embed, audio and video
 
 = 0.4.6.2 =
 * no changes; just synced readme and plugin version numbers
+
+= 0.4.6.3 =
+* fix drag and drop problem on search widgets administrator's interface for older versions of Internet Explorer
+* added style sheet for the search widget
+* several small enhancements and bug fixes for the search widget

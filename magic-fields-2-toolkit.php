@@ -1,15 +1,5 @@
 <?php
 
-/*
-Plugin Name: Magic Fields 2 Toolkit
-Plugin URI: http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4-2/
-Description: custom post copier, custom fields shortcodes, ...
-Version: 0.4.6.2
-Author: Magenta Cuda (PHP), Black Charger (JavaScript)
-Author URI: http://magentacuda.wordpress.com
-License: GPL2
-*/
-
 /*  Copyright 2013  Magenta Cuda
 
     This program is free software; you can redistribute it and/or modify
@@ -29,21 +19,6 @@ License: GPL2
 class Magic_Fields_2_Toolkit_Init {
     public function __construct() {
         global $wpdb;
-        list( $major, $minor ) = sscanf( phpversion(), '%D.%D' );
-        #error_log( '##### Magic_Fields_2_Toolkit_Init::__construct():phpversion()=' . $major . ',' . $minor );
-        $tested_major = 5;
-        $tested_minor = 4;
-        if ( !( $major > $tested_major || ( $major == $tested_major && $minor >= $tested_minor ) ) ) {
-            add_action( 'admin_notices', function() use ( $major, $minor, $tested_major, $tested_minor ) {
-                echo <<<EOD
-<div style="padding:10px 20px;border:2px solid red;margin:50px 20px;font-weight:bold;">
-    Magic Fields 2 Toolkit will not work with PHP version $major.$minor;
-    Please uninstall it or upgrade your PHP version to $tested_major.$tested_minor or later.
-</div>
-EOD;
-            } );
-            return;
-        }
         include( dirname(__FILE__) . '/magic-fields-2-toolkit-settings.php' );
         $options = get_option( 'magic_fields_2_toolkit_enabled' );
         #error_log( '##### Magic_Fields_2_Toolkit_Init:$options='
