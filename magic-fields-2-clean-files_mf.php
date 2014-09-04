@@ -19,84 +19,97 @@
 /*
  * Finds files in folder "wp-content/files_mf" that are not referenced by 
  * published or draft posts.
- *
- * Note that the unlink is intentionally DISABLED. You need to edit the
- * appropiate lines to enable it after verifing the correctness of this.
  */
-
- wp_enqueue_script( 'mf2tk_clean_mf_files', plugins_url( 'magic-fields-2-toolkit/js/mf2tk_clean_mf_files.js' ), array( 'jquery' ) );
+add_action( 'admin_enqueue_scripts', function() {
+    wp_enqueue_style( 'mf2tk-jquery-ui', plugins_url( 'mf2tk-jquery-ui.min.css', __FILE__ ) );
+    wp_enqueue_script( 'jquery-ui-tabs' );
+    wp_enqueue_script( 'mf2tk_clean_mf_files', plugins_url( 'js/mf2tk_clean_mf_files.js', __FILE__ ),
+        array( 'jquery' ) );
+} );
 
 function get_unreferenced_image_files_in_folder_files_mf() {
-  global $wpdb;
-  echo( '<h2>Unreferenced Files in Folder "wp-content/files_mf/"</h2>' );
-  if ( $handle = opendir( MF_FILES_DIR ) ) {
+    global $wpdb;
+    if ( !( $handle = opendir( MF_FILES_DIR ) ) ) { return; }
+    echo( '<h2 style="text-align:center;font-weight:bold;">Unreferenced Files in Folder ".../wp-content/files_mf/"</h2>' );
+    echo( '<div id="mf2tk-unreferenced-files" style="color:#070707;background-color:#d7d7d7;">'
+        . '<style scoped>table.mf2tk-unreferenced,table.mf2tk-unreferenced th,table.mf2tk-unreferenced td'
+        . '{padding:5px 10px;border:2px solid black;border-collapse:collapse;}'
+        . 'table.mf2tk-unreferenced{margin:10px;}</style>'
+        . '<ul><li><a href="#dir-files-mc">Files of Folder ".../wp-content/files_mf/"</a></li>'
+        . '<li><a href="#dir-referenced-mc">Referenced by Published or Draft Posts</a></li>'
+        . '<li><a href="#dir-unreferenced-mc">Unreferenced by Published or Draft Posts</a></li>'
+        . '</ul>' );
     $entries = array();
     while ( false !== ($entry = readdir( $handle ) ) ) {
       if ( is_dir( MF_FILES_DIR . $entry ) ) { continue; }
       $entries[] = $entry;    
     }
     closedir($handle);
-    echo( '<a href="#" onclick="document.getElementById(\'dir-files-mc\')'
-      . '.style.display=\'block\';return false;"><h3>Files of Folder '
-      . '"wp-content/files_mf/"'
-      . '</h3></a><div id="dir-files-mc" style="border:2px solid black;'
-      . 'margin:10px 20px;padding:5px;display:none;"><button style'
-      . '="float:right;" onclick="this.parentNode.style.display=\'none\';'
-      . 'return false;">X</button><ol>' );
-    foreach ( $entries as $entry ) { echo( "<li>\"$entry\"</li>" ); }
-    echo( '</ol></div>' );
+    $entries = array_map( function( $v ) {
+        $o = new stdClass();
+        $o->real_name = $v;
+        $o->friendly_name = substr( $v, 10);
+        $o->size = filesize( MF_FILES_DIR . $v );
+        $o->date = date( DATE_RSS, (integer) substr( $v, 0, 10 ) );
+        return $o;
+    }, $entries );
+    usort( $entries, function( $a, $b ) {
+        if ( $a->friendly_name === $b->friendly_name ) { return 0; }
+        return $a->friendly_name < $b->friendly_name ? -1 : 1;
+    } );
+    echo( '<div id="dir-files-mc" style="margin:10px 20px;padding:5px;"><table class="mf2tk-unreferenced">' );
+    echo( '<tr><th>No.</th><th>Friendly Name</th><th>Real File Name</th><th>Size</th><th>Time Stamp</th></tr>' );
+    foreach ( $entries as $i => $entry ) {
+        echo( '<tr><td>' . ( $i + 1 ) . '</td>'
+            . "<td><a href=\"" . MF_FILES_URL . "$entry->real_name\" target=\"_blank\">$entry->friendly_name</td>"
+            . "<td>$entry->real_name</td><td>$entry->size</td><td>$entry->date</td></tr>" );
+    }
+    echo( '</table></div>' );
     $sql = 'SELECT post_id, meta_key, meta_value FROM ' . $wpdb->postmeta
-      . ' WHERE meta_key IN (SELECT name FROM ' . MF_TABLE_CUSTOM_FIELDS
-        . ' WHERE type = "image" OR type = "audio" OR type = "file" )'
-      . ' AND post_id IN (SELECT ID FROM '. $wpdb->posts
-        . ' WHERE post_status = "publish" OR post_status = "draft"'
-          . ' OR post_status = "auto-draft")';
+        . ' WHERE meta_key IN (SELECT name FROM ' . MF_TABLE_CUSTOM_FIELDS
+            . ' WHERE type = "image" OR type = "audio" OR type = "file" )'
+        . ' AND post_id IN (SELECT ID FROM '. $wpdb->posts
+            . ' WHERE post_status = "publish" OR post_status = "draft"'
+                . ' OR post_status = "auto-draft") ORDER BY SUBSTR( meta_value, 11 ) ASC';
     $results = $wpdb->get_results( $sql, ARRAY_A );
-    echo( '<a href="#" onclick="document.getElementById(\'dir-referenced-mc\')'
-      . '.style.display=\'block\';return false;"><h3>Referenced by Published '
-      . 'or Draft Posts'
-      . '</h3></a><div id="dir-referenced-mc" style="border:2px solid black;'
-      . 'margin:10px 20px;padding:5px;display:none;"><button style'
-      . '="float:right;" onclick="this.parentNode.style.display=\'none\';'
-      . 'return false;">X</button><ol>' );
+    echo( '<div id="dir-referenced-mc" style="margin:10px 20px;padding:5px;">'
+        . '<table class="mf2tk-unreferenced">'
+        . '<th>No.</th><th>Friendly Name</th><th>Real File Name</th><th>Referenced by</th><th>via Field</th>' );
     $referenced = array();
+    $previous = '';
+    $count = 0;
     foreach ( $results as $result ) {
-      if ( !$result['meta_value'] ) { continue; }
-      $referenced[] = $result['meta_value'];
-      echo( '<li><a href="' . MF_FILES_URL . $result['meta_value'] . '" target='
-        . '"_blank"><span style="font-weight:bold;">&quot;'
-        . $result['meta_value']
-        . '&quot;</span></a>&nbsp;&nbsp; referenced by &nbsp;&nbsp;<a href="'
-        . get_permalink( $result['post_id'] ) . '" target="_blank">'
-        . '<span style="font-weight:bold;">&quot;'
-        . get_the_title( $result['post_id'] ) . '&quot;</span></a>&nbsp;&nbsp;'
-        . ' via field &nbsp;&nbsp;<span style="font-weight:bold;">'
-        . $result['meta_key'] . '</span></li>' );
+        $value = $result['meta_value'];
+        if ( !$value ) { continue; }
+        if ( $value !== $previous ) {
+            ++$count;
+            $previous = $value;
+        }
+        $referenced[] = $value;
+        echo( '<tr><td>' . $count . '</td>'
+            . '<td><a href="' . MF_FILES_URL . $value . '" target="_blank">' . substr( $value, 10 ) . '</a></td>'
+            . '<td><a href="' . MF_FILES_URL . $value . '" target="_blank">' . $value . '</a></td>'
+            . '<td><a href="' . get_permalink( $result['post_id'] ) . '" target="_blank">'
+                . get_the_title( $result['post_id'] ) . '</a></td>'
+            . '<td>' . $result['meta_key'] . '</td></tr>' );
     }
-    echo( '</ol></div>' );
+    echo( '</table></div>' );
+    $entries = array_map( function( $o ) { return $o->real_name; }, $entries );
     $unreferenced = array_merge( array_diff( $entries, $referenced ) );
-    echo( '<a href="#" onclick="document.getElementById('
-      . '\'dir-unreferenced-mc\').style.display=\'block\';return false;"><h3>'
-      . 'Unreferenced by Published or Draft Posts'
-      . '</h3></a><div id="dir-unreferenced-mc" style="border:2px solid black;'
-      . 'margin:10px 20px;padding:5px;display:block;"><button style'
-      . '="float:right;" onclick="this.parentNode.style.display=\'none\';'
-      . 'return false;">X</button><ol>' );
+    echo( '<div id="dir-unreferenced-mc" style="margin:10px 20px;padding:5px;">' );
     echo( '<form method="post" action="' . get_option('siteurl')
-      . '/wp-admin/options-general.php?page=get_unreferenced_files_mc&amp;'
-      . 'noheader=true"><button class="mf2tk-delete-mf-files">Select All</button>'
-      . '&nbsp;&nbsp;<button class="mf2tk-delete-mf-files">Clear All</button><br>'
-      . '<hr><ol>' );
+      . '/wp-admin/options-general.php?page=get_unreferenced_files_mc&amp;noheader=true">'
+      . '<button class="mf2tk-delete-mf-files">Select All</button>&nbsp;&nbsp;'
+      . '<button class="mf2tk-delete-mf-files">Clear All</button><br><hr><ol>' );
     foreach ( $unreferenced as $i => $unreference ) {
-      echo( '<li><input type="checkbox" class="mf2tk-delete-mf-files" '
-        . 'name="to-be-deleted-' . $i . '" value="' . $unreference
-        . '">&nbsp;&nbsp;<a href="' . MF_FILES_URL . $unreference
-        . '" target="_blank"><span style="font-weight:bold;">&quot;'
-        . $unreference . '&quot;</span></a></li>' );
+        echo( '<li><input type="checkbox" class="mf2tk-delete-mf-files" '
+            . 'name="to-be-deleted-' . $i . '" value="' . $unreference
+            . '">&nbsp;&nbsp;<a href="' . MF_FILES_URL . $unreference
+            . '" target="_blank"><span style="font-weight:bold;">&quot;'
+            . $unreference . '&quot;</span></a></li>' );
     }
-    echo( '</ol><hr><br><input type="submit" value="Delete Checked">'
-        . '</form></div>' );
-  }
+    echo( '</ol><hr><br><input type="submit" value="Delete Checked"></form></div>' );
+    echo( '</div>' );
 }
 
 if ( is_admin() ) {
