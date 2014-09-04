@@ -1,0 +1,63 @@
+div.scpbcfw-admin-search-fields-help,div.scpbcfw-admin-search-fields-display-button{
+    background-color:#f0f0f0;
+    width:4em;
+    float:right;
+    border:2px solid black;
+    border-radius:7px;
+    text-align:center;
+    margin:0px;
+}
+
+div.scpbcfw-admin-search-fields-help:hover,div.scpbcfw-admin-search-fields-display-button:hover{
+    background-color:white;
+}
+
+h4.scpbcfw-admin-search-fields-title{
+    display:inline;
+}
+
+div.scpbcfw-admin-search-fields{
+    padding:5px;
+    border:2px solid gray;
+    border-radius:7px;
+    margin:5px 0px;
+}
+
+div.scpbcfw-admin-search-fields-name{
+    font-size:16px;
+    font-weight:bold;
+    width:66%;
+    float:left;
+    border:2px solid transparent;
+    text-align:left;
+    margin:0px;
+}
+
+div.scpbcfw-admin-search-fields-options-container{
+    padding:5px;
+    border:2px solid gray;
+    border-radius:7px;
+    margin:5px 0px;
+}
+
+div.scpbcfw-admin-search-fields-option{
+    padding:10px;
+    border:1px solid gray;
+    margin:5px;
+}
+
+input.scpbcfw-admin-search-fields-option-checkbox{
+    float:right;
+    margin-top:5px;
+    margin-left:5px;
+}
+
+input.scpbcfw-admin-search-fields-option-number{
+    float:right;
+    text-align:right;
+}
+
+textarea.scpbcfw-admin-search-fields-option-textarea{
+    width:90%;
+}
+
