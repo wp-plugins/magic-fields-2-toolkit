@@ -64,11 +64,9 @@ if ( !$height && preg_match( '/<video\s+class="wp-video-shortcode"\s+id="([^"]+)
 <script>
 (function(){
   var f=function(){
-    console.log("f()");
     var s=false;
     jQuery("video.wp-video-shortcode#$id").parents("div.mejs-container").parents("div.wp-video").each(function(){
       this.style.height="auto";
-      console.log("f():this=",this);
       s=true;
     });
     if(!s){window.setTimeout(f,1000);}

@@ -24,12 +24,12 @@ class Magic_Fields_2_Toolkit_Init {
             wp_enqueue_style( 'admin', plugins_url( 'admin.css', __FILE__ ) );
             wp_enqueue_script( 'mf2tk_alt_media_admin', plugins_url( 'magic-fields-2-toolkit/js/mf2tk_alt_media_admin.js' ),
                 array( 'jquery' ) );
-            $options = get_option( 'magic_fields_2_toolkit_enabled' );
+            $options = get_option( 'magic_fields_2_toolkit_enabled', [ ] );
             $mf2tkDisableHowToUse = array_key_exists( 'dumb_shortcodes', $options ) ? 'false' : 'true';
             $wp_scripts->add_data( 'mf2tk_alt_media_admin', 'data', "var mf2tkDisableHowToUse=$mf2tkDisableHowToUse;" );
         } );
         include( dirname(__FILE__) . '/magic-fields-2-toolkit-settings.php' );
-        $options = get_option( 'magic_fields_2_toolkit_enabled' );
+        $options = get_option( 'magic_fields_2_toolkit_enabled', [ ] );
         #error_log( '##### Magic_Fields_2_Toolkit_Init:$options='
         #    . print_r( $options, TRUE ) );
         if ( is_array( $options ) ) {

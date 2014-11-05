@@ -17,7 +17,6 @@ class Magic_Fields_2_Toolkit_Settings {
             if ( file_exists( $mf_dir ) ) {
                 $my_dir = dirname( __FILE__ ) . "/{$field}_field/";
                 foreach ( [ "{$field}_field.php", 'preview.jpg', 'icon_color.png', 'icon_gray.png' ] as $file ) {
-                    error_log( "copy( $my_dir{$file}, $mf_dir{$file} )" );
                     if ( !copy( $my_dir . $file, $mf_dir . $file ) ) {
                         error_log( "copy( $my_dir{$file}, $mf_dir{$file} ) failed" );
                     }
@@ -59,7 +58,6 @@ class Magic_Fields_2_Toolkit_Settings {
                     implode( ', ', $failed ) . ' failed!' );
             }
         }
-        error_log( 'do_field_type_option():$input=' . print_r( $input, true) );
         return $input;
     }
     public function __construct() {
@@ -72,21 +70,18 @@ class Magic_Fields_2_Toolkit_Settings {
                 self::sync_field_and_option( $field, $options );
             }
             register_setting( 'magic_fields_2_toolkit', 'magic_fields_2_toolkit_enabled', function( $input ) {
-                error_log( 'register_setting():$input=' . print_r( $input, true) );
                 if ( $input === NULL ) { $input = [ ]; }
                 $options = get_option( 'magic_fields_2_toolkit_enabled', [ ] );
                 foreach ( self::$fields as $field ) {
-                    error_log( 'register_setting():$field=' . $field );
                     $input = self::do_field_type_option( $field, $input, $options );
                 }
-                error_log( 'register_setting():$input=' . print_r( $input, true) );
                 return $input;
             } );
             add_settings_section( 'magic_fields_2_toolkit_settings_sec', '',
                 function( ) {
                     echo( __( '<h3>Use this form to enable specific features.</h3>', 'magic-fields-2-toolkit' ) );
                 }, 'magic-fields-2-toolkit-page' );	
-            $options = get_option( 'magic_fields_2_toolkit_enabled' );
+            $options = get_option( 'magic_fields_2_toolkit_enabled', [ ] );
             $settings = [
                 ['custom_post_copier', 'Custom Post Copier', 'copy'],
                 ['dumb_shortcodes', 'Dumb Shortcodes', 'shortcode'],

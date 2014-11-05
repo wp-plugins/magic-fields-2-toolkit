@@ -4,7 +4,7 @@ Donate link:
 Tags: custom, post, copier, fields, shortcodes, macros
 Requires at least: 3.6
 Tested up to: 4.0
-Stable tag: 0.5
+Stable tag: 0.5.0.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Plugin adds some useful features to the Magic Fields 2 plugin.
@@ -71,6 +71,10 @@ Version 0.4.6 has a new default content macro for sortable tables. However, the 
 == Screenshots ==
 
 == Changelog ==
+
+= 0.5.0.1 =
+* removed some debugging code
+
 = 0.5 =
 * make shortcodes easier to use by automatically generating a bespoke shortcode for each Magic Field
 * added a pseudo field that automatically generates a shortcode for table of Magic Fields names and values
@@ -236,4 +240,6 @@ added fields for embed, audio and video
 * added a numeric field type with a measurement unit suffix and/or currency symbol prefix
 * make the video, audio, embed and image field types more user friendly and correct anomalies in the generated HTML elements
 * bug fixes, prettify admin settings interface
- 
+
+ = 0.5.0.1 =
+* removed some debugging code

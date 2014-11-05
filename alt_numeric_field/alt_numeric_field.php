@@ -98,7 +98,6 @@ class alt_numeric_field extends mf_custom_fields {
     }
   
     public function display_field( $field, $group_index = 1, $field_index = 1 ) {
-        error_log( 'alt_numeric_field::display_field():$field=' . print_r( $field, true ) );
         $options =& $field['options'];
         $min  = ( array_key_exists( 'min',  $options ) && is_numeric ( $options['min']  ) )
                     ? " min  = \"$options[min]\""  : '';
@@ -149,9 +148,7 @@ EOT;
     public static function get_numeric( $field_name, $group_index = 1, $field_index = 1, $post_id = null ) {
         global $post;
         if ( $post_id === null ) { $post_id = $post->ID; }
-        error_log( 'alt_numeric_field::get_numeric():$field_name=' . $field_name );
         $data = get_data( $field_name, $group_index, $field_index, $post_id );
-        error_log( 'alt_numeric_field::get_numeric():$data=' . print_r( $data, true ) );
         $value   = $data['meta_value'];
         $options = $data['options'];
         $unit    = $options['unit'];

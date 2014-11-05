@@ -125,8 +125,7 @@ class alt_video_field extends mf_custom_fields {
             $html = preg_replace_callback( '/<div\s.*?style=".*?(width:\s*\d+px)/', function( $matches ) use ( $width ) {
                 return str_replace( $matches[1], "width:{$width}px", $matches[0] );  
             }, $html, 1 );
-        }
-        error_log( '##### alt_video_field::get_video():$html=' . $html );        
+        }      
         return $html;
     }  
 }

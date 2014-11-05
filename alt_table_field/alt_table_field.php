@@ -37,7 +37,6 @@ class alt_table_field extends mf_custom_fields {
         global $post;
         global $wpdb;
         $default_height = 50;
-        error_log( 'display_field():$post=' + print_r( $post, true ) );
         $post_type = $post->post_type;
         $MF_TABLE_CUSTOM_FIELDS = MF_TABLE_CUSTOM_FIELDS;
         $results = $wpdb->get_col(

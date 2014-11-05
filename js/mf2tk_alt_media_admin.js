@@ -380,7 +380,6 @@ jQuery(document).ready(function(){
                     fields+=input.prop("value");
                 }
             });
-            console.log('"button.mf2tk-refresh-table-shortcode":fields=',fields);
             jQuery(this).find("fieldset.mf2tk-configure.mf2tk-filters input[type='checkbox']").each(function(){
                 var input=jQuery(this);
                 if(input.prop("checked")){
@@ -397,18 +396,15 @@ jQuery(document).ready(function(){
                     filters+=name;
                 }
             });
-            console.log('"button.mf2tk-refresh-table-shortcode":filters=',filters);
         });
         var textarea=jQuery(this).parents("div.mf-field-ui").find("textarea.mf2tk-how-to-use.mf2tk-table-shortcode");
         var text=textarea[0].textContent;
-        console.log('"button.mf2tk-refresh-table-shortcode":text=',text);
         text=text.replace(/field="([\w;]*)"/,function(match,old){
             return 'field="'+fields+'"';
         });
         text=text.replace(/filter="([\w;]*)"/,function(match,old){
             return 'filter="'+filters+'"';
         });
-        console.log('"button.mf2tk-refresh-table-shortcode":text=',text);
         textarea[0].textContent=text;
         return false;
     });

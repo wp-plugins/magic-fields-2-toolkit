@@ -20,10 +20,7 @@ if ( $result['type'] === 'alt_video' ) {
     if ( $options['max_width']  ) { $dimensions['width']  = $options['max_width'];  }
     if ( $options['max_height'] ) { $dimensions['height'] = $options['max_height']; }
 }
-#error_log( '##### mf2tk_alt_media_admin_refresh.php:$_REQUEST["url"]=' . $_REQUEST['url'] );
-error_log( '##### mf2tk_alt_media_admin_refresh.php:$dimensions=' . print_r( $dimensions, true ) );
 $html = call_user_func( $wp_media_shortcode, array_merge( array( 'src' => $_REQUEST['url'] ), $dimensions ) );
-error_log( '##### mf2tk_alt_media_admin_refresh.php:$html=' . $html );
 $html = "<div class=\"mf2tk-new-wp-media-shortcode\">$html</div>";
 $html .= <<<EOD
 <script type="text/javascript">
@@ -47,12 +44,10 @@ if ( !$height && preg_match( '/<video\s+class="wp-video-shortcode"\s+id="([^"]+)
 <script>
 (function(){
   var f=function(){
-    console.log("f()");
     var s=false;
     jQuery("video.wp-video-shortcode#$id").parents("div.mejs-container").parents("div.wp-video").each(function(){
       if(this.style.height!=="auto"){
         this.style.height="auto";
-        console.log("f():this=",this);
         s=true;
       }
     });
