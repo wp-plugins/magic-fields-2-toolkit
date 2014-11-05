@@ -3,8 +3,8 @@ Contributors: Magenta Cuda
 Donate link:
 Tags: custom, post, copier, fields, shortcodes, macros
 Requires at least: 3.6
-Tested up to: 3.9
-Stable tag: 0.4.6.3.1
+Tested up to: 4.0
+Stable tag: 0.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Plugin adds some useful features to the Magic Fields 2 plugin.
@@ -37,8 +37,12 @@ The current features are:
    
    12. Provides a field for WordPress's video and audio shortcodes.
    
+   13. Provides a numeric field with support for measurement units suffix and/or currency symbol prefix.
+   
+   14. Provides a pseudo field for generating a table of Magic Field names and values.
+   
 Please visit the [Toolkit's online documentation](http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4-2/) for more details.
-**This plugin works with Magic Fields 2.2.2 and requires at least PHP 5.4.**
+**This plugin works with Magic Fields 2.3 and requires at least PHP 5.4.**
 
 == Installation ==
 1. Upload the `Magic Fields 2 Toolkit` folder to the `/wp-content/plugins/` directory
@@ -67,6 +71,13 @@ Version 0.4.6 has a new default content macro for sortable tables. However, the 
 == Screenshots ==
 
 == Changelog ==
+= 0.5 =
+* make shortcodes easier to use by automatically generating a bespoke shortcode for each Magic Field
+* added a pseudo field that automatically generates a shortcode for table of Magic Fields names and values
+* added a numeric field type with a measurement unit suffix and/or currency symbol prefix
+* make the video, audio, embed and image field types more user friendly and correct anomalies in the generated HTML elements
+* bug fixes, prettify admin settings interface
+ 
 = 0.4.6.3.1 =
 * bug fixes, prettify user interface and code maintenance
 
@@ -218,3 +229,11 @@ added fields for embed, audio and video
 
 = 0.4.6.3.1 =
 * bug fixes, prettify user interface and code maintenance
+
+= 0.5 =
+* make shortcodes easier to use by automatically generating a bespoke shortcode for each Magic Field
+* added a pseudo field that automatically generates a shortcode for table of Magic Fields names and values
+* added a numeric field type with a measurement unit suffix and/or currency symbol prefix
+* make the video, audio, embed and image field types more user friendly and correct anomalies in the generated HTML elements
+* bug fixes, prettify admin settings interface
+ 

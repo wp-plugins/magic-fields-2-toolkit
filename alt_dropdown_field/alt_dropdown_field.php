@@ -65,9 +65,11 @@ class alt_dropdown_field extends mf_custom_fields {
   }
   
   public function display_field( $field, $group_index = 1, $field_index = 1 ) {
+    $index = $group_index === 1 && $field_index === 1 ? '' : "<$group_index,$field_index>";
     $output = '';
+    $output .= '<div class="mf2tk-field-input-main">';
     $div_id = sprintf( 'div-alt-dropdown-%d-%d-%d', $field['id'], $group_index, $field_index );
-    $output .= '<div id="' . $div_id . '">';
+    $output .= '<div id="' . $div_id . '" class="mf2tk-field_value_pane">';
     $is_multiple = ($field['options']['multiple']) ? true : false;
 
     $check_post_id = null;
@@ -92,6 +94,7 @@ class alt_dropdown_field extends mf_custom_fields {
     $output .= '<div class="mf-dropdown-box">';
 
     $multiple = ($is_multiple) ? 'multiple="multiple"' : '';
+    $separator = ($is_multiple) ? ' separator=", "' : '';
     $output .= sprintf('<select class="dropdown_mf" id="%s" name="%s[]" %s >',$field['input_id'],$field['input_name'],$multiple);
     foreach($options as $option) {
       $option = trim($option);
@@ -109,7 +112,25 @@ class alt_dropdown_field extends mf_custom_fields {
     $output .= '</div>';
     $output .= '<div class="text_field_mf" >';
     $output .= sprintf('<input type="text" placeholder="%s" style="display:none;" />', $field['label'] );
-    $output .= '</div></div><script type="text/javascript">';
+    $output .= '</div></div></div>';
+    $output .= <<<EOD
+    <div class="mf2tk-field-input-optional">
+        <button class="mf2tk-field_value_pane_button">Open</button>
+        <h6>How to Use</h6>
+        <div class="mf2tk-field_value_pane" style="display:none;clear:both;">
+            <ul>
+                <li style="list-style:square inside">Use with the Toolkit's shortcode:<br>
+                    <input type="text" class="mf2tk-how-to-use" size="50" readonly
+                        value='[show_custom_field field="$field[name]$index"$separator]'>
+                    - <button class="mf2tk-how-to-use">select,</button> copy and paste this into editor above in
+                        <strong>Text</strong> mode
+                <li style="list-style:square inside">Call the PHP function:<br>
+                    get_data( "$field[name]", $group_index, $field_index, \$post_id )
+            </ul>
+        </div>
+    </div>
+EOD;
+    $output .= '<script type="text/javascript">';
     $output .= 'jQuery("div#' . $div_id . ' select").change(function(){';
     $output .= <<<'EOD'
     if(jQuery("option:selected:last",this).text()=="--Enter New Value--"){

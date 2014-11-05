@@ -96,8 +96,11 @@ class alt_related_type_field extends mf_custom_fields {
 
     $options = get_posts( sprintf("post_type=%s&numberposts=-1&order=%s&orderby=%s&suppress_filters=0",$type,$order,$field_order) );
 
-    $output = '<div class="mf-checkbox-list-box" >';
-      
+    $index = $group_index === 1 && $field_index === 1 ? '' : "<$group_index,$field_index>";
+
+    $output  = '<div class="mf-checkbox-list-box" >';
+    $output .= '<div class="mf2tk-field-input-main">';
+    $output .= '<div class="mf2tk-field_value_pane">'; 
       foreach($values as &$val){
         $val = trim($val);
       }
@@ -105,13 +108,32 @@ class alt_related_type_field extends mf_custom_fields {
     foreach($options as $option){
       $check = in_array($option->ID, $values) ? 'checked="checked"' : '';
 
-      $output .= sprintf('<label for="%s_%s" class="selectit mf-checkbox-list">',$field['input_id'],$option->ID);
-      $output .= sprintf('<input tabindex="3" class="checkbox_list_mf" id="%s_%s" name="%s[]" value="%s" type="checkbox" %s %s />',
+      $output .= sprintf('<label for="%s_%s" class="selectit mf-checkbox-list">', $field['input_id'], $option->ID);
+      $output .= sprintf('<input type="checkbox" class="checkbox_list_mf" id="%s_%s" name="%s[]" value="%s" %s %s />',
 					$field['input_id'],$option->ID,$field['input_name'],$option->ID,$check,$field['input_validate']);
       $output .= esc_attr($option->post_title);
       $output .= '</label>';
     }
-
+    $output .= '<div style="clear:both;"></div>';
+    $output .= '</div>';
+    $output .= '</div>';
+    $output .= <<<EOD
+    <div class="mf2tk-field-input-optional">
+        <button class="mf2tk-field_value_pane_button">Open</button>
+        <h6>How to Use</h6>
+        <div class="mf2tk-field_value_pane" style="display:none;clear:both;">
+            <ul>
+                <li style="list-style:square inside">Use with the Toolkit's shortcode:<br>
+                    <input type="text" class="mf2tk-how-to-use" size="50" readonly
+                        value='[show_custom_field field="$field[name]$index" filter="url_to_link2" separator=", "]'>
+                    - <button class="mf2tk-how-to-use">select,</button> copy and paste this into editor above in
+                        <strong>Text</strong> mode
+                <li style="list-style:square inside">Call the PHP function:<br>
+                    get_data( "$field[name]", $group_index, $field_index, \$post_id )
+            </ul>
+        </div>
+    </div>
+EOD;
     $output .= '</div>';
 	#error_log( "##### alt_related_type_field::display_field() returns $output\n" );
     return $output;

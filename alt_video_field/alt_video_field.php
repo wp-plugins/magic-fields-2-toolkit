@@ -1,13 +1,4 @@
 <?php
-// initialisation
-global $mf_domain;
-
-#error_log( '##### alt_video_field.php:backtrace=' . print_r( debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS ), true ) );
-
-if ( is_admin() ) {
-    wp_enqueue_script( 'mf2tk_alt_media_admin', plugins_url( 'magic-fields-2-toolkit/js/mf2tk_alt_media_admin.js' ),
-        array( 'jquery' ) );
-}
 
 class alt_video_field extends mf_custom_fields {
 
@@ -18,17 +9,7 @@ class alt_video_field extends mf_custom_fields {
 
     public function _update_description(){
         global $mf_domain;
-        $this->description = __( <<<'EOD'
-This is a Magic Fields 2 field for WordPress's video shortcode facility.
-<h3>How to Use</h3>
-<ul>
-<li style="list-style:square outside">Use with the Toolkit's shortcode:<br>
-[show_custom_field field="your_field_name" filter="url_to_media"]<br>
-<li style="list-style:square outside">Call the PHP function:<br>
-alt_video_field::get_video( $field_name, $group_index, $field_index, $post_id, $atts = array() )
-</ul>
-EOD
-            , $mf_domain );
+        $this->description = __( 'This is a Magic Fields 2 field for WordPress\'s video shortcode facility.', $mf_domain );
     }
   
     public function _options() {
@@ -42,7 +23,7 @@ EOD
                     'label'       =>  __('Width',$mf_domain),
                     'name'        =>  'mf_field[option][max_width]',
                     'default'     =>  '320',
-                    'description' =>  'width',
+                    'description' =>  'width in pixels',
                     'value'       =>  '320',
                     'div_class'   =>  '',
                     'class'       =>  ''
@@ -52,9 +33,10 @@ EOD
                     'id'          =>  'max_height',
                     'label'       =>  __('Height',$mf_domain),
                     'name'        =>  'mf_field[option][max_height]',
-                    'default'     =>  '240',
-                    'description' =>  'height',
-                    'value'       =>  '240',
+                    'default'     =>  '0',
+                    'description' =>  'height in pixels - 0 lets the browser set the height to preserve the aspect ratio' .
+                                      ' - recommended',
+                    'value'       =>  '0',
                     'div_class'   =>  '',
                     'class'       =>  ''
                 ),
@@ -110,7 +92,7 @@ EOD
                                         'alignnone'   => 'None',
                                     ),
                     'add_empty'   => false,
-                    'description' => '',
+                    'description' => 'alignment is effective only if a caption is specified',
                     'value'       => '',
                     'div_class'   => '',
                     'class'       => ''
@@ -140,8 +122,11 @@ EOD
             if ( !$width ) { $width = 160; }
             $html = img_caption_shortcode( array( 'width' => $width, 'align' => $data['options']['align'], 'caption' => $caption ),
                 $html );
+            $html = preg_replace_callback( '/<div\s.*?style=".*?(width:\s*\d+px)/', function( $matches ) use ( $width ) {
+                return str_replace( $matches[1], "width:{$width}px", $matches[0] );  
+            }, $html, 1 );
         }
-        #error_log( '##### alt_video_field::get_video():$html=' . $html );        
+        error_log( '##### alt_video_field::get_video():$html=' . $html );        
         return $html;
     }  
 }
