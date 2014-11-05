@@ -1,13 +1,4 @@
 <?php
-// initialisation
-global $mf_domain;
-
-#error_log( '##### alt_audio_field.php:backtrace=' . print_r( debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS ), true ) );
-
-if ( is_admin() ) {
-    wp_enqueue_script( 'mf2tk_alt_media_admin', plugins_url( 'magic-fields-2-toolkit/js/mf2tk_alt_media_admin.js' ),
-        array( 'jquery' ) );
-}
 
 class alt_image_field extends mf_custom_fields {
 
@@ -15,17 +6,7 @@ class alt_image_field extends mf_custom_fields {
     
     public function _update_description(){
         global $mf_domain;
-        $this->description = __( <<<'EOD'
-This is an alternate Magic Fields 2 field for images.
-<h3>How to Use</h3>
-<ul>
-<li style="list-style:square outside">Use with the Toolkit's shortcode:<br>
-[show_custom_field field="your_field_name" filter="url_to_media"]<br>
-<li style="list-style:square outside">Call the PHP function:<br>
-alt_image_field::get_image( $field_name, $group_index, $field_index, $post_id, $atts = array() )
-</ul>
-EOD
-            , $mf_domain );
+        $this->description = __( 'This is an alternate Magic Fields 2 field for images.', $mf_domain );
     }
   
     public function _options() {
@@ -39,7 +20,7 @@ EOD
                     'label'       =>  __( 'Width', $mf_domain ),
                     'name'        =>  'mf_field[option][max_width]',
                     'default'     =>  '320',
-                    'description' =>  'width for image',
+                    'description' =>  'width in pixels',
                     'value'       =>  '320',
                     'div_class'   =>  '',
                     'class'       =>  ''
@@ -49,9 +30,10 @@ EOD
                     'id'          =>  'max_height',
                     'label'       =>  __( 'Height', $mf_domain ),
                     'name'        =>  'mf_field[option][max_height]',
-                    'default'     =>  '240',
-                    'description' =>  'height for image',
-                    'value'       =>  '240',
+                    'default'     =>  '0',
+                    'description' =>  'height in pixels - 0 lets the browser set the height to preserve the aspect ratio' .
+                                      ' - recommended',
+                    'value'       =>  '0',
                     'div_class'   =>  '',
                     'class'       =>  ''
                 ),
@@ -68,7 +50,7 @@ EOD
                                         'alignnone'   => 'None',
                                     ),
                     'add_empty'   => false,
-                    'description' => '',
+                    'description' => 'alignment is effective only if a caption is specified',
                     'value'       => '',
                     'div_class'   => '',
                     'class'       => ''
@@ -84,54 +66,62 @@ EOD
         $field_id = "mf2tk-$field[name]-$group_index-$field_index";
         $input_value = str_replace( '"', '&quot;', $field['input_value'] );
         $width = $field['options']['max_width'];
-        if ( !$width ) { $width = 320; }
         $height = $field['options']['max_height'];
-        if ( !$height ) { $height = 240; }
+        $attrWidth  = $width  ? " width=\"$width\""   : '';
+        $attrHeight = $height ? " height=\"$height\"" : '';
         #set up caption field
         $caption_field_name = $field['name'] . self::$suffix_caption;
         $caption_input_name = sprintf( 'magicfields[%s][%d][%d]', $caption_field_name, $group_index, $field_index );
         $caption_input_value = ( !empty( $mf_post_values[$caption_field_name][$group_index][$field_index] ) )
             ? $mf_post_values[$caption_field_name][$group_index][$field_index] : '';
         $caption_input_value = str_replace( '"', '&quot;', $caption_input_value );
+        $index = $group_index === 1 && $field_index === 1 ? '' : "<$group_index,$field_index>";
         $output = <<<EOD
 <div class="text_field_mf">
     <!-- main $media_type field -->
-    <div>
+    <div class="mf2tk-field-input-main">
         <h6>URL of Image</h6>
-        <div>
+        <div class="mf2tk-field_value_pane">
             <input type="text" name="$field[input_name]" id="$field_id" class="mf2tk-img" maxlength="2048"
-                placeholder="URL of the image" value="$input_value" style="width:97%" $field[input_validate]>
-            <button id="{$field_id}.media-library-button" class="mf2tk-media-library-button"
-                style="font-size:10px;font-weight:bold;padding:0px 5px;">Get URL from Media Library</button>
-            <button id="{$field_id}.refresh-button" class="mf2tk-alt_media_admin-refresh"
-                style="font-size:10px;font-weight:bold;padding:0px 5px;">Reload Media</button>
+                placeholder="URL of the image" value="$input_value" $field[input_validate]>
+            <button id="{$field_id}.media-library-button" class="mf2tk-media-library-button">
+                Get URL from Media Library</button>
+            <button id="{$field_id}.refresh-button" class="mf2tk-alt_media_admin-refresh">Reload Media</button>
             <br>
             <div style="width:{$width}px;padding-top:10px;margin:auto;">
-                <img class="mf2tk-poster" src="$input_value" width="$width" height="$height">
+                <img class="mf2tk-poster" src="$input_value"{$attrWidth}{$attrHeight}>
             </div>
         </div>
     </div>
-    <br>
     <!-- optional caption field -->
-    <div>
-        <h6 style="display:inline;">Optional Caption for Image</h6>
-        <button class="mf2tk-field_value_pane_button" style="font-size:10px;font-weight:bold;padding:0px 5px;">Show</button>
+    <div class="mf2tk-field-input-optional">
+        <button class="mf2tk-field_value_pane_button">Open</button>
+        <h6>Optional Caption for Image</h6>
         <div class="mf2tk-field_value_pane" style="display:none;clear:both;">
             <input type="text" name="$caption_input_name" maxlength="256" placeholder="optional caption for image"
-                value="$caption_input_value" style="width:97%">
+                value="$caption_input_value">
         </div>
     </div>
-    <br>
     <!-- usage instructions -->    
-    <div>
-        <h6 style="display:inline;">How to Use</h6>
-        <button class="mf2tk-field_value_pane_button" style="font-size:10px;font-weight:bold;padding:0px 5px;">Show</button>
+    <div class="mf2tk-field-input-optional">
+        <button class="mf2tk-field_value_pane_button">Open</button>
+        <h6>How to Use</h6>
         <div class="mf2tk-field_value_pane" style="display:none;clear:both;">
             <ul>
-                <li style="list-style:square inside">Use with the Toolkit's shortcode:<br>
-                    [show_custom_field field="your_field_name" filter="url_to_media"]
+                <li style="list-style:square inside">Use with the Toolkit's shortcode - (if caption entered):<br>
+                    <input type="text" class="mf2tk-how-to-use" size="50" readonly
+                        value='[show_custom_field field="$field[name]$index" filter="url_to_media"]'>
+                    - <button class="mf2tk-how-to-use">select,</button> copy and paste this into editor above in
+                        <strong>Text</strong> mode
+                <li style="list-style:square inside">Use with the Toolkit's shortcode - (if caption not entered):<br>
+                    <textarea class="mf2tk-how-to-use" rows="4" cols="80" readonly>&lt;div style="width:{$width}px;border:2px solid black;background-color:gray;
+        padding:10px;margin:0 auto;"&gt;
+    [show_custom_field field="$field[name]$index" filter="url_to_media"]
+&lt;/div&gt;</textarea><br>
+                    - <button class="mf2tk-how-to-use">select,</button> copy and paste this into editor above in
+                        <strong>Text</strong> mode
                 <li style="list-style:square inside">Call the PHP function:<br>
-                    alt_image_field::get_image( \$field_name, \$group_index, \$field_index, \$post_id, \$atts = array() )
+                    alt_image_field::get_image( "$field[name]", $group_index, $field_index, \$post_id, \$atts = array() )
             </ul>
         </div>
     </div>
@@ -152,18 +142,25 @@ EOD;
             include WP_PLUGIN_DIR . '/magic-fields-2-toolkit/magic-fields-2-get-optional-field.php';
         }
         $caption = _mf2tk_get_optional_field( $field_name, $group_index, $field_index, $post_id, self::$suffix_caption );
+        $attrWidth  = $width  ? " width=\"$width\""   : '';
+        $attrHeight = $height ? " height=\"$height\"" : '';
         $html = <<<EOD
             <div style="display:inline-block;width:{$width}px;padding:0px;">
-                <img src="$data[meta_value]" width="$width" height="$height">
-                $html
+                <img src="$data[meta_value]"{$attrWidth}{$attrHeight}>
             </div>
 EOD;
         #error_log( '##### alt_image_field::get_image():$html=' . $html );
         # attach optional caption
         if ( $caption ) {
             if ( !$width ) { $width = 160; }
-            $html = img_caption_shortcode( array( 'width' => $width, 'align' => $data['options']['align'], 'caption' => $caption ),
-                $html );
+            $html = img_caption_shortcode( array( 'width' => $width, 'align' => $data['options']['align'],
+                'caption' => $caption ), $html );
+            $html = preg_replace_callback( '/<div\s.*?style=".*?(width:\s*\d+px)/', function( $matches ) use ( $width ) {
+                return str_replace( $matches[1], "width:{$width}px;max-width:100%", $matches[0] );  
+            }, $html, 1 );
+            $html = preg_replace_callback( '/(<img\s.*?)>/', function( $matches ) {
+                return $matches[1] . 'style="margin:0;max-width:100%">';  
+            }, $html, 1 );
         }
         #error_log( '##### alt_image_field::get_image():$html=' . $html );
         return $html;

@@ -39,7 +39,13 @@ class Magic_Fields_2_Toolkit_Dumb_Shortcodes {
             if ( $filters !== NULL ) {
                 foreach( explode ( ';', $filters ) as $filter) {
                     if ( function_exists( $filter ) ) {
-                        $value = call_user_func( $filter, $value, $field, $type, $classes, $group_index, $field_index, $post_id );
+                        $value = call_user_func( $filter, $value, $field, $type, $classes, $group_index, $field_index,
+                            $post_id );
+                    } else if ( preg_match( '/(\w+__)(\w+)/', $filter, $matches ) ) {
+                        if ( function_exists( $matches[1] ) ) {
+                            $value = call_user_func( $matches[1], $matches[2], $value, $field, $type, $classes, $group_index,
+                                $field_index, $post_id );
+                        }
                     }
                 }
             }
@@ -253,7 +259,8 @@ class Magic_Fields_2_Toolkit_Dumb_Shortcodes {
 											}
                                         } else if ( $field == '__post_title' ) {
                                             # handle the psuedo field __post_title as a related_type if url_to_link is available
-                                            $url_to_link_available = in_array( 'url_to_link', explode( ';', $filter ) );
+                                            $url_to_link_available = (boolean) array_intersect(
+                                                [ 'url_to_link', 'url_to_link2' ], explode( ';', $filter ) );
                                             $field_value .= $wrap_value( ( $url_to_link_available ? $post_id
                                                 : get_the_title( $post_id ) ), $field, ( $url_to_link_available ? 'related_type'
                                                 : 'textbox' ), $filter, $before, $after, $separator );
@@ -266,7 +273,8 @@ class Magic_Fields_2_Toolkit_Dumb_Shortcodes {
 EOD
                                                 , OBJECT );
                                             # TODO author id and display name
-                                            $url_to_link_available = in_array( 'url_to_link', explode( ';', $filter ) );
+                                            $url_to_link_available = (boolean) array_intersect(
+                                                [ 'url_to_link', 'url_to_link2' ], explode( ';', $filter ) );
                                             $field_value .= $wrap_value( ( $url_to_link_available ? $author[0]->ID
                                                 : $author[0]->display_name ), $field, ( $url_to_link_available ? 'author'
                                                 : 'textbox' ), $filter, $before, $after, $separator );
@@ -310,7 +318,13 @@ EOD
 										#error_log( '##### $field=' . $field . ', $post_id=' . $post_id
 										#    . ', $datax[\'type\']=' . $datax['type']
 										#    . ', $datax[\'description\']=' . $datax['description'] );
-                                        $value = get( $field, $group_index, $field_index, $post_id );
+                                        if ( $data['type'] === 'alt_table' ) {
+											$skip_field1 = $skip_field2 = TRUE;
+                                            continue;
+                                        }
+                                        $value = ( $data['type'] === 'alt_numeric' )
+                                            ? alt_numeric_field::get_numeric( $field, $group_index, $field_index, $post_id )
+                                            : get( $field, $group_index, $field_index, $post_id );
 										#error_log( '##### $value=' . $value );
 										#error_log( '##### $field=' . $field . ', $data[\'description\']=' . $data['description'] );
 										preg_match( '/\[\*([a-zA-Z0-9_]+,?)+\*\]/', $data['description'], $classes );
@@ -535,6 +549,85 @@ function url_to_link( $value, $field, $type ) {
     return $value;
 }
 
+function url_to_link2( $value, $field, $type ) {
+    global $wpdb;
+    if ( ( $type === 'related_type' || $type === 'alt_related_type' ) && is_numeric( $value ) ) {
+        $value = '<a href="' . get_permalink( $value ) . '">' . get_the_title ( $value ) . '</a>';
+    }  else if ( ( $type === 'image' || $type === 'file' || $type === 'audio' )
+        && is_string( $value ) && strpos( $value, 'http' ) === 0 ) {
+        $value = '<a href="' . $value . '">' . substr( $value, strrpos( $value, '/' ) + 11 ) . '</a>';
+    } else if ( $type === 'image_media' && is_string( $value ) && strpos( $value, 'http' ) === 0 ) {
+        $value = '<a href="' . $value . '">' . substr( $value, strrpos( $value, '/' ) + 1 ) . '</a>';
+    } else if ( $type === 'author' ) {
+        $author = $wpdb->get_results( "SELECT u.display_name, u.user_url FROM $wpdb->users u WHERE u.ID = '$value'", OBJECT );
+        if ( $author[0]->user_url ) {
+            $value = '<a href="' . $author[0]->user_url . '">' . $author[0]->display_name . '</a>';
+        } else {
+            $value = $author[0]->display_name;
+        }
+    } else if ( ( $type === 'alt_embed' || $type === 'alt_video' || $type === 'alt_audio' || $type === 'alt_image' )
+         && is_string( $value ) && strpos( $value, 'http' ) === 0 ) {
+       $value = '<a href="' . $value . '">' . substr( $value, strrpos( $value, '/' ) + 1 ) . '</a>';
+    }
+    return $value;
+}
+
+function tk_value_as_checkbox( $value, $field, $type ) {
+    if ( $type === 'checkbox' ) {
+        $checked = $value ? 'checked' : '';
+        $value = "<input type=\"checkbox\"$checked readonly>";
+    }
+    return $value;
+}
+
+function tk_value_as_color( $value, $field, $type ) {
+    if ( $type === 'color_picker' ) {
+        $value = "<div style='display:inline-block;width:0.66em;height:0.66em;padding:0;border:1px solid black;background-color:$value;'></div>";
+    }
+    return $value;
+}
+
+function tk_value_as_audio( $value, $field, $type ) {
+    if ( $value && ( $type === 'audio' || $type === 'alt_audio' ) ) {
+        $mime_type = array(
+          'mp3' => 'audio/mpeg',
+          'wav' => 'audio/wav',
+          'ogg' => 'audio/ogg',
+        );
+        $extension = strtolower( pathinfo( $value,  PATHINFO_EXTENSION ) );
+        if ( array_key_exists( $extension, $mime_type ) ) {
+            $value = '<audio controls><source src="' . $value . '" type="' . $mime_type[$extension] .'"></audio>';
+        } else {
+            $value = 'Your browser cannot play ' . $extension . ' audio files.';
+        }
+    }
+    return $value;
+}
+
+function tk_value_as_image__( $parm, $value, $field, $type ) {
+    if ( $type === 'image' || $type === 'image_media' || $type === 'alt_image' ) {
+        if ( substr( $parm, 0, 1 ) === 'h' ) {
+            $height = ' height="' . substr( $parm, 1 ) . '"';
+        } else if ( $substr( $parm, 0, 1 ) === 'w' ) {
+            $width  = ' width="'  . substr( $parm, 1 ) . '"';
+        }
+        $value = "<img src=\"$value\"{$width}{$height}>";
+     }
+    return $value;
+}
+
+function tk_value_as_video__( $parm, $value, $field, $type ) {
+    if ( $type === 'alt_video' ) {
+        if ( substr( $parm, 0, 1 ) === 'h' ) {
+            $height = ' height="' . substr( $parm, 1 ) . '"';
+        } else if ( $substr( $parm, 0, 1 ) === 'w' ) {
+            $width  = ' width="'  . substr( $parm, 1 ) . '"';
+        }
+        $value = "<video src=\"$value\" controls=\"controls\"{$width}{$height}></video>";
+    }
+    return $value;
+}
+
 # filter for alt media fields
 
 function url_to_media( $value, $field, $type, $classes, $group_index, $field_index, $post_id ) {
@@ -557,5 +650,4 @@ function media_url_to_link( $value, $field, $type ) {
     }
     return $value;
 }
-    
 ?>

@@ -59,7 +59,7 @@ class Search_Using_Magic_Fields_Widget extends WP_Widget {
     field_after="</td>
     post_before="<tr>"
     post_after="</tr>"
-    filter="url_to_link;media_url_to_link"
+    filter="url_to_link2"
 ]
 </tbody>
 </table>

@@ -19,6 +19,15 @@
 class Magic_Fields_2_Toolkit_Init {
     public function __construct() {
         global $wpdb;
+        add_action( 'admin_enqueue_scripts', function( $hook ) {
+            global $wp_scripts;
+            wp_enqueue_style( 'admin', plugins_url( 'admin.css', __FILE__ ) );
+            wp_enqueue_script( 'mf2tk_alt_media_admin', plugins_url( 'magic-fields-2-toolkit/js/mf2tk_alt_media_admin.js' ),
+                array( 'jquery' ) );
+            $options = get_option( 'magic_fields_2_toolkit_enabled' );
+            $mf2tkDisableHowToUse = array_key_exists( 'dumb_shortcodes', $options ) ? 'false' : 'true';
+            $wp_scripts->add_data( 'mf2tk_alt_media_admin', 'data', "var mf2tkDisableHowToUse=$mf2tkDisableHowToUse;" );
+        } );
         include( dirname(__FILE__) . '/magic-fields-2-toolkit-settings.php' );
         $options = get_option( 'magic_fields_2_toolkit_enabled' );
         #error_log( '##### Magic_Fields_2_Toolkit_Init:$options='
@@ -77,13 +86,13 @@ EOD
 [show_custom_field field="$#fields#"
     field_before="<tr><td><!--$Field--></td><td>"
     field_after="</td></tr>"
-    separator=", " filter="url_to_link"]
+    separator=", " filter="url_to_link2"]
 #else#
 [show_custom_field field="*_*<*,*>"
     group_before="<tr><td><!--$Group--></td><td>&nbsp;</td></tr>"
     field_before="<tr><td><!--$Field--></td><td>"
     field_after="</td></tr>"
-    separator=", " filter="url_to_link"]
+    separator=", " filter="url_to_link2"]
 #endif#
 </table>
 EOD
@@ -125,7 +134,7 @@ EOD
     field="$#group#_*<*,*>"
     group_before="<tr><td><!--$Group--></td>" 
     field_before="<td>"
-    filter="url_to_link" separator=", "
+    filter="url_to_link2" separator=", "
     field_after="</td>"
     group_after="</tr>"   
 ]
@@ -173,7 +182,7 @@ EOD
     field="$#group#_*<*,*>f"
     field_before="<tr><td><!--$Field--></td><td>"
     group_separator="</td><td>"
-    separator=", " filter="url_to_link" 
+    separator=", " filter="url_to_link2" 
     field_after="</td></tr>"
 ]
 </table>
@@ -215,7 +224,7 @@ EOD
         <div style='border-bottom:1px solid red;'>
         <!--$Group-->:</div>"
     group_after="</div>"
-    filter="url_to_link"]                        
+    filter="url_to_link2"]                        
 EOD
 					) );
 				}
@@ -257,7 +266,7 @@ EOD
     field_after="</td>
     post_before="<tr>"
     post_after="</tr>"
-    filter="url_to_link"]
+    filter="url_to_link2"]
 </table>
 EOD
 					) );
@@ -291,7 +300,7 @@ EOD
 ]</tr>
 <tr>[show_custom_field field="$#fields#"
     field_before="<td>"
-    filter="url_to_link" separator=", "
+    filter="url_to_link2" separator=", "
     field_after="</td>"
 ]</tr>
 </table>
