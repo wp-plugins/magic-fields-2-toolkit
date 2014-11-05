@@ -47,12 +47,33 @@ $defaults = array(
 );
 extract( shortcode_atts( $defaults, $atts ) );
 # construct attribute array for wp media shortcode
-$atts = array_merge( $srcs, array( 'width'  => $width, 'height' => $height, 'loop' => $loop, 'autoplay' => $autoplay,
-    'preload' => $preload ) );
-if ( $poster ) { $atts['poster'] = $poster; }
+$atts = $srcs;
+if ( $width    ) { $atts['width']    = $width;    }
+if ( $height   ) { $atts['height']   = $height;   }
+if ( $loop     ) { $atts['loop']     = $loop;     }
+if ( $autoplay ) { $atts['autoplay'] = $autoplay; }
+if ( $preload  ) { $atts['preload']  = $preload;  }
+if ( $poster   ) { $atts['poster']   = $poster;   }
 $atts = array_diff_key( $atts, $invalid_atts );
 $atts = array_filter( $atts, function( $v ) { return $v !== 'off'; } );
 #error_log( '##### magic-fields-2-alt-media-get-template.php:$atts=' . print_r( $atts, true ) );
-$html =  call_user_func( $wp_media_shortcode, $atts );
-
+$html = call_user_func( $wp_media_shortcode, $atts );
+if ( !$height && preg_match( '/<video\s+class="wp-video-shortcode"\s+id="([^"]+)"/', $html, $matches ) ) {
+    $id = $matches[1];
+    $html .= <<<EOD
+<script>
+(function(){
+  var f=function(){
+    var s=false;
+    jQuery("video.wp-video-shortcode#$id").parents("div.mejs-container").parents("div.wp-video").each(function(){
+      this.style.height="auto";
+      s=true;
+    });
+    if(!s){window.setTimeout(f,1000);}
+  }
+  window.setTimeout(f);
+}());
+</script>
+EOD;
+}
 ?>

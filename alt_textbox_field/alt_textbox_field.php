@@ -29,7 +29,8 @@ class alt_textbox_field extends mf_custom_fields {
 
   public function _update_description(){
     global $mf_domain;
-    $this->description = __("Textbox with dropdown",$mf_domain);
+    $this->description = __('Textbox with Dropdown - useful for text fields where the same value is used in multiple posts',
+        $mf_domain);
   }
   
   public function _options(){
@@ -72,16 +73,19 @@ class alt_textbox_field extends mf_custom_fields {
     #error_log( '$$$$$ textbox_field::display_field():$field=' . print_r( $field, TRUE ) );
     #####
     $output = '';
+    $output .= '<div class="text_field_mf" >';
+    $output .= '<div class="mf2tk-field-input-main">';
     $max = '';
     if( $field['options']['evalueate'] && ($field['options']['size'] > 0) ){
       $max = sprintf('maxlength="%s"',$field['options']['size']);
     }
+    $index = $group_index === 1 && $field_index === 1 ? '' : "<$group_index,$field_index>";
     #####
     $div_id = sprintf( 'div-alt-textbox-%d-%d-%d', $field['id'], $group_index, $field_index );
-    $output .= '<div id="' . $div_id . '">';
+    $output .= '<div id="' . $div_id . '" class="mf2tk-field_value_pane">';
     $sql = 'select m.meta_value, count(*) from ' . $wpdb->postmeta . ' m inner join ' . $wpdb->posts
         . ' p on m.post_id = p.ID where m.meta_key = "' . $field['name'] . '" AND p.post_type = "' . $field['post_type']
-        . '" GROUP BY m.meta_value ORDER BY count(*) DESC';
+        . '" GROUP BY m.meta_value ORDER BY count(*) DESC LIMIT 32';
     #error_log( '$$$$$ $sql=' . $sql );
     $values = $wpdb->get_col( $sql );
     #error_log( '$$$$$ $values=' . print_r( $values, TRUE ) );
@@ -96,9 +100,32 @@ class alt_textbox_field extends mf_custom_fields {
         $output .= '</select></div>';
     }
     #####
-    $output .= '<div class="text_field_mf" >';
+    $output .= '<div>';
     $output .= sprintf('<input %s type="text" name="%s" placeholder="%s" value="%s" %s />',$field['input_validate'], $field['input_name'], $field['label'], str_replace('"', '&quot;', $field['input_value']), $max );
     $output .= '</div>';
+    $output .= '</div>';
+    $output .= '<div style="font-size:75%;margin:5px 50px;">';
+    $output .= 'To select from previously entered values for this field change the value of this field to a blank field';
+    $output .= ' and temporarily change the focus away from this field by clicking anywhere outside this field.';
+    $output .= '</div>';
+    $output .= '</div>';
+    $output .= <<<EOD
+    <div class="mf2tk-field-input-optional">
+        <button class="mf2tk-field_value_pane_button">Open</button>
+        <h6>How to Use</h6>
+        <div class="mf2tk-field_value_pane" style="display:none;clear:both;">
+            <ul>
+                <li style="list-style:square inside">Use with the Toolkit's shortcode:<br>
+                    <input type="text" class="mf2tk-how-to-use" size="50" readonly
+                        value='[show_custom_field field="$field[name]$index"]'>
+                    - <button class="mf2tk-how-to-use">select,</button> copy and paste this into editor above in
+                        <strong>Text</strong> mode
+                <li style="list-style:square inside">Call the PHP function:<br>
+                    get_data( "$field[name]", $group_index, $field_index, \$post_id )
+            </ul>
+        </div>
+    </div>
+EOD;
     $output .= '</div><script type="text/javascript">';
     $output .= 'jQuery("div#' . $div_id . ' select").change(function(){';
     $output .= <<<'EOD'
