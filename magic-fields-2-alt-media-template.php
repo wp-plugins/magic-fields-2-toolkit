@@ -179,17 +179,9 @@ if ( !$height && preg_match_all( '/<video\s+class="wp-video-shortcode"\s+id="([^
     foreach( $matches[1] as $id ) {
         $html .= <<<EOD
 <script>
-(function(){
-  var f=function(){
-    var s=false;
-    jQuery("video.wp-video-shortcode#$id").parents("div.mejs-container").parents("div.wp-video").each(function(){
-      this.style.height="auto";
-      s=true;
-    });
-    if(!s){window.setTimeout(f,1000);}
-  }
-  window.setTimeout(f);
-}());
+jQuery(document).ready(function(){
+  mf2tk_resize_mejs_video_elements("video.wp-video-shortcode#$id");
+});
 </script>
 EOD;
     }

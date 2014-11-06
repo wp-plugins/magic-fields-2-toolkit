@@ -42,19 +42,7 @@ if ( !$height && preg_match( '/<video\s+class="wp-video-shortcode"\s+id="([^"]+)
     $id = $matches[1];
     $html .= <<<EOD
 <script>
-(function(){
-  var f=function(){
-    var s=false;
-    jQuery("video.wp-video-shortcode#$id").parents("div.mejs-container").parents("div.wp-video").each(function(){
-      if(this.style.height!=="auto"){
-        this.style.height="auto";
-        s=true;
-      }
-    });
-    if(!s){window.setTimeout(f,1000);}
-  }
-  window.setTimeout(f);
-}());
+mf2tk_resize_mejs_video_elements("video.wp-video-shortcode#$id");
 </script>
 EOD;
 }

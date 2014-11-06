@@ -62,17 +62,25 @@ if ( !$height && preg_match( '/<video\s+class="wp-video-shortcode"\s+id="([^"]+)
     $id = $matches[1];
     $html .= <<<EOD
 <script>
-(function(){
+jQuery(document).ready(function(){
+  var v=jQuery("video.wp-video-shortcode#$id");
   var f=function(){
-    var s=false;
-    jQuery("video.wp-video-shortcode#$id").parents("div.mejs-container").parents("div.wp-video").each(function(){
-      this.style.height="auto";
-      s=true;
-    });
-    if(!s){window.setTimeout(f,1000);}
-  }
-  window.setTimeout(f);
-}());
+    if(!v.length){return;}
+    if(v[0].videoWidth&&v[0].videoHeight){
+      var e=v.parents("div.mejs-container");
+      if(e.length){
+        v=v[0];
+        v.height=(v.videoHeight/v.videoWidth)*v.width;
+        e[0].style.height=v.height+"px";
+        e.parents("div.wp-video")[0].style.height=v.height+"px";
+        e.find("div.mejs-layer").css("height",v.height+"px");
+        return;
+      }
+    }
+    window.setTimeout(f,1000);
+  };
+  f();
+});
 </script>
 EOD;
 }

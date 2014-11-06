@@ -415,4 +415,23 @@ jQuery(document).ready(function(){
     }});
 });
 
-    
+function mf2tk_resize_mejs_video_elements(selector){
+  var f=function(){
+    var v=jQuery(selector);
+    if(!v.length){return;}
+    if(v[0].videoWidth&&v[0].videoHeight){
+      var e=v.parents("div.mejs-container");
+      if(e.length){
+        v=v[0];
+        v.height=(v.videoHeight/v.videoWidth)*v.width;
+        e[0].style.height=v.height+"px";
+        e.parents("div.wp-video")[0].style.height=v.height+"px";
+        e.find("div.mejs-layer").css("height",v.height+"px");
+        return;
+      }
+    }
+    window.setTimeout(f,1000);
+  };
+  f();
+}
+

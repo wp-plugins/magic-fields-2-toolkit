@@ -4,13 +4,13 @@ Donate link:
 Tags: custom, post, copier, fields, shortcodes, macros
 Requires at least: 3.6
 Tested up to: 4.0
-Stable tag: 0.5.0.1
+Stable tag: 0.5.0.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Plugin adds some useful features to the Magic Fields 2 plugin.
 
 == Description ==
-This plugin adds some useful features to the Magic Fields 2 plugin.
+This plugin adds some useful features to [the Magic Fields 2 plugin](https://wordpress.org/plugins/magic-fields-2/). Some of these features in particular makes it possible to write HTML templates without the need for PHP programming.
 The current features are:
 
    1. Create a copy of a Magic Fields 2 custom post copying all of the Magic Fields' custom fields, groups and taxonomies.
@@ -25,7 +25,7 @@ The current features are:
 
    6. Provides an alternative textbox field that allows you to select previously entered data.
 
-   7. Supports HTML and WordPress macros for post content.
+   7. Supports HTML and WordPress macros for post content - allows you to create HTML templates without need for PHP code.
 
    8. Provides an alternative dropdown field that allows you to enter new options directly into the dropdown.
 
@@ -71,6 +71,9 @@ Version 0.4.6 has a new default content macro for sortable tables. However, the 
 == Screenshots ==
 
 == Changelog ==
+
+= 0.5.0.2 =
+* fix some css problems on Firefox and some anomalies with the video shortcode on Firefox
 
 = 0.5.0.1 =
 * removed some debugging code
@@ -243,3 +246,6 @@ added fields for embed, audio and video
 
  = 0.5.0.1 =
 * removed some debugging code
+
+= 0.5.0.2 =
+* fix some css problems on Firefox and some anomalies with the video shortcode on Firefox
