@@ -1,13 +1,4 @@
 <?php
-// initialisation
-global $mf_domain;
-
-#error_log( '##### alt_audio_field.php:backtrace=' . print_r( debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS ), true ) );
-
-if ( is_admin() ) {
-    wp_enqueue_script( 'mf2tk_alt_media_admin', plugins_url( 'magic-fields-2-toolkit/js/mf2tk_alt_media_admin.js' ),
-        array( 'jquery' ) );
-}
 
 class alt_audio_field extends mf_custom_fields {
 
@@ -18,17 +9,7 @@ class alt_audio_field extends mf_custom_fields {
 
     public function _update_description(){
         global $mf_domain;
-        $this->description = __( <<<'EOD'
-This is a Magic Fields 2 field for WordPress's audio shortcode facility.
-<h3>How to Use</h3>
-<ul>
-<li style="list-style:square outside">Use with the Toolkit's shortcode:<br>
-[show_custom_field field="your_field_name" filter="url_to_media"]<br>
-<li style="list-style:square outside">Call the PHP function:<br>
-alt_audio_field::get_audio( $field_name, $group_index, $field_index, $post_id, $atts = array() )
-</ul>
-EOD
-            , $mf_domain );
+        $this->description = __( 'This is a Magic Fields 2 field for WordPress\'s audio shortcode facility.', $mf_domain );
     }
   
     public function _options() {
@@ -42,7 +23,7 @@ EOD
                     'label'       =>  __( 'Width', $mf_domain ),
                     'name'        =>  'mf_field[option][max_width]',
                     'default'     =>  '320',
-                    'description' =>  'width for optional caption and/or optional image',
+                    'description' =>  'width in pixels for optional caption and/or optional image',
                     'value'       =>  '320',
                     'div_class'   =>  '',
                     'class'       =>  ''
@@ -53,7 +34,8 @@ EOD
                     'label'       =>  __( 'Height', $mf_domain ),
                     'name'        =>  'mf_field[option][max_height]',
                     'default'     =>  '240',
-                    'description' =>  'height for optional caption and/or optional image',
+                    'description' =>  'height in pixels for optional caption and/or optional image' .
+                                      ' - 0 lets the browser set the height to preserve the aspect ratio - recommended',
                     'value'       =>  '240',
                     'div_class'   =>  '',
                     'class'       =>  ''
@@ -110,7 +92,7 @@ EOD
                                         'alignnone'   => 'None',
                                     ),
                     'add_empty'   => false,
-                    'description' => '',
+                    'description' => 'alignment is effective only if a caption is specified',
                     'value'       => '',
                     'div_class'   => '',
                     'class'       => ''
@@ -133,6 +115,8 @@ EOD
         $wp_media_shortcode = 'wp_audio_shortcode';
         $width  = !empty( $atts['width'] )  ? $atts['width']  : $data['options']['max_width'];
         $height = !empty( $atts['height'] ) ? $atts['height'] : $data['options']['max_height'];
+        $attrWidth  = $width  ? " width=\"$width\""   : '';
+        $attrHeight = $height ? " height=\"$height\"" : '';
         $invalid_atts = array( 'width' => true, 'height' => true, 'poster' => true );
         include WP_PLUGIN_DIR . '/magic-fields-2-toolkit/magic-fields-2-alt-media-get-template.php';
         #error_log( '##### alt_audio_field::get_audio():$html=' . $html );
@@ -140,7 +124,7 @@ EOD
         if ( $poster ) {
             $html = <<<EOD
                 <div style="display:inline-block;width:{$width}px;padding:0px;">
-                    <img src="$poster" width="$width" height="$height">
+                    <img src="$poster"{$attrWidth}{$attrHeight}>
                     $html
                 </div>
 EOD;
@@ -151,6 +135,12 @@ EOD;
             if ( !$width ) { $width = 160; }
             $html = img_caption_shortcode( array( 'width' => $width, 'align' => $data['options']['align'], 'caption' => $caption ),
                 $html );
+            $html = preg_replace_callback( '/<div\s.*?style=".*?(width:\s*\d+px)/', function( $matches ) use ( $width ) {
+                return str_replace( $matches[1], "width:{$width}px;max-width:100%", $matches[0] );  
+            }, $html, 1 );
+            $html = preg_replace_callback( '/(<img\s.*?)>/', function( $matches ) {
+                return $matches[1] . 'style="margin:0;max-width:100%">';  
+            }, $html, 1 );
         }
         #error_log( '##### alt_audio_field::get_audio():$html=' . $html );
         return $html;
