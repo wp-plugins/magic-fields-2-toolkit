@@ -2,10 +2,10 @@
 
 class alt_audio_field extends mf_custom_fields {
 
-    private static $suffix_fallback = '_mf2tk_fallback';
-    private static $suffix_alternate_fallback = '_mf2tk_alternate_fallback';
-    private static $suffix_caption = '_mf2tk_caption';
-    private static $suffix_poster = '_mf2tk_poster';
+    public static $suffix_fallback = '_mf2tk_fallback';
+    public static $suffix_alternate_fallback = '_mf2tk_alternate_fallback';
+    public static $suffix_caption = '_mf2tk_caption';
+    public static $suffix_poster = '_mf2tk_poster';
 
     public function _update_description(){
         global $mf_domain;
@@ -113,6 +113,7 @@ class alt_audio_field extends mf_custom_fields {
     static function get_audio( $field_name, $group_index = 1, $field_index = 1, $post_id = NULL, $atts = array() ) {
         $wp_get_media_extensions = 'wp_get_audio_extensions';
         $wp_media_shortcode = 'wp_audio_shortcode';
+        $data = get_data( $field_name, $group_index, $field_index, $post_id );
         $width  = !empty( $atts['width'] )  ? $atts['width']  : $data['options']['max_width'];
         $height = !empty( $atts['height'] ) ? $atts['height'] : $data['options']['max_height'];
         $attrWidth  = $width  ? " width=\"$width\""   : '';

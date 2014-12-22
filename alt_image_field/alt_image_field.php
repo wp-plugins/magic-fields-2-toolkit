@@ -78,7 +78,7 @@ class alt_image_field extends mf_custom_fields {
         $index = $group_index === 1 && $field_index === 1 ? '' : "<$group_index,$field_index>";
         $output = <<<EOD
 <div class="text_field_mf">
-    <!-- main $media_type field -->
+    <!-- main audio field -->
     <div class="mf2tk-field-input-main">
         <h6>URL of Image</h6>
         <div class="mf2tk-field_value_pane">
@@ -138,9 +138,6 @@ EOD;
         $width  = !empty( $atts['width'] )  ? $atts['width']  : $data['options']['max_width'];
         $height = !empty( $atts['height'] ) ? $atts['height'] : $data['options']['max_height'];
         # get optional caption
-        if ( !function_exists( '_mf2tk_get_optional_field' ) ) {
-            include WP_PLUGIN_DIR . '/magic-fields-2-toolkit/magic-fields-2-get-optional-field.php';
-        }
         $caption = _mf2tk_get_optional_field( $field_name, $group_index, $field_index, $post_id, self::$suffix_caption );
         $attrWidth  = $width  ? " width=\"$width\""   : '';
         $attrHeight = $height ? " height=\"$height\"" : '';

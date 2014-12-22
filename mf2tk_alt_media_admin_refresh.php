@@ -38,7 +38,7 @@ $html .= <<<EOD
 }(jQuery));
 </script>
 EOD;
-if ( !$height && preg_match( '/<video\s+class="wp-video-shortcode"\s+id="([^"]+)"/', $html, $matches ) ) {
+if ( !$options['max_height'] && preg_match( '/<video\s+class="wp-video-shortcode"\s+id="([^"]+)"/', $html, $matches ) ) {
     $id = $matches[1];
     $html .= <<<EOD
 <script>

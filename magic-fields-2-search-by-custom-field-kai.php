@@ -67,8 +67,9 @@ class Search_Using_Magic_Fields_Widget extends WP_Widget {
 </div>
 EOD;
 	public function __construct() {
-		parent::__construct( 'search_magic_fields', __( 'Search using Magic Fields' ),
-            array( 'classname' => 'search_magic_fields_widget', 'description' => __( "Search for Custom Posts using Magic Fields" ) )
+		parent::__construct( 'search_magic_fields', __( 'Search using Magic Fields', 'mf2tk' ),
+            [ 'classname' => 'search_magic_fields_widget',
+                'description' => __( "Search for Custom Posts using Magic Fields" ), 'mf2tk' ]
         );
 	}
 
@@ -91,8 +92,8 @@ EOD;
 <a href="http://magicfields17.wordpress.com/magic-fields-2-search-0-4-1/#user" target="_blank">help</a>
 </div>
 <h2 class="scpbcfw-search-fields-title">Search:</h2>
-<h4 class="scpbcfw-search-fields-post-type-title">Select post type:</h4>
 <div class="magic-field-parameter">
+<h4 class="scpbcfw-search-fields-post-type-title">Select post type:</h4>
 <select id="post_type" name="post_type" class="scpbcfw-search-fields-post-type" required>
 <option value="no-selection">--select post type--</option>
 <?php
@@ -230,8 +231,8 @@ EOD
         $wp_taxonomies = get_taxonomies( '', 'objects' );
         # do all post types
         foreach ( $types as $name => $type ) {
-            $selected      = $instance[$name];
-            $show_selected = $instance['show-' . $name];
+            $selected      = array_key_exists( $name, $instance ) ? $instance[$name] : [];
+            $show_selected = array_key_exists( 'show-' . $name, $instance ) ? $instance['show-' . $name] : [];
 ?>
 <div class="scpbcfw-admin-search-fields">
 <div class="scpbcfw-admin-search-fields-name"><?php echo "$name ($type->count)"; ?>:</div>
@@ -454,7 +455,8 @@ jQuery(document).ready(function(){
             }
             return $arr;
         }
-        return FALSE;
+        $arr = false;
+        return $arr;
     }
 }   # class Search_Using_Magic_Fields_Widget extends WP_Widget
 
@@ -519,7 +521,7 @@ div.mf2tk-selectable-field-after.mf2tk-hover{background-color:black;}
                             AND x.taxonomy = "$taxonomy->name" AND p.post_type = %s
                             GROUP BY x.term_taxonomy_id ORDER BY count DESC LIMIT $SQL_LIMIT
 EOD
-                    , $_REQUEST[post_type] ), OBJECT );
+                    , $_REQUEST['post_type'] ), OBJECT );
 ?>
 <div class="scpbcfw-search-fields">
 <span class="scpbcfw-search-fields-field-label"><?php echo $taxonomy->name ?>:</span>
@@ -576,7 +578,7 @@ EOD
                             WHERE p.post_author = u.ID AND p.post_type = %s AND p.post_status = "publish"
                                 AND p.post_author IS NOT NULL GROUP BY p.post_author ORDER BY count
 EOD
-                        , $_REQUEST[post_type] ), OBJECT );
+                        , $_REQUEST['post_type'] ), OBJECT );
                     $count = -1;
                     foreach ( $results as $result ) {
                         if ( ++$count === $SQL_LIMIT ) { break; }
@@ -605,7 +607,7 @@ EOD
                                 AND m.meta_value IS NOT NULL AND m.meta_value != '' ) d
                             GROUP BY meta_value ORDER BY count DESC LIMIT $SQL_LIMIT
 EOD
-                    , $meta_key, $_REQUEST[post_type] ), OBJECT_K );
+                    , $meta_key, $_REQUEST['post_type'] ), OBJECT_K );
                 $values = array();   # to be used by serialized fields
                 $numeric = TRUE;
                 foreach ( $results as $meta_value => $result ) {
@@ -613,7 +615,9 @@ EOD
                     if ( $field->type === 'related_type' ) {
                         $value = get_the_title( $meta_value );
                     } else if ( $field->type === 'image_media' ) {
-                        $value = $wpdb->get_col( $wpdb->prepare( "SELECT guid FROM $wpdb->posts WHERE ID = %s", $meta_value ) );
+                        # must use _wp_attached_file from $wpdb->postmeta 
+                        #$value = $wpdb->get_col( $wpdb->prepare( "SELECT guid FROM $wpdb->posts WHERE ID = %s", $meta_value ) );
+                        $value = wp_get_attachment_url( $meta_value );
                         if ( $value ) { $value = substr( $value[0], strrpos( $value[0], '/' ) + 1 ); }
                         else { $value = ''; }
                     } else if ( $field->type === 'image' ) {
@@ -782,7 +786,7 @@ EOD
             SELECT u.display_name, u.ID FROM $wpdb->users u, $wpdb->posts p
                 WHERE u.ID = p.post_author AND p.post_type = %s GROUP BY u.ID
 EOD
-            , $_REQUEST[post_type] ), OBJECT );
+            , $_REQUEST['post_type'] ), OBJECT );
         $author_ids = array();
         foreach ( $results as $result ) {
             $author_ids[strtolower( $result->display_name)] = $result->ID;
@@ -880,7 +884,7 @@ EOD
         }   #  foreach ( $_REQUEST as $key => $values ) {
         if ( $sql ) {
             $sql = $wpdb->prepare( "SELECT p.ID FROM $wpdb->posts p WHERE p.post_type = %s AND p.post_status = 'publish' AND ",
-                $_REQUEST[post_type] ) . "( $sql )";
+                $_REQUEST['post_type'] ) . "( $sql )";
             $ids0 = $wpdb->get_col( $sql );
             if ( $and_or == 'AND' && !$ids0 ) { return ' AND 1 = 2 '; }
         } else {
@@ -908,7 +912,7 @@ EOD
         if ( $sql ) {
             $sql = $wpdb->prepare(
                 "SELECT p.ID FROM $wpdb->posts p WHERE p.post_type = %s AND p.post_status = 'publish' AND ( $sql )",
-                $_REQUEST[post_type] );
+                $_REQUEST['post_type'] );
             $ids1 = $wpdb->get_col( $sql );
             if ( $and_or == 'AND' && !$ids1 ) { return ' AND 1 = 2 '; }
         } else {
@@ -921,7 +925,7 @@ EOD
                 SELECT ID FROM $wpdb->posts WHERE post_type = %s AND post_status = "publish"
                     AND ( post_content LIKE %s OR post_title LIKE %s OR post_excerpt LIKE %s )
 EOD
-                , $_REQUEST[post_type], "%{$_REQUEST['pst-std-post_content']}%", "%{$_REQUEST['pst-std-post_content']}%",
+                , $_REQUEST['post_type'], "%{$_REQUEST['pst-std-post_content']}%", "%{$_REQUEST['pst-std-post_content']}%",
                 "%{$_REQUEST['pst-std-post_content']}%" );
             $ids2 = $wpdb->get_col( $sql );
             if ( $and_or == 'AND' && !$ids2 ) { return ' AND 1 = 2 '; }
@@ -937,7 +941,7 @@ EOD
             }, $_REQUEST['pst-std-post_author'] ) );
             $sql = $wpdb->prepare(
                 "SELECT ID FROM $wpdb->posts WHERE post_type = %s AND post_status = 'publish' AND post_author IN ( $authors )",
-                $_REQUEST[post_type] );
+                $_REQUEST['post_type'] );
             $ids4 = $wpdb->get_col( $sql );
             if ( $and_or == 'AND' && !$ids4 ) { return ' AND 1 = 2 '; }
         } else {
@@ -985,6 +989,12 @@ EOD
                 include_once( dirname( __FILE__ ) . '/magic-fields-2-dumb-macros.php' );
             }
             # get the list of posts
+            if ( !$wp_query->posts ) {
+                get_header();
+                echo __( 'Nothing found', 'mf2tk' );
+                get_footer();
+                exit();
+            }
             $posts = array_map( function( $post ) { return $post->ID; }, $wp_query->posts );
             $option = get_option( $_REQUEST['magic_fields_search_widget_option'] );
             $number = $_REQUEST['magic_fields_search_widget_number'];
@@ -1009,7 +1019,9 @@ EOD
             $macro = $option[$number]['table_shortcode'];
             if ( empty( $macro ) ) { $macro = Search_Using_Magic_Fields_Widget::DEFAULT_CONTENT_MACRO; }
             $macro = htmlspecialchars_decode( $macro );
-            if ( $table_width = $option[$number]['table_width'] ) { $table_width = " style='width:{$table_width}px;'"; }
+            if ( array_key_exists( 'table_width', $option[$number] ) and $table_width = $option[$number]['table_width'] ) {
+                $table_width = " style='width:{$table_width}px;'";
+            }
             $post    = $posts[0];
             $posts   = implode( ',', $posts );
             $fields  = implode( ';', $fields );

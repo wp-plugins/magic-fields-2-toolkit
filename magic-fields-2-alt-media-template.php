@@ -1,6 +1,7 @@
 <?php
     #error_log( '##### magic-fields-2-alt-media-template.php:$field=' . print_r( $field, true ) );
     #error_log( '##### magic-fields-2-alt-media-template.php:$mf_post_values=' . print_r( $mf_post_values, true ) );
+    $index = $group_index === 1 && $field_index === 1 ? '' : "<$group_index,$field_index>";
     $width  = $field['options']['max_width'];
     $height = $field['options']['max_height'];
     $dimensions = [];

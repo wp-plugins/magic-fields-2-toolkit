@@ -157,7 +157,7 @@ EOT;
             if ( $value == 1 ) { $unit = $unit[0]; }
             else { $unit = $unit[1]; }
         }        
-        return $options['currency']. number_format( $value, $options['precision'], $options['decimal_point'],
+        return $options['currency']. number_format( (double) $value, $options['precision'], $options['decimal_point'],
             $options['thousands_separator'] ) . $unit;
     }
 

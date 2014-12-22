@@ -19,6 +19,16 @@
 class Magic_Fields_2_Toolkit_Init {
     public function __construct() {
         global $wpdb;
+        add_action( 'admin_init', function() {
+            if ( !is_plugin_active( 'magic-fields-2/main.php' ) ) {
+                add_action( 'admin_notices', function() {
+?>
+<div style="clear:both;font-weight:bold;border:2px solid red;padding:5px 10px;margin:10px;">Magic Templates requires that plugin <a href="https://wordpress.org/plugins/magic-fields-2/">Magic Fields 2</a> be installed
+and activated.</div> 
+<?php
+                } );
+            }
+        } );
         add_action( 'admin_enqueue_scripts', function( $hook ) {
             global $wp_scripts;
             wp_enqueue_style( 'admin', plugins_url( 'admin.css', __FILE__ ) );
@@ -368,12 +378,68 @@ EOD
                 } );
             }
             if ( is_admin()
-                && ( array_key_exists( 'alt_video_field', $options ) || array_key_exists( 'alt_video_field', $options ) ) ) {
+                && ( array_key_exists( 'alt_video_field', $options ) || array_key_exists( 'alt_audio_field', $options ) ) ) {
                 add_action( 'wp_ajax_' . 'mf2tk_alt_media_admin_refresh', function() {
                     include dirname(__FILE__) . '/mf2tk_alt_media_admin_refresh.php';
                 } );
             }
-        }
+            if ( array_key_exists( 'alt_video_field', $options ) || array_key_exists( 'alt_audio_field', $options )
+                || array_key_exists( 'alt_embed_field', $options ) || array_key_exists( 'alt_image_field', $options ) ) {
+                include_once dirname( __FILE__ ) . '/magic-fields-2-get-optional-field.php';
+            }
+            if ( array_key_exists( 'dumb_macros', $options ) ) {
+                add_action( 'admin_print_footer_scripts', function() {
+                    global $hook_suffix;
+                    if ( $hook_suffix === 'post.php' || $hook_suffix === 'post-new.php' ) {
+?>
+<script type="text/javascript">
+    (function(){
+        var a=document.createElement("a");
+        a.className="button";
+        a.href="#";
+        a.textContent="Save as Template";
+        jQuery("a#insert-media-button").after(a);
+        jQuery(a).click(function(){
+            var slug=jQuery("input#post_name").val();
+            var title=jQuery("input#title").val();
+            var text=jQuery("textarea#content").val();
+            jQuery.post(ajaxurl,{action:'mf2tk_update_content_macro',slug:slug,title:title,text:text},function(r){
+                alert(r);
+            });
+        });
+    }());
+</script>
+<?php
+                    }   # if ( $hook_suffix === 'post.php' ) {
+                } );   # add_action( 'admin_print_footer_scripts', function() {
+                if ( is_admin() ) {
+                    add_action( 'wp_ajax_mf2tk_update_content_macro', function() {
+                        global $wpdb;
+                        $ids = $wpdb->get_col( <<<EOD
+SELECT ID FROM $wpdb->posts WHERE post_type = 'content_macro'
+    AND post_title = '$_POST[title]' AND post_status = 'publish'
+EOD
+                        );
+                        $post = [
+                            'post_type' => 'content_macro',
+                            'post_name' => $_POST['slug'],
+                            'post_title' => $_POST['title'],
+                            'post_status' => 'publish',
+                            'post_content' => $_POST['text']
+                        ];
+                        if ( $ids ) {
+                            $post['ID'] = $ids[0];
+                            $id0 = wp_update_post( $post );
+                        } else {
+                            $id1 = wp_insert_post( $post );
+                        }
+                        die( !empty ( $id0 ) ? "Content template $id0 updated."
+                            : ( !empty( $id1 ) ? "Content template $id1 created."
+                                : "Error: Content template not created/updated." ) );
+                    } ); # add_action( 'wp_ajax_mf2tk_update_content_macro', function() {
+                } #   if ( is_admin() ) {
+            } #   if ( array_key_exists( 'dumb_macros', $options ) ) {
+        }   # if ( is_array( $options ) ) {
         #add_filter( 'plugin_row_meta', function( $plugin_meta, $plugin_file, $plugin_data, $status ) {
         #    #error_log( '##### filter:plugin_row_meta:$plugin_file=' . $plugin_file );
         #    if ( strpos( $plugin_file, basename( __FILE__ ) ) !== FALSE ) {
@@ -385,7 +451,7 @@ EOD
 		add_filter( 'plugin_action_links', function( $actions, $plugin_file, $plugin_data, $context ) {
             if ( strpos( $plugin_file, basename( __FILE__ ) ) !== FALSE ) {
                 array_unshift( $actions, '<a href="' . admin_url( 'options-general.php?page=magic-fields-2-toolkit-page' ) . '">'
-                    . __( 'Settings' ) . '</a>' );
+                    . __( 'Settings', 'mf2tk' ) . '</a>' );
             }
 			return $actions;
 		}, 10, 4 );
@@ -395,5 +461,4 @@ EOD
         } );
     }
 }
-
 new Magic_Fields_2_Toolkit_Init();

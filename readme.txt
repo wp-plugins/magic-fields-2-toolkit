@@ -1,46 +1,40 @@
 === Magic Fields 2 Toolkit ===
 Contributors: Magenta Cuda
 Donate link:
-Tags: custom, post, copier, fields, shortcodes, macros
+Tags: shortcodes, templates, custom fields, post copier
 Requires at least: 3.6
-Tested up to: 4.0
-Stable tag: 0.5.0.2
+Tested up to: 4.1
+Stable tag: 0.5.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
-Plugin adds some useful features to the Magic Fields 2 plugin.
+A toolkit for the Magic Fields 2 plugin for CMS web design by non programmers.
 
 == Description ==
-This plugin adds some useful features to [the Magic Fields 2 plugin](https://wordpress.org/plugins/magic-fields-2/). Some of these features in particular makes it possible to write HTML templates without the need for PHP programming.
+The main objective of this plugin is to transform the [Magic Fields 2](https://wordpress.org/plugins/magic-fields-2/) plugin into something that can be used by a non programmer to CMS do web design.
 The current features are:
 
-   1. Create a copy of a Magic Fields 2 custom post copying all of the Magic Fields' custom fields, groups and taxonomies.
-   
-   2. Supports a shortcode for showing Magic Fields 2 custom fields and taxonomies. In particular, the shortcodes makes it easy to display a table of custom field names and their values.
-   
-   3. Identify and delete unreferenced files in folder files_mf.
+= Support for coding HTML templates without the need for PHP programming =
+* [shortcode for showing Magic Fields 2 custom fields and taxonomies](http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4-2/#shortcode). In particular, the shortcodes makes it easy to display a table of custom field names and their values.
+* [post content templates for HTML and WordPress shortcodes](http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4-2/#macros) - these templates do not need PHP code.
 
-   4. Provides an alternative related type field which uses multiple selection checkboxes instead of a single selection dropdown.
+= Additional custom fields =
+* [field for WordPress's video and audio shortcodes](http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4-2/#alt_media).
+* [alternative related type field](http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4-2/#alt_related) which uses multiple selection checkboxes instead of a single selection dropdown.
+* [numeric field](http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4-2/#alt_numeric) with support for measurement units suffix and/or currency symbol prefix.
+* [pseudo field for generating a table of Magic Field names and values](http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4-2/#alt_table).
+* field for WordPress's embed shortcode.
+* alternative textbox field that allows you to select previously entered data.
+* alternative dropdown field that allows you to enter new options directly into the dropdown.
 
-   5. Provides a search widget that does searching for Magic Fields 2 field values.
+= Search widget =
+* [finds posts by Magic Fields 2 field values.](http://magicfields17.wordpress.com/magic-fields-2-search-0-4-1/)
 
-   6. Provides an alternative textbox field that allows you to select previously entered data.
+= Miscellaneous enhancements to Magic Fields 2 =
+* [Create a copy of a Magic Fields 2 custom post](http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4-2/#copy) copying all of the Magic Fields' custom fields, groups and taxonomies.
+* Identify and delete unreferenced files in folder files_mf.
+* Provides an alternative get_audio function that outputs HTML5 audio elements for iPad and iPhone browsers.
+* Provides some Magic Fields 2 utility functions for PHP programmers.
 
-   7. Supports HTML and WordPress macros for post content - allows you to create HTML templates without need for PHP code.
-
-   8. Provides an alternative dropdown field that allows you to enter new options directly into the dropdown.
-
-   9. Provides an alternative get_audio function that outputs HTML5 audio elements for iPad and iPhone browsers.
-
-   10. Provides some Magic Fields 2 utility functions for PHP programmers.
-   
-   11. Provides a field for WordPress's embed shortcode.
-   
-   12. Provides a field for WordPress's video and audio shortcodes.
-   
-   13. Provides a numeric field with support for measurement units suffix and/or currency symbol prefix.
-   
-   14. Provides a pseudo field for generating a table of Magic Field names and values.
-   
 Please visit the [Toolkit's online documentation](http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4-2/) for more details.
 **This plugin works with Magic Fields 2.3 and requires at least PHP 5.4.**
 
@@ -50,7 +44,7 @@ Please visit the [Toolkit's online documentation](http://magicfields17.wordpress
 3. Open 'Settings->Magic Fields 2 Toolkit' menu item and enable specific features - all features are not enabled by default.
 4. To copy a custom post open the "All Your Custom Post Type" menu item and click on "Create Copy" for the entry of the desired post.
 5. To use shortcodes please see [the online documentation](http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4-2/#shortcode).
-6. To use content macros please see [the online documentation](http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4-2/#macros).
+6. To use content templates please see [the online documentation](http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4-2/#macros).
 7. Other features are self-explanatory.
 8. The most current documentation is available at [Toolkit's online documentation](http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4-2/).
 
@@ -71,6 +65,10 @@ Version 0.4.6 has a new default content macro for sortable tables. However, the 
 == Screenshots ==
 
 == Changelog ==
+
+= 0.5.1 =
+* save post content as a content template(content macro)
+* psuedo field to generate the shortcode to use a content template(content macro)
 
 = 0.5.0.2 =
 * fix some css problems on Firefox and some anomalies with the video shortcode on Firefox
@@ -249,3 +247,7 @@ added fields for embed, audio and video
 
 = 0.5.0.2 =
 * fix some css problems on Firefox and some anomalies with the video shortcode on Firefox
+
+= 0.5.1 =
+* save post content as a content template(content macro)
+* psuedo field to generate the shortcode to use a content template(content macro)

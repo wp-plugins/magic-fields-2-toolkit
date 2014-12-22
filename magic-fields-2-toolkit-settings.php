@@ -3,13 +3,12 @@
 class Magic_Fields_2_Toolkit_Settings {
     public static $fields = [
         'alt_textbox', 'alt_related_type', 'alt_dropdown', 'alt_numeric', 'alt_embed', 'alt_video', 'alt_audio', 'alt_image',
-        'alt_table'
+        'alt_table', 'alt_template'
     ];
     private static function sync_field_and_option( $field, $options ) {
         if ( array_key_exists( $field . '_field', $options ) ) {
             $mf_dir = MF_PATH . "/field_types/{$field}_field/";
             if ( !file_exists( $mf_dir ) ) {
-                error_log( "mkdir( $mf_dir, 0777 )" );
                 if ( !mkdir( $mf_dir, 0777 ) ) {
                     error_log( "mkdir( $mf_dir, 0777 ) failed" );
                 }
@@ -65,6 +64,7 @@ class Magic_Fields_2_Toolkit_Settings {
             wp_enqueue_style( 'dashicons' );
         } );
         add_action( 'admin_init', function() {
+            if ( !defined( 'MF_PATH' ) ) { return; }
             $options = get_option( 'magic_fields_2_toolkit_enabled', [ ] );
             foreach ( self::$fields as $field ) {
                 self::sync_field_and_option( $field, $options );
@@ -79,24 +79,25 @@ class Magic_Fields_2_Toolkit_Settings {
             } );
             add_settings_section( 'magic_fields_2_toolkit_settings_sec', '',
                 function( ) {
-                    echo( __( '<h3>Use this form to enable specific features.</h3>', 'magic-fields-2-toolkit' ) );
+                    echo( __( '<h3>Use this form to enable specific features.</h3>', 'mf2tk' ) );
                 }, 'magic-fields-2-toolkit-page' );	
             $options = get_option( 'magic_fields_2_toolkit_enabled', [ ] );
             $settings = [
-                ['custom_post_copier', 'Custom Post Copier', 'copy'],
                 ['dumb_shortcodes', 'Dumb Shortcodes', 'shortcode'],
-                ['dumb_macros', 'Content Macros', 'macros'],
-                ['search_using_magic_fields', 'Search using Magic Fields', 'search'],
-                ['clean_files_mf', 'Clean Folder files_mf', 'unreferenced'],
+                ['dumb_macros', 'Content Templates', 'macros'],
+                ['alt_template_field', 'Alt Template Field', 'alt_template'],
+                ['alt_table_field', 'Alt Table Field', 'alt_table'],
+                ['alt_numeric_field', 'Alt Numeric Field', 'alt_numeric'],
                 ['alt_related_type_field', 'Alt Related Type Field', 'alt_related'],
                 ['alt_embed_field', 'Alt Embed Field', 'embed'],
                 ['alt_video_field', 'Alt Video Field', 'video'],
                 ['alt_audio_field', 'Alt Audio Field', 'audio'],
                 ['alt_image_field', 'Alt Image Field', 'image'],
-                ['alt_numeric_field', 'Alt Numeric Field', 'alt_numeric'],
                 ['alt_textbox_field', 'Alt Textbox Field', 'alt_textbox'],
                 ['alt_dropdown_field', 'Alt Dropdown Field', 'alt_dropdown'],
-                ['alt_table_field', 'Alt Table Field', 'alt_table'],
+                ['search_using_magic_fields', 'Search using Magic Fields', 'search'],
+                ['custom_post_copier', 'Custom Post Copier', 'copy'],
+                ['clean_files_mf', 'Clean Folder files_mf', 'unreferenced'],
                 ['alt_get_audio', 'Alt Get Audio', 'alt_audio'],
                 ['utility_functions', 'Utility Functions', 'utility_functions']
             ];
@@ -104,7 +105,7 @@ class Magic_Fields_2_Toolkit_Settings {
                 $name  = $v[0];
                 $title = $v[1];
                 $help  = $v[2];
-                add_settings_field( "magic_fields_2_toolkit_$name", __( $title, 'magic-fields-2-toolkit' ),
+                add_settings_field( "magic_fields_2_toolkit_$name", __( $title, 'mf2tk' ),
                     function() use ( $name, $help, $options ) {
                         echo( "<input name=\"magic_fields_2_toolkit_enabled[$name]\" type=\"checkbox\" value=\"enabled\""
                             . ( ( is_array( $options ) && array_key_exists( $name, $options ) ) ? ' checked' : '' ) . '>' );
@@ -117,6 +118,7 @@ class Magic_Fields_2_Toolkit_Settings {
             
         } );
         add_action( 'admin_menu', function() {
+            if ( !defined( 'MF_PATH' ) ) { return; }
             add_options_page( 'Magic Fields 2 Toolkit', 'Magic Fields 2 Toolkit',
                 'manage_options', 'magic-fields-2-toolkit-page',
                 function() {

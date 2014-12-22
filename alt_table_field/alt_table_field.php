@@ -11,7 +11,7 @@ class alt_table_field extends mf_custom_fields {
   public  $css_script = FALSE;
   public  $js_script = FALSE;
   public  $js_dependencies = array();
-  public  $allow_multiple = TRUE;
+  public  $allow_multiple = FALSE;
   public  $has_properties = TRUE;
   
     public function get_properties() {
@@ -23,8 +23,9 @@ class alt_table_field extends mf_custom_fields {
 
     public function _update_description(){
         global $mf_domain;
-        $this->description = __( 'Table of All Magic Fields'
-                                . '- automatically generated shortcode to display all Magic Fields in a table', $mf_domain);
+        $this->description = __( 'Table of Magic Fields'
+            . ' - This is a psuedo field for automatically generating shortcodes to display all/some Magic Fields in a table',
+            $mf_domain);
     }
     
     public function _options(){
@@ -39,8 +40,10 @@ class alt_table_field extends mf_custom_fields {
         $default_height = 50;
         $post_type = $post->post_type;
         $MF_TABLE_CUSTOM_FIELDS = MF_TABLE_CUSTOM_FIELDS;
-        $results = $wpdb->get_col(
-            "SELECT name FROM $MF_TABLE_CUSTOM_FIELDS WHERE post_type = '$post_type' AND type != 'alt_table'" );
+        $results = $wpdb->get_col( <<<EOD
+SELECT name FROM $MF_TABLE_CUSTOM_FIELDS WHERE post_type = '$post_type' AND type != 'alt_table' AND type != 'alt_template'
+EOD
+        );
         $fields = implode( ';', $results );
     $output = <<<EOD
     <div class="mf2tk-field-input-optional">

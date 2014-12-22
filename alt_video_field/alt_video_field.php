@@ -2,10 +2,10 @@
 
 class alt_video_field extends mf_custom_fields {
 
-    private static $suffix_fallback = '_mf2tk_fallback';
-    private static $suffix_alternate_fallback = '_mf2tk_alternate_fallback';
-    private static $suffix_caption = '_mf2tk_caption';
-    private static $suffix_poster = '_mf2tk_poster';
+    public static $suffix_fallback = '_mf2tk_fallback';
+    public static $suffix_alternate_fallback = '_mf2tk_alternate_fallback';
+    public static $suffix_caption = '_mf2tk_caption';
+    public static $suffix_poster = '_mf2tk_poster';
 
     public function _update_description(){
         global $mf_domain;
@@ -114,6 +114,7 @@ class alt_video_field extends mf_custom_fields {
     static function get_video( $field_name, $group_index = 1, $field_index = 1, $post_id = NULL, $atts = array() ) {
         $wp_get_media_extensions = 'wp_get_video_extensions';
         $wp_media_shortcode = 'wp_video_shortcode';
+        $data = get_data( $field_name, $group_index, $field_index, $post_id );
         $invalid_atts = array();
         include WP_PLUGIN_DIR . '/magic-fields-2-toolkit/magic-fields-2-alt-media-get-template.php';
         #error_log( '##### alt_video_field::get_video():$html=' . $html );

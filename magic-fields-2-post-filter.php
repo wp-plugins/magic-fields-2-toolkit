@@ -17,7 +17,7 @@
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-trait Magic_Fields_2_Toolkit_Post_Filters {
+trait Magic_Fields_2_Toolkit_Post_Filter {
 
     # find post ids of posts with specified taxonomy and tags
 
@@ -123,5 +123,5 @@ EOD;
 
     #get_posts_with_spec( 'carburetor:year:-1969,1970,-1971,1972;company_type:llc,-corporation,;' );
     
-}   # trait Magic_Fields_2_Toolkit_Post_Filters {
+}   # trait Magic_Fields_2_Toolkit_Post_Filter {
 

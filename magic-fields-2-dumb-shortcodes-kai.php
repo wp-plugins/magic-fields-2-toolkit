@@ -24,13 +24,11 @@
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#error_log( '__FILE__ =' . __FILE__ );
-
 include_once( dirname( __FILE__ ) . '/magic-fields-2-group-key.php' );
 include_once( dirname( __FILE__ ) . '/magic-fields-2-post-filter.php' );
 
 class Magic_Fields_2_Toolkit_Dumb_Shortcodes {
-    use Magic_Fields_2_Toolkit_Post_Filters;
+    use Magic_Fields_2_Toolkit_Post_Filter;
 	public static $recursion_separator = '>';
     public function __construct() {
         # wrapper for the individual values of a field
@@ -90,7 +88,6 @@ class Magic_Fields_2_Toolkit_Dumb_Shortcodes {
             # field parameter is of the form: field_specifier1;field_specifier2;field_specifier3 ...
             preg_match_all( '/(([^{};]+)(\.{[^{}]+})?)(;|$)/', $the_fields, $fields );
             $the_fields = $fields[1];
-            #error_log( '##### $show_custom_field():$the_fields=' . print_r( $the_fields, TRUE ) );
             foreach ( $the_fields as $the_name ) {
                 # do one field specifier of a field parameter of the form: field_specifier1;field_specifier2;field_specifier3 ...
                 # first separate field specifier into path components
@@ -100,11 +97,9 @@ class Magic_Fields_2_Toolkit_Dumb_Shortcodes {
                 $field = trim( $names[0] );
                 if ( !preg_match( '/((\*_\*)|([\w-]+(\*)?))(<(\*|[\w\s]+)((,|><)(\*|\d+))?>)?(g|f)?(:((\*?-?[a-zA-Z0-9_]+),?)+)?/',
 					$field, $matches ) || $matches[0] != $field ) {
-					#error_log( '##### $show_custom_field:$matches=' . print_r( $matches, true ) );
 					return '<div style="border:2px solid red;color:red;padding:5px;">'
 						. "\"$field\" is an invalid field expression for short code: show_custom_field.</div>";
 				}
-                #error_log( '##### $show_custom_field:$matches=' . print_r( $matches, true ) );
                 if ( array_key_exists( 1, $matches ) ) { $the_field = $matches[1]; }
                 else { return '#ERROR#'; }
                 if ( array_key_exists( 6, $matches ) ) { $the_group_index = $matches[6]; }
@@ -112,7 +107,6 @@ class Magic_Fields_2_Toolkit_Dumb_Shortcodes {
                 if ( array_key_exists( 9, $matches ) ) { $the_field_index = $matches[9]; }
                 else { $the_field_index = 1; }
                 $fields_by_group = ( array_key_exists( 10, $matches ) && $matches[10] == 'f' ) ? FALSE : TRUE;
-                #error_log( '##### $show_custom_field:$fields_by_group=' . $fields_by_group );
 				$the_group_excludes = array();
 				$the_group_classes = array();
 				$the_excludes = array();
@@ -130,20 +124,11 @@ class Magic_Fields_2_Toolkit_Dumb_Shortcodes {
 							$the_classes[]        = $raw_class;
 						}
 					}
-					#error_log( '##### $the_group_excludes=' . print_r( $the_group_excludes, TRUE ) );
-					#error_log( '##### $the_group_classes='  . print_r( $the_group_classes,  TRUE ) );
-					#error_log( '##### $the_excludes='       . print_r( $the_excludes,       TRUE ) );
-					#error_log( '##### $the_classes='        . print_r( $the_classes,        TRUE ) );
                 } else {
                     $the_classes = NULL;
                 }
-                #error_log( '##### $show_custom_field():$the_field=' . $the_field . ', $the_classes='
-                #    . ( is_array( $the_classes ) ? implode( ', ', $the_classes ) : 'NULL' ) );
-                #error_log( "\$show_custom_field:{$the_field}[{$the_group_index}][{$the_field_index}]" );
 				$all_group_names = $wpdb->get_col( 'SELECT name FROM ' . MF_TABLE_CUSTOM_GROUPS . ' WHERE post_type = "'
 					. get_post_type( $post_id ) . '"' );
-                #error_log( '##### $show_custom_field():post_type=' . get_post_type( $post_id ) );
-                #error_log( '##### $show_custom_field():$all_group_names=' . print_r( $all_group_names, TRUE ) );
 				if ( $the_field == '*_*' ) {
 					$group_names = $all_group_names;
                 } else if ( substr_compare( $the_field, '__default_', 0, 10 ) === 0 ) {
@@ -159,7 +144,6 @@ class Magic_Fields_2_Toolkit_Dumb_Shortcodes {
 						$group_names = array( '__default' );
 					}
 				}
-                #error_log( '##### $show_custom_field():$group_names=' . print_r( $group_names, TRUE ) );
 				$the_field0 = $the_field;
 				foreach ( $group_names as $group_name ) {
 					$mf2tk_key_name = ( $group_name != '__default' ? $group_name . '_' : '' ) . 'mf2tk_key';
@@ -172,27 +156,28 @@ class Magic_Fields_2_Toolkit_Dumb_Shortcodes {
 							. $the_group . '" AND cg.post_type = "' . get_post_type( $post_id )
 							. '" AND cf.custom_group_id = cg.id' . ' ORDER BY cf.display_order', OBJECT_K );
 						if( !$the_field_data ) { continue; }
-						#error_log( 'results=' . print_r( $results, TRUE ) );
+                        $the_field_data = array_filter( $the_field_data, function( $data ) {
+                            return $data->type !== 'alt_table' && $data->type !== 'alt_template';
+                        } );
 						$fields = array_map( function( $row ) { return $row->label; }, $the_field_data );
 						if ( array_key_exists( $mf2tk_key_name, $fields ) ) { unset( $fields[$mf2tk_key_name] ); }
-						#error_log( '##### $show_custom_field():fields=' . print_r( $fields, TRUE ) );
 					} else {
 						$the_field_data = $wpdb->get_results( 'SELECT name, label, description, type FROM '
 							. MF_TABLE_CUSTOM_FIELDS . " WHERE name IN ( '$the_field', '$mf2tk_key_name' ) AND post_type = '"
 							. get_post_type( $post_id ) . '\'', OBJECT_K );
-						#error_log( 'column=' . print_r( $column, TRUE ) );
 						if ( $the_field_data && isset( $the_field_data[$the_field] ) ) {
 							$fields = array( $the_field => $the_field_data[$the_field]->label );
 						} else {
 							$fields = array( $the_field => $the_field );
 							$not_magic_field = TRUE;
 						}
-						#error_log( '##### $show_custom_field():fields=' . print_r( $fields, TRUE ) );
 					}
-					if ( $mf2tk_key_data = (array) $the_field_data[$mf2tk_key_name] ) {
+					if ( array_key_exists( $mf2tk_key_name, $the_field_data )
+                        && ($mf2tk_key_data = (array) $the_field_data[$mf2tk_key_name] ) ) {
 						preg_match( '/\[\*([a-zA-Z0-9_]+,?)+\*\]/', $mf2tk_key_data['description'], $mf2tk_key_classes );
 						if ( $mf2tk_key_classes ) { $mf2tk_key_classes = explode( ',', trim( $mf2tk_key_classes[0], '[]*' ) ); }
 					}
+                    if ( !isset( $mf2tk_key_classes ) ) { $mf2tk_key_classes = []; }
 					if ( $the_group_classes
 						&& ( !$mf2tk_key_classes || !array_intersect( $the_group_classes, $mf2tk_key_classes ) ) ) {
 						continue;
@@ -201,9 +186,11 @@ class Magic_Fields_2_Toolkit_Dumb_Shortcodes {
 						&& ( $mf2tk_key_classes && array_intersect( $the_group_excludes, $mf2tk_key_classes ) ) ) {
 						continue;
 					}
-					#error_log( '##### $the_group_index=' . $the_group_index );
 					if ( $the_group_index === '*' ) {
-						$group_indices = get_order_group( key( $fields ), $post_id );
+						#$group_indices = get_order_group( key( $fields ), $post_id );
+                        $group_indices = $wpdb->get_col( $wpdb->prepare( 'SELECT DISTINCT group_count FROM '
+                            . MF_TABLE_POST_META . " WHERE post_id = %d AND field_name in ( '"
+                            . implode( '\', \'', array_keys( $fields ) ) . '\' ) ORDER BY group_count ASC', (int) $post_id ) );
 					} else if ( !is_numeric( $the_group_index ) ) {
 						if ( function_exists( '_get_group_index_for_key' ) ) {
 							$group_indices = array( _get_group_index_for_key( $the_group, $the_field, $the_group_index ) );
@@ -213,7 +200,6 @@ class Magic_Fields_2_Toolkit_Dumb_Shortcodes {
 					} else {
 						$group_indices = array( $the_group_index );
 					}
-					#####
 					$fields1 = $fields;
                     # outer field loop
 					foreach ( $fields1 as $field1 => $label1 ) {
@@ -232,16 +218,15 @@ class Magic_Fields_2_Toolkit_Dumb_Shortcodes {
 									$field = $field1;
 									$label = $label1;
 								}
-								#error_log( '##### $show_custom_field():$field=' . $field );
 								$field_value = '';
 								$recursion = FALSE;
 								$skip_field2 = FALSE;
+                                $classes = null;
 								if ( $not_magic_field ) {
 									if ( !$the_classes ) {
 										if ( $field == '__parent' ) {
                                             # handle the psuedo field __parent
 											if ( array_key_exists( 1, $names ) ) {
-												#error_log( '##### $show_custom_field():$names=' . print_r( $names, TRUE ) );
 												$parent_ids1 = $parent_ids;
 												$parent_id = array_pop( $parent_ids1 );
 												$label = $wpdb->get_var( 'SELECT name FROM ' . MF_TABLE_POSTTYPES . ' WHERE type ="'
@@ -289,7 +274,6 @@ EOD
 											if ( array_key_exists( 0, $column ) ) { $label = $column[0]; }
 										} else {
 											$values = get_post_custom_values( $field, $post_id );
-											#error_log( '##### get_post_custom_values()=' . print_r( $values, TRUE ) );
 											if ( is_array( $values ) ) {
 												foreach ( $values as $value ) {
 													if ( is_object( $value ) || is_array( $value ) ) { $value = serialize( $value ); }
@@ -299,38 +283,21 @@ EOD
 											}
 										}
 									}
-								} else {						
+								} else {
 									if ( $the_field_index === '*' ) {
 										$field_indices = get_order_field( $field, $group_index, $post_id );
 										if ( !$field_indices ) { $field_indices = array( 1 ); }
 									} else {
 										$field_indices = array( $the_field_index );
 									}
-									#error_log('#####' . $field . '<' . $group_index . ',' . $the_field_index . '> $field_indices='
-									#	. print_r( $field_indices, TRUE ) );
 									foreach ( $field_indices as $field_index ) {
 										$data = (array) $the_field_data[$field];
-										#$data = get_data( $field, $group_index, $field_index, $post_id );
-										#error_log( '$field=' . $field . ', $data=' . print_r( $data, TRUE ) );
-										#error_log( '##### $field=' . $field . ', $post_id=' . $post_id
-										#    . ', $data[\'type\']=' . $data['type']
-										#    . ', $data[\'description\']=' . $data['description'] );
-										#error_log( '##### $field=' . $field . ', $post_id=' . $post_id
-										#    . ', $datax[\'type\']=' . $datax['type']
-										#    . ', $datax[\'description\']=' . $datax['description'] );
-                                        if ( $data['type'] === 'alt_table' ) {
-											$skip_field1 = $skip_field2 = TRUE;
-                                            continue;
-                                        }
+										$dataz = get_data( $field, $group_index, $field_index, $post_id );
                                         $value = ( $data['type'] === 'alt_numeric' )
                                             ? alt_numeric_field::get_numeric( $field, $group_index, $field_index, $post_id )
                                             : get( $field, $group_index, $field_index, $post_id );
-										#error_log( '##### $value=' . $value );
-										#error_log( '##### $field=' . $field . ', $data[\'description\']=' . $data['description'] );
 										preg_match( '/\[\*([a-zA-Z0-9_]+,?)+\*\]/', $data['description'], $classes );
 										if ( $classes ) { $classes = explode( ',', trim( $classes[0], '[]*' ) ); }
-										#error_log( '##### $show_custom_field():$field=' . $field . ', $classes='
-										#    . implode( ', ', $classes ) );
 										if ( $the_classes && ( !$classes || !array_intersect( $the_classes, $classes ) ) ) {
 											$skip_field1 = $skip_field2 = TRUE;
 											continue;
@@ -346,7 +313,6 @@ EOD
 												foreach ( $values as $value ) {
 													if ( $value ) {
 														if ( array_key_exists( 1, $names ) ) {
-															#error_log( '##### $show_custom_field():$names=' . print_r( $names, TRUE ) );
 															$parent_ids1 = $parent_ids;
 															array_push( $parent_ids1, $post_id );
 															$field_value .= $show_custom_field( $value, $names[1], $before, $after,
@@ -376,7 +342,6 @@ EOD
 														$multi_value = substr( $multi_value, 0, strlen( $multi_value )
 															- strlen( $multi_separator ) );
 													}
-													#error_log( '$multi_value=' . $multi_value );
 													$field_value .= $wrap_value( $multi_value, NULL, NULL, NULL, $before, $after,
 														$separator, $classes );
 												}
@@ -385,7 +350,6 @@ EOD
 													$separator, $classes, $group_index, $field_index, $post_id );
 											}
 										}
-										#error_log( '##### $show_custom_field:$field_value="' . $field_value . '"' );
 									} # foreach ( $field_indices as $field_index ) { # results in $field_value
 								}
                                 # if using outer field loop do only one iteration on inner loop
@@ -398,11 +362,9 @@ EOD
 									}
 									$fields_value .= $wrap_field_value( $field_value, $field_before, $field_after, $field_separator,
 										$label, $field, is_array( $classes ) ? implode( ' ', $classes ) : '', $field_rename, $path );
-                                    #error_log( '##### $show_custom_field:$fields_value="' . $fields_value . '"' );
 								} else {
 									$fields_value .= $field_value;
 								}
-								#error_log( '##### $show_custom_field:$fields_value="' . $fields_value . '"' );
 							} # foreach ( $fields as $field2 => $label2 ) { # results in $fields_value
 							if ( $fields_by_group ) {
 								if ( $field_separator && substr( $fields_value, strlen( $fields_value ) - strlen( $field_separator ) )
@@ -461,13 +423,11 @@ EOD
                     $content = call_user_func( $final, $content, $the_names );
                 }
             }
-            #error_log( '$content="' . $content . '"' );
             return $content;
         };
 
         add_shortcode( 'show_custom_field', function( $atts ) use ( &$show_custom_field ) {
             global $post;
-            #error_log( '$atts=' . print_r( $atts, TRUE ) );
             extract( shortcode_atts( array(
                 'field' => 'something',
                 'before' => '',
@@ -494,8 +454,6 @@ EOD
             if ( $multi_before === NULL ) { $multi_before = $before; }
             if ( $multi_after === NULL ) { $multi_after = $after; }
             if ( $multi_separator === NULL ) { $multi_separator = $separator; }
-            #error_log( '##### show_custom_field:' . print_r( compact( 'field', 'before', 'after', 'filter', 'separator',
-            #    'field_before', 'field_after', 'field_separator', 'post_id' ), TRUE ) );
             if ( is_numeric( $post_id) ) {
                 # single numeric post id
                 $rtn = '';
@@ -504,7 +462,6 @@ EOD
 					$field_separator, $field_rename, $group_before, $group_after, $group_separator, $group_rename, $multi_before,
 					$multi_after, $multi_separator, $final, '' );
                 if ( $post_after ) { $rtn .= $post_after; }
-                #error_log( '##### show_custom_field:$rtn=' . $rtn );
                 return $rtn;
             } else {
                 # handle multiple posts
@@ -513,14 +470,12 @@ EOD
                 $rtn = '';
                 foreach ( $post_ids as $post_id ) {
                     # do each post accumulating the output in $rtn
-                    #error_log( '##### show_custom_field:$post_id=' . $post_id );
                     if ( $post_before ) { $rtn .= $post_before; }
                     $rtn .= $show_custom_field( $post_id, $field, $before, $after, $separator, $filter, $field_before, $field_after,
                         $field_separator, $field_rename, $group_before, $group_after, $group_separator, $group_rename, $multi_before,
                         $multi_after, $multi_separator, $final, '' );
                     if ( $post_after ) { $rtn .= $post_after; }
                 }
-                #error_log( '##### show_custom_field:$rtn=' . $rtn );
                 return $rtn;
             }
         } );
@@ -587,18 +542,30 @@ function tk_value_as_color( $value, $field, $type ) {
     return $value;
 }
 
-function tk_value_as_audio( $value, $field, $type ) {
+function tk_value_as_audio( $value, $field, $type, $classes, $group_index, $field_index, $post_id ) {
     if ( $value && ( $type === 'audio' || $type === 'alt_audio' ) ) {
         $mime_type = array(
           'mp3' => 'audio/mpeg',
           'wav' => 'audio/wav',
           'ogg' => 'audio/ogg',
         );
-        $extension = strtolower( pathinfo( $value,  PATHINFO_EXTENSION ) );
-        if ( array_key_exists( $extension, $mime_type ) ) {
-            $value = '<audio controls><source src="' . $value . '" type="' . $mime_type[$extension] .'"></audio>';
+        if ( $type === 'audio' ) {
+            $type = strtolower( pathinfo( $value, PATHINFO_EXTENSION ) );
+            $srcs = [ $type => $value ];
         } else {
-            $value = 'Your browser cannot play ' . $extension . ' audio files.';
+            $srcs = _mf2tk_get_media_srcs( $field, $group_index, $field_index, $post_id, 'alt_audio_field' );
+        }
+        if ( count( $srcs ) ) {
+            $value = '<audio controls>';
+            foreach ( $srcs as $type => $url ) {
+                if ( array_key_exists( $type, $mime_type ) ) {
+                    $value .= "<source src=\"$url\" type=\"" . $mime_type[$type] . '">';
+                }
+            }
+            $value .= 'Your browser does not support the audio element.';
+            $value .= '</audio>';
+        } else {
+            $value = 'Invalid audio sources';
         }
     }
     return $value;
@@ -606,24 +573,39 @@ function tk_value_as_audio( $value, $field, $type ) {
 
 function tk_value_as_image__( $parm, $value, $field, $type ) {
     if ( $type === 'image' || $type === 'image_media' || $type === 'alt_image' ) {
+        $height = '';
+        $width = '';
         if ( substr( $parm, 0, 1 ) === 'h' ) {
             $height = ' height="' . substr( $parm, 1 ) . '"';
-        } else if ( $substr( $parm, 0, 1 ) === 'w' ) {
+        } else if ( substr( $parm, 0, 1 ) === 'w' ) {
             $width  = ' width="'  . substr( $parm, 1 ) . '"';
         }
-        $value = "<img src=\"$value\"{$width}{$height}>";
+        $value = "<a href=\"$value\"><img src=\"$value\"{$width}{$height}></a>";
      }
     return $value;
 }
 
-function tk_value_as_video__( $parm, $value, $field, $type ) {
+function tk_value_as_video__( $parm, $value, $field, $type, $classes, $group_index, $field_index, $post_id ) {
     if ( $type === 'alt_video' ) {
+        $height = '';
+        $width = '';
         if ( substr( $parm, 0, 1 ) === 'h' ) {
             $height = ' height="' . substr( $parm, 1 ) . '"';
-        } else if ( $substr( $parm, 0, 1 ) === 'w' ) {
+        } else if ( substr( $parm, 0, 1 ) === 'w' ) {
             $width  = ' width="'  . substr( $parm, 1 ) . '"';
         }
-        $value = "<video src=\"$value\" controls=\"controls\"{$width}{$height}></video>";
+        $srcs = _mf2tk_get_media_srcs( $field, $group_index, $field_index, $post_id, 'alt_video_field' );
+        if ( count( $srcs ) === 1 ) {
+            $value = "<video src=\"$value\" controls=\"controls\"{$width}{$height}></video>";
+        } else if ( count( $srcs ) > 1 ) {
+            $value = "<video controls=\"controls\"{$width}{$height}>";
+            foreach ( $srcs as $type => $url ) {
+                $value .= "<source src=\"$url\" type=\"video/$type\">";
+            }
+            $value .= '</video>';
+        } else {
+             $value = 'Invalid video sources';
+        }
     }
     return $value;
 }
