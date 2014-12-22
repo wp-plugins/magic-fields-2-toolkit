@@ -14,4 +14,38 @@ if ( !function_exists( '_mf2tk_get_optional_field' ) ) {
     }
 }
 
+if ( !function_exists( '_mf2tk_get_media_srcs' ) ) {
+    function _mf2tk_get_media_srcs( $field_name, $group_index, $field_index, $post_id, $class_name ) {
+        switch ( $class_name ) {
+        case "alt_audio_field":
+            $wp_get_media_extensions = 'wp_get_audio_extensions';
+            break;
+        case "alt_video_field":
+            $wp_get_media_extensions = 'wp_get_video_extensions';
+            break;
+        default:
+            return [];
+        }
+        # get main src
+        $src = get_data( $field_name, $group_index, $field_index, $post_id )['meta_value'];
+        # get optional fallback
+        $fallback = _mf2tk_get_optional_field( $field_name, $group_index, $field_index, $post_id,
+            $class_name::$suffix_fallback );
+        # get optional alternate fallback
+        $alternate_fallback = _mf2tk_get_optional_field( $field_name, $group_index, $field_index, $post_id,
+            $class_name::$suffix_alternate_fallback );
+        $srcs = [];
+        $extensions = call_user_func( $wp_get_media_extensions );
+        $regex = '/\.(' . implode( '|', $extensions ) . ')($|\?)/';
+        foreach( [ $src, $fallback, $alternate_fallback ] as $url ) {
+            if ( $url ) {
+                if ( preg_match( $regex, $url, $matches ) ) {
+                    $srcs[$matches[1]] = $url;
+                }
+            }
+        }
+        return $srcs;
+    }
+}
+
 ?>

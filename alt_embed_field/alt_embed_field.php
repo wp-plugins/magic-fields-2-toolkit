@@ -128,9 +128,6 @@ EOD;
         global $wpdb;
         $data = get_data( $field_name, $group_index, $field_index, $post_id );
         # get optional caption
-        if ( !function_exists( '_mf2tk_get_optional_field' ) ) {
-            include WP_PLUGIN_DIR . '/magic-fields-2-toolkit/magic-fields-2-get-optional-field.php';
-        }
         $caption = _mf2tk_get_optional_field( $field_name, $group_index, $field_index, $post_id, self::$suffix_caption );
         #error_log( '##### embed_field::get_embed():$caption=' . $caption );
         if ( !$max_width  ) { $max_width  = $data['options']['max_width'];  }

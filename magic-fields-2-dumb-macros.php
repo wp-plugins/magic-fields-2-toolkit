@@ -27,7 +27,7 @@ class Magic_Fields_2_Toolkit_Dumb_Macros {
     public function __construct() {
         add_action( 'init', function() {
             register_post_type( 'content_macro', array(
-                'label' => 'Content Macros',
+                'label' => 'Content Templates',
                 'description' => 'defines a single macro for HTML and WordPress shortcodes macro',
                 'public' => TRUE,
                 'exclude_from_search' => TRUE,
@@ -43,10 +43,42 @@ class Magic_Fields_2_Toolkit_Dumb_Macros {
             if ( get_post_type( $post ) == 'content_macro' ) { unset( $actions['view'] ); }
             return $actions;
         }, 10, 2 );
-        add_shortcode( 'show_macro', function( $atts, $macro ) {
+        $do_macro = function( $atts, $macro ) {
+            global $post;
             global $wpdb;
+            $mf_table_custom_groups = MF_TABLE_CUSTOM_GROUPS;
+            $mf_table_custom_fields = MF_TABLE_CUSTOM_FIELDS;
+            $mf_table_post_meta = MF_TABLE_POST_META;
             static $saved_inline_macros = array();
             #error_log( '##### shortcode:show_macro:$atts=' . print_r( $atts, TRUE ) );
+            if ( $group = array_key_exists( 'group_iterator', $atts )
+                or $field = array_key_exists( 'field_iterator', $atts ) ) {
+                #$indexes = $wpdb->get_col( "SELECT $column FROM " . MF_TABLE_POST_META
+                #    . " WHERE post_id = $post->ID AND field_name = '$field_name'" );
+                if ( $group ) {
+                    list( $iterator_name, $group_name ) = explode( ':', $atts['group_iterator'] );
+                    unset( $atts['group_iterator'] );
+                    $indexes = $wpdb->get_col( $wpdb->prepare( <<<EOD
+SELECT m.group_count FROM $mf_table_custom_groups g, $mf_table_custom_fields f, $mf_table_post_meta m
+    WHERE g.id = f.custom_group_id AND f.name = m.field_name AND g.name = %s AND m.post_id = $post->ID
+EOD
+                    , $group_name ) );
+                } else if ( $field ) {
+                    preg_match( '^/(\w+):(\w+)<(\d+)>$/', $atts['field_iterator'], $matches );
+                    unset( $atts['field_iterator'] );
+                    $indexes = $wpdb->get_col( $wpdb->prepare( <<<EOD
+SELECT m.field_count FROM $mf_table_post_meta m WHERE m.field_name = %s AND m.post_id = $post->ID AND m.group_count = %d
+EOD
+                        , $matches[2], $matches[3] ) );
+                    $iterator_name = $matches[1];
+                }
+                $result = '';
+                foreach ( $indexes as $index ) {
+                    $atts[$iterator_name] = $index;
+                    $result .= $do_macro( $atts, $macro );
+                }
+                return $result;
+            }
             if ( !$macro ) {
                 if ( !empty( $atts['macro'] ) ) {
                     if ( !empty( $saved_inline_macros[$atts['macro']] ) ) {
@@ -164,7 +196,8 @@ class Magic_Fields_2_Toolkit_Dumb_Macros {
             $macro = do_shortcode( $macro );
             #error_log( '##### shortcode:show_macro:$macro=' . print_r( $macro, TRUE ) );
             return $macro;
-        } );
+        };
+        add_shortcode( 'show_macro', $do_macro );
     }
 }   
 
