@@ -45,7 +45,7 @@ EOD
             , OBJECT );
         $output  = '<div class="mf2tk-field-input-optional">';
         $output .= '<h6>How to Use</h6><div class="mf2tk-field_value_pane" style="clear:both;">';
-        $output .= '<select id="mf2tk-alt_template-select" onchange="window.mf2tk_alt_template.select_onchange();">';
+        $output .= '<select id="mf2tk-alt_template-select" onchange="window.mf2tk_alt_template.select_onchange(this);">';
         foreach ( $results as $i => $result ) {
             $selected = !$i ? ' selected' : '';
             $output .= "<option value='$result->post_name'$selected>$result->post_title</option>";
@@ -70,16 +70,18 @@ EOD;
                 str_replace( "\r", '', htmlentities( $result->post_content, ENT_QUOTES, 'UTF-8' ) ) ) . "';";
         }, $results ) );
         $output .= <<<EOD
-window.mf2tk_alt_template.select_onchange=function(){
-    var template=window.mf2tk_alt_template.templates[document.querySelector("select#mf2tk-alt_template-select").value];
+window.mf2tk_alt_template.select_onchange=function(select){
+    var template=window.mf2tk_alt_template.templates[
+        select.parentNode.parentNode.parentNode.querySelector("select#mf2tk-alt_template-select").value];
     var matches=template.match(/\\$#(\w+)#/g);
     var parms={};
     if(matches){matches.forEach(function(v){parms[v]=true;});}
-    var macro='[show_macro macro="'+document.querySelector("select#mf2tk-alt_template-select").value+'"';
+    var macro='[show_macro macro="'+select.parentNode.parentNode.parentNode
+        .querySelector("select#mf2tk-alt_template-select").value+'"';
     for(parm in parms){macro+=" "+parm.slice(2,-1)+'=""';}
     macro+="]";
-    document.querySelector("input#mf2tk-alt_template-post_name").value=macro;
-    document.querySelector("textarea#mf2tk-alt_template-post_content").innerHTML=template;
+    select.parentNode.parentNode.parentNode.querySelector("input#mf2tk-alt_template-post_name").value=macro;
+    select.parentNode.parentNode.parentNode.querySelector("textarea#mf2tk-alt_template-post_content").innerHTML=template;
 };
 jQuery("select#mf2tk-alt_template-select").change();
 EOD;

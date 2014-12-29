@@ -3,6 +3,7 @@
 class alt_image_field extends mf_custom_fields {
 
     private static $suffix_caption = '_mf2tk_caption';
+    private static $suffix_link    = '_mf2tk_link';
     
     public function _update_description(){
         global $mf_domain;
@@ -74,7 +75,11 @@ class alt_image_field extends mf_custom_fields {
         $caption_input_name = sprintf( 'magicfields[%s][%d][%d]', $caption_field_name, $group_index, $field_index );
         $caption_input_value = ( !empty( $mf_post_values[$caption_field_name][$group_index][$field_index] ) )
             ? $mf_post_values[$caption_field_name][$group_index][$field_index] : '';
-        $caption_input_value = str_replace( '"', '&quot;', $caption_input_value );
+        #set up link field
+        $link_field_name = $field['name'] . self::$suffix_link;
+        $link_input_name = sprintf( 'magicfields[%s][%d][%d]', $link_field_name, $group_index, $field_index );
+        $link_input_value = ( !empty( $mf_post_values[$link_field_name][$group_index][$field_index] ) )
+            ? $mf_post_values[$link_field_name][$group_index][$field_index] : '';
         $index = $group_index === 1 && $field_index === 1 ? '' : "<$group_index,$field_index>";
         $output = <<<EOD
 <div class="text_field_mf">
@@ -100,6 +105,17 @@ class alt_image_field extends mf_custom_fields {
         <div class="mf2tk-field_value_pane" style="display:none;clear:both;">
             <input type="text" name="$caption_input_name" maxlength="256" placeholder="optional caption for image"
                 value="$caption_input_value">
+        </div>
+    </div>
+    <!-- optional link field -->
+    <div class="mf2tk-field-input-optional">
+        <button class="mf2tk-field_value_pane_button">Open</button>
+        <h6>Optional Link for Image</h6>
+        <div class="mf2tk-field_value_pane" style="display:none;clear:both;">
+            <input type="url" name="$link_input_name" maxlength="2048" placeholder="optional link for image"
+                value="$link_input_value">
+            <button class="mf2tk-test-load-button" style="float:right;" onclick="event.preventDefault();
+                window.open(this.parentNode.querySelector('input[type=\'url\']').value,'_blank');">Test Load</button>
         </div>
     </div>
     <!-- usage instructions -->    
@@ -139,11 +155,12 @@ EOD;
         $height = !empty( $atts['height'] ) ? $atts['height'] : $data['options']['max_height'];
         # get optional caption
         $caption = _mf2tk_get_optional_field( $field_name, $group_index, $field_index, $post_id, self::$suffix_caption );
+        $link    = _mf2tk_get_optional_field( $field_name, $group_index, $field_index, $post_id, self::$suffix_link    );
         $attrWidth  = $width  ? " width=\"$width\""   : '';
         $attrHeight = $height ? " height=\"$height\"" : '';
         $html = <<<EOD
             <div style="display:inline-block;width:{$width}px;padding:0px;">
-                <img src="$data[meta_value]"{$attrWidth}{$attrHeight}>
+                <a href="$link" target="_blank"><img src="$data[meta_value]"{$attrWidth}{$attrHeight}></a>
             </div>
 EOD;
         #error_log( '##### alt_image_field::get_image():$html=' . $html );

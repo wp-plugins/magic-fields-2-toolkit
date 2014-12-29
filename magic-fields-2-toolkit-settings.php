@@ -2,8 +2,8 @@
 
 class Magic_Fields_2_Toolkit_Settings {
     public static $fields = [
-        'alt_textbox', 'alt_related_type', 'alt_dropdown', 'alt_numeric', 'alt_embed', 'alt_video', 'alt_audio', 'alt_image',
-        'alt_table', 'alt_template'
+        'alt_textbox', 'alt_related_type', 'alt_dropdown', 'alt_numeric', 'alt_url', 'alt_embed', 'alt_video', 'alt_audio',
+        'alt_image', 'alt_table', 'alt_template'
     ];
     private static function sync_field_and_option( $field, $options ) {
         if ( array_key_exists( $field . '_field', $options ) ) {
@@ -61,6 +61,7 @@ class Magic_Fields_2_Toolkit_Settings {
     }
     public function __construct() {
         add_action( 'admin_enqueue_scripts', function( ) {
+            wp_enqueue_style( 'admin', plugins_url( 'admin.css', __FILE__ ) );
             wp_enqueue_style( 'dashicons' );
         } );
         add_action( 'admin_init', function() {
@@ -88,6 +89,7 @@ class Magic_Fields_2_Toolkit_Settings {
                 ['alt_template_field', 'Alt Template Field', 'alt_template'],
                 ['alt_table_field', 'Alt Table Field', 'alt_table'],
                 ['alt_numeric_field', 'Alt Numeric Field', 'alt_numeric'],
+                ['alt_url_field', 'Alt URL Field', 'alt_url'],
                 ['alt_related_type_field', 'Alt Related Type Field', 'alt_related'],
                 ['alt_embed_field', 'Alt Embed Field', 'embed'],
                 ['alt_video_field', 'Alt Video Field', 'video'],

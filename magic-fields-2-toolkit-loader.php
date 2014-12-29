@@ -4,7 +4,7 @@
 Plugin Name: Magic Fields 2 Toolkit
 Plugin URI:  http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4-2/
 Description: custom post copier, custom fields shortcodes, ...
-Version:     0.5.1
+Version:     0.5.2
 Author:      Magenta Cuda (PHP), Black Charger (JavaScript)
 Author URI:  http://magentacuda.wordpress.com
 License:     GPL2
@@ -42,6 +42,23 @@ if ( !( $major > $tested_major || ( $major == $tested_major && $minor >= $tested
 EOD;
     } );
     return;
+}
+
+register_activation_hook( __FILE__, function( ) {
+    set_transient( 'magic_fields_2_tolkit_activated', 'magic_fields_2_tolkit_activated', 10 );
+} );
+
+if ( is_admin( ) && get_transient( 'magic_fields_2_tolkit_activated' ) ) {
+    add_action( 'admin_notices', function( ) {
+?>
+<div style="clear:both;border:2px solid red;padding:5px 10px;margin:10px;">
+After installing Magic Fields 2 Toolkit you should visit its settings page -
+<a href="<?php echo admin_url( 'options-general.php?page=magic-fields-2-toolkit-page' ); ?>">
+Settings -> Magic Fields 2 Toolkit</a>.
+</div>
+<?php
+        delete_transient( 'magic_fields_2_tolkit_activated' );
+    } );
 }
 
 # ok to start loading PHP 5.4 code
