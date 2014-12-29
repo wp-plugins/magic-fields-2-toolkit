@@ -31,6 +31,7 @@ and activated.</div>
         } );
         add_action( 'admin_enqueue_scripts', function( $hook ) {
             global $wp_scripts;
+            if ( $hook !== 'post.php' && $hook !== 'post-new.php' ) { return; }
             wp_enqueue_style( 'admin', plugins_url( 'admin.css', __FILE__ ) );
             wp_enqueue_script( 'mf2tk_alt_media_admin', plugins_url( 'magic-fields-2-toolkit/js/mf2tk_alt_media_admin.js' ),
                 array( 'jquery' ) );
@@ -407,6 +408,32 @@ EOD
                 alert(r);
             });
         });
+        var a=document.createElement("a");
+        a.className="button";
+        a.href="#";
+        a.textContent="Insert Template";
+        jQuery("a#insert-media-button").after(a);
+        jQuery(a).click(function(){
+            var windowWidth=jQuery(window).width();
+            var windowHeight=jQuery(window).height();
+            var width=windowWidth>800?800:Math.floor(windowWidth*9/10);
+            var height=Math.floor(windowHeight*9/10);
+            var div=jQuery("div#mf2tk-alt-template");
+            var style=div[0].style;
+            style.position="fixed";
+            style.width=width+"px";
+            style.height=height+"px";
+            style.overflow="auto";
+            style.left=Math.floor((windowWidth-width)/2)+"px";
+            style.top=Math.floor((windowHeight-height)/2)+"px";
+            style.backgroundColor="lightgray";
+            style.border="3px solid black";
+            style.zIndex=100000;
+            style.display="block";
+            div.find("button#button-mf2tk-alt-template-close").click(function(){
+                this.parentNode.style.display="none";
+            });
+        });
     }());
 </script>
 <?php
@@ -461,4 +488,5 @@ EOD
         } );
     }
 }
+
 new Magic_Fields_2_Toolkit_Init();

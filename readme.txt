@@ -4,13 +4,15 @@ Donate link:
 Tags: shortcodes, templates, custom fields, post copier
 Requires at least: 3.6
 Tested up to: 4.1
-Stable tag: 0.5.1
+Stable tag: 0.5.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 A toolkit for the Magic Fields 2 plugin for CMS web design by non programmers.
 
 == Description ==
-The main objective of this plugin is to transform the [Magic Fields 2](https://wordpress.org/plugins/magic-fields-2/) plugin into something that can be used by a non programmer to CMS do web design.
+The main objective of this toolkit is to transform the [Magic Fields 2](https://wordpress.org/plugins/magic-fields-2/) plugin into something that can be used by a non programmer to do CMS web design.
+With this toolkit you can design your page content using only HTML, CSS and the [toolkit's shortcodes](http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4-2/#shortcode).
+Using the [toolkit's content templates](http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4-2/#macros) you can define a reusable template for page contents which can be used to create multiple pages using the page's custom fields to instantiate the template.
 The current features are:
 
 = Support for coding HTML templates without the need for PHP programming =
@@ -21,6 +23,7 @@ The current features are:
 * [field for WordPress's video and audio shortcodes](http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4-2/#alt_media).
 * [alternative related type field](http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4-2/#alt_related) which uses multiple selection checkboxes instead of a single selection dropdown.
 * [numeric field](http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4-2/#alt_numeric) with support for measurement units suffix and/or currency symbol prefix.
+* [URL field](http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4-2/#alt_url) contains the data for a HTML <a> element.
 * [pseudo field for generating a table of Magic Field names and values](http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4-2/#alt_table).
 * field for WordPress's embed shortcode.
 * alternative textbox field that allows you to select previously entered data.
@@ -52,7 +55,7 @@ Please visit the [Toolkit's online documentation](http://magicfields17.wordpress
 
 = Does this plugin require Magic Fields 2 to be installed? =
 
-This plugin is designed to work with Magic Fields 2's custom post types and custom fields which have a non-standard implementation where generic utilities would probably not work.
+Yes, this plugin is designed to work with Magic Fields 2 custom fields which have a non-standard implementation.
 
 = I have installed the plugin without errors but the plugin does nothing. =
 
@@ -65,6 +68,13 @@ Version 0.4.6 has a new default content macro for sortable tables. However, the 
 == Screenshots ==
 
 == Changelog ==
+
+= 0.5.2 =
+* added a URL field
+* alt_image now has onclick URL property
+* added how to use boxes for taxonomies
+* inserting content templates can now be done directly from the post content editor - alt_template pseudo field is not necessary
+* alt_table field now saves its settings
 
 = 0.5.1 =
 * save post content as a content template(content macro)
@@ -251,3 +261,10 @@ added fields for embed, audio and video
 = 0.5.1 =
 * save post content as a content template(content macro)
 * psuedo field to generate the shortcode to use a content template(content macro)
+
+= 0.5.2 =
+* added a URL field
+* alt_image now has onclick URL property
+* added how to use boxes for taxonomies
+* inserting content templates can now be done directly from the post content editor - alt_template pseudo field is not necessary
+* alt_table field now saves its settings

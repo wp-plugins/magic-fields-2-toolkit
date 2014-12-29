@@ -117,12 +117,16 @@ div.mf2tk-field_value_pane{
 }
 
 div.mf2tk-field-input-main div.mf2tk-field_value_pane input[type="text"],
-div.mf2tk-field-input-optional div.mf2tk-field_value_pane input[type="text"]{
+div.mf2tk-field-input-main div.mf2tk-field_value_pane input[type="url"],
+div.mf2tk-field-input-optional div.mf2tk-field_value_pane input[type="text"],
+div.mf2tk-field-input-optional div.mf2tk-field_value_pane input[type="url"]{
     width:97%;
 }
 
 div.mf2tk-field-input-main div.mf2tk-field_value_pane button.mf2tk-media-library-button,
-div.mf2tk-field-input-optional div.mf2tk-field_value_pane button.mf2tk-media-library-button{
+div.mf2tk-field-input-optional div.mf2tk-field_value_pane button.mf2tk-media-library-button,
+div.mf2tk-field-input-main div.mf2tk-field_value_pane button.mf2tk-test-load-button,
+div.mf2tk-field-input-optional div.mf2tk-field_value_pane button.mf2tk-test-load-button{
     font-size:10px;
     font-weight:bold;
     padding:0px 5px;
@@ -136,7 +140,9 @@ div.mf2tk-field-input-main div.mf2tk-field_value_pane button.mf2tk-media-library
 div.mf2tk-field-input-optional div.mf2tk-field_value_pane button.mf2tk-media-library-button:hover,
 div.mf2tk-field-input-main div.mf2tk-field_value_pane button.mf2tk-alt_media_admin-refresh:hover,
 div.mf2tk-field-input-optional div.mf2tk-field_value_pane button.mf2tk-alt_media_admin-refresh:hover,
-div.mf2tk-field-input-main div.mf2tk-field_value_pane button.mf2tk-alt_embed_admin-refresh:hover{
+div.mf2tk-field-input-main div.mf2tk-field_value_pane button.mf2tk-alt_embed_admin-refresh:hover,
+div.mf2tk-field-input-main div.mf2tk-field_value_pane button.mf2tk-test-load-button:hover,
+div.mf2tk-field-input-optional div.mf2tk-field_value_pane button.mf2tk-test-load-button:hover{
     background-color:white;
 }
 

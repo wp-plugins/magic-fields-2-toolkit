@@ -504,7 +504,7 @@ function url_to_link( $value, $field, $type ) {
     return $value;
 }
 
-function url_to_link2( $value, $field, $type ) {
+function url_to_link2( $value, $field, $type, $classes, $group_index, $field_index, $post_id ) {
     global $wpdb;
     if ( ( $type === 'related_type' || $type === 'alt_related_type' ) && is_numeric( $value ) ) {
         $value = '<a href="' . get_permalink( $value ) . '">' . get_the_title ( $value ) . '</a>';
@@ -521,8 +521,10 @@ function url_to_link2( $value, $field, $type ) {
             $value = $author[0]->display_name;
         }
     } else if ( ( $type === 'alt_embed' || $type === 'alt_video' || $type === 'alt_audio' || $type === 'alt_image' )
-         && is_string( $value ) && strpos( $value, 'http' ) === 0 ) {
-       $value = '<a href="' . $value . '">' . substr( $value, strrpos( $value, '/' ) + 1 ) . '</a>';
+        && is_string( $value ) && strpos( $value, 'http' ) === 0 ) {
+        $value = '<a href="' . $value . '">' . substr( $value, strrpos( $value, '/' ) + 1 ) . '</a>';
+    } else if ( $type === 'alt_url' ) {
+        $value = alt_url_field::get_url( $field, $group_index, $field_index, $post_id );
     }
     return $value;
 }

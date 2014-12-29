@@ -43,6 +43,24 @@ class Magic_Fields_2_Toolkit_Dumb_Macros {
             if ( get_post_type( $post ) == 'content_macro' ) { unset( $actions['view'] ); }
             return $actions;
         }, 10, 2 );
+        $alt_template = function( ) {
+?>
+<!-- start alt_template -->
+<div id="mf2tk-alt-template" style="display:none;">
+    <h3 style="float:left;">Get Content Template</h3>
+    <button id="button-mf2tk-alt-template-close" style="float:right;">X</button>
+    <div style="clear:both;">
+<?php
+            $alt_template = new alt_template_field();
+            echo $alt_template->display_field( null, null, null );
+?>
+    </div>
+</div>
+<!-- end alt_template -->
+<?php
+        };
+        add_action( 'admin_footer-post.php', $alt_template );
+        add_action( 'admin_footer-post-new.php', $alt_template );
         $do_macro = function( $atts, $macro ) {
             global $post;
             global $wpdb;

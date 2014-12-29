@@ -60,13 +60,10 @@ jQuery(document).ready(function(){
             <button class="mf2tk-field_value_pane_button">Open</button>\
             <h6>How to Use with the Toolkit\'s Shortcode</h6>\
             <div class="mf2tk-field_value_pane" style="display:none;clear:both;">\
-                <ul>\
-                    <li style="list-style:square inside">Use with the Toolkit\'s shortcode:<br>\
-                        <input type="text" class="mf2tk-how-to-use" size="50" readonly\
-                            value=\'[show_custom_field field="$#fieldName#$#index#"$#filter#$#separator#$#before#$#after#$#field_before#$#field_after#]\'>\
-                        - <button class="mf2tk-how-to-use">select,</button> copy and paste this into editor above in\
-                            <strong>Text</strong> mode\
-                </ul>\
+                <input type="text" class="mf2tk-how-to-use" size="50" readonly\
+                    value=\'[show_custom_field field="$#fieldName#$#index#"$#filter#$#separator#$#before#$#after#$#field_before#$#field_after#]\'><br>\
+                - <button class="mf2tk-how-to-use">select,</button> copy and paste this into editor above in\
+                    <strong>Text</strong> mode\
             </div>\
         </div>';
         jQuery("div.text_field_mf").each(function(){
@@ -353,6 +350,29 @@ jQuery(document).ready(function(){
             });
             jQuery(this).append(html);
         });
+        jQuery("div#postbox-container-1").find("div.postbox[id^='tagsdiv-']").each(function(){
+            var args={
+                fieldName:this.id.substr(8),
+                separator:' separator=", "'
+            };
+            var html=template.replace(/\$#(\w+)#/g,function(match,match1){
+                if(args.hasOwnProperty(match1)){return args[match1];}
+                return '';
+            });
+            jQuery(this).append(html);            
+        });
+        jQuery("div#postbox-container-1").find("div.postbox[id$='div']").each(function(){
+            if(this.id==="submitdiv"){return;}
+            var args={
+                fieldName:this.id.substr(0,this.id.length-3),
+                separator:' separator=", "'
+            };
+            var html=template.replace(/\$#(\w+)#/g,function(match,match1){
+                if(args.hasOwnProperty(match1)){return args[match1];}
+                return '';
+            });                
+            jQuery(this).append(html);            
+        });
     }
     // Show/Hide panes
     jQuery("button.mf2tk-field_value_pane_button").click(function(event){
@@ -370,6 +390,7 @@ jQuery(document).ready(function(){
         return false;
     });
     jQuery("button.mf2tk-refresh-table-shortcode").click(function(){
+        var inputId="input"+this.id.substr(6);
         var fields="";
         var filters="";
         jQuery(this).parents("div.mf2tk-field_value_pane").each(function(){
@@ -385,7 +406,7 @@ jQuery(document).ready(function(){
                 if(input.prop("checked")){
                     var name=input.prop("value");
                     if(name==="tk_value_as_image__"||name==="tk_value_as_video__"){
-                        if(jQuery(this.parentNode.parentNode).find("input[type='checkbox'][value='width']").prop("checked")){
+                        if(jQuery(this.parentNode.parentNode).find("input[type='radio'][value='width']").prop("checked")){
                             name+="w";
                         }else{
                             name+="h";
@@ -406,6 +427,7 @@ jQuery(document).ready(function(){
             return 'filter="'+filters+'"';
         });
         textarea[0].textContent=text;
+        jQuery("input#"+inputId).val("field="+fields+"|filter="+filters);
         return false;
     });
     jQuery("div.mf2tk-dragable-field").draggable({cursor:"crosshair",revert:true});
