@@ -4,7 +4,7 @@ Donate link:
 Tags: shortcodes, templates, custom fields, post copier
 Requires at least: 3.6
 Tested up to: 4.1
-Stable tag: 0.5.2
+Stable tag: 0.5.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 A toolkit for the Magic Fields 2 plugin for CMS web design by non programmers.
@@ -68,6 +68,9 @@ Version 0.4.6 has a new default content macro for sortable tables. However, the 
 == Screenshots ==
 
 == Changelog ==
+
+= 0.5.3 =
+* added support for post type specific search result templates
 
 = 0.5.2 =
 * added a URL field
@@ -268,3 +271,7 @@ added fields for embed, audio and video
 * added how to use boxes for taxonomies
 * inserting content templates can now be done directly from the post content editor - alt_template pseudo field is not necessary
 * alt_table field now saves its settings
+
+= 0.5.3 =
+* added support for post type specific search result templates
+

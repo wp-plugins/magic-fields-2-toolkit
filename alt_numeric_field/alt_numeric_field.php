@@ -151,7 +151,7 @@ EOT;
         $data = get_data( $field_name, $group_index, $field_index, $post_id );
         $value   = $data['meta_value'];
         $options = $data['options'];
-        $unit    = $options['unit'];
+        $unit    = array_key_exists( 'unit', $options ) ? $options['unit'] : '';
         if ( strpos( $unit, ':' ) ) {
             $unit = explode( ':', $unit ); 
             if ( $value == 1 ) { $unit = $unit[0]; }
