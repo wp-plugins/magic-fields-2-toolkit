@@ -401,9 +401,9 @@ EOD
         a.textContent="Save as Template";
         jQuery("a#insert-media-button").after(a);
         jQuery(a).click(function(){
-            var slug=jQuery("input#post_name").val();
-            var title=jQuery("input#title").val();
-            var text=jQuery("textarea#content").val();
+            var slug=jQuery("div#slugdiv input#post_name").val();
+            var title=jQuery("div#post-body-content div#titlediv input#title").val();
+            var text=jQuery("div#post-body-content div#wp-content-editor-container textarea#content").val();
             jQuery.post(ajaxurl,{action:'mf2tk_update_content_macro',slug:slug,title:title,text:text},function(r){
                 alert(r);
             });

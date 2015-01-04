@@ -40,7 +40,8 @@ class alt_template_field extends mf_custom_fields {
         $post_type = $post->post_type;
         $MF_TABLE_CUSTOM_FIELDS = MF_TABLE_CUSTOM_FIELDS;
         $results = $wpdb->get_results( <<<EOD
-SELECT post_name, post_title, post_content FROM $wpdb->posts WHERE post_type = 'content_macro' AND post_status = 'publish'
+SELECT post_name, post_title, post_content FROM $wpdb->posts
+    WHERE post_type = 'content_macro' AND post_status = 'publish' AND post_name NOT LIKE 'search-result-template-for-%';
 EOD
             , OBJECT );
         $output  = '<div class="mf2tk-field-input-optional">';

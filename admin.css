@@ -223,3 +223,34 @@ div.mf2tk-dragable-field-after{
 div.mf2tk-dragable-field-after.mf2tk-hover{
     background-color:black;
 }
+
+h3#mf2tk-edit-search-result-template-h3, button#mf2tk-edit-search-result-template-close-button{
+    margin-left:10px;
+    margin-right:10px;
+}
+
+textarea#mf2tk-search-result-template-textarea{
+    width:96%;
+    margin-left:auto;
+    margin-right:auto;
+}
+
+button#mf2tk-save-search-result-template-button,button#mf2tk-search-result-template-refresh-button{
+    background-color:#f0f0f0;
+    width:18em;
+    float:right;
+    border:2px solid black;
+    border-radius:7px;
+    text-align:center;
+    margin:0px;
+}
+
+button#mf2tk-save-search-result-template-button:hover,button#mf2tk-search-result-template-refresh-button:hover{
+    background-color:white;
+}
+
+
+button#mf2tk-save-search-result-template-button{
+    margin-top:5px;
+}
+
