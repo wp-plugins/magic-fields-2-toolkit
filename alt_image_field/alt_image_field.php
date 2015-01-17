@@ -55,6 +55,18 @@ class alt_image_field extends mf_custom_fields {
                     'value'       => '',
                     'div_class'   => '',
                     'class'       => ''
+                ),
+                'class_name'  => array(
+                    'type'        =>  'text',
+                    'id'          =>  'class_name',
+                    'label'       =>  __( 'Class Name', $mf_domain ),
+                    'name'        =>  'mf_field[option][class_name]',
+                    'default'     =>  '',
+                    'description' =>  'This is the class option of the WordPress caption shortcode' .
+                        ' and is set only if a caption is specified',
+                    'value'       =>  '',
+                    'div_class'   =>  '',
+                    'class'       =>  ''
                 )
             )
         );
@@ -150,7 +162,6 @@ EOD;
   
     static function get_image( $field_name, $group_index = 1, $field_index = 1, $post_id = NULL, $atts = array() ) {
         $data = get_data( $field_name, $group_index, $field_index, $post_id );
-        #error_log( '##### alt_image_field::get_image():$data=' . print_r( $data, true ) );
         $width  = !empty( $atts['width'] )  ? $atts['width']  : $data['options']['max_width'];
         $height = !empty( $atts['height'] ) ? $atts['height'] : $data['options']['max_height'];
         # get optional caption
@@ -163,12 +174,13 @@ EOD;
                 <a href="$link" target="_blank"><img src="$data[meta_value]"{$attrWidth}{$attrHeight}></a>
             </div>
 EOD;
-        #error_log( '##### alt_image_field::get_image():$html=' . $html );
         # attach optional caption
         if ( $caption ) {
             if ( !$width ) { $width = 160; }
+            $class_name = array_key_exists( 'class_name', $data['options'] ) ? $data['options']['class_name'] : null;
+            if ( !$class_name ) { $class_name = "mf2tk-{$data['type']}-{$field_name}"; }
             $html = img_caption_shortcode( array( 'width' => $width, 'align' => $data['options']['align'],
-                'caption' => $caption ), $html );
+                'class' => $class_name, 'caption' => $caption ), $html );
             $html = preg_replace_callback( '/<div\s.*?style=".*?(width:\s*\d+px)/', function( $matches ) use ( $width ) {
                 return str_replace( $matches[1], "width:{$width}px;max-width:100%", $matches[0] );  
             }, $html, 1 );

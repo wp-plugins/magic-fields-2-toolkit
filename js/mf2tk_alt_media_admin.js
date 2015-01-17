@@ -52,7 +52,7 @@ jQuery(document).ready(function(){
     });
 });
 
-jQuery(document).ready(function(){
+function mf2tkInsertHowToUse(root){
     if(typeof mf2tkDisableHowToUse === "undefined"||!mf2tkDisableHowToUse){
         var template=
        '<div style="clear:both;"></div>\
@@ -66,134 +66,134 @@ jQuery(document).ready(function(){
                     <strong>Text</strong> mode\
             </div>\
         </div>';
-        jQuery("div.text_field_mf").each(function(){
-            var $this=jQuery(this);
-            if($this.parents("div.mf-field").find("div.mf2tk-field-input-optional").length){return;}
-            var name=$this.find("input[type='text']")[0].name;
-            var matches=name.match(/magicfields\[(\w+)\]\[(\d+)\]\[(\d+)\]/);
-            var groupIndex=parseInt(matches[2]);
-            var fieldIndex=parseInt(matches[3]);
-            var args={
-                fieldName:matches[1],
-                index:groupIndex===1&&fieldIndex===1?'':"<"+groupIndex+","+fieldIndex+">",
-                filter:'',
-                separator:'',
-                before:'',
-                after:''
-            };
-            var html=template.replace(/\$#(\w+)#/g,function(match,match1){
-                if(args.hasOwnProperty(match1)){return args[match1];}
-                return '';
+        jQuery("div.mf-field-ui",root).each(function(){
+            jQuery(this).find("div.text_field_mf").each(function(){
+                var $this=jQuery(this);
+                if($this.parents("div.mf-field-ui").find("div.mf2tk-field-input-optional").length){return;}
+                var name=$this.find("input[type='text']")[0].name;
+                var matches=name.match(/magicfields\[(\w+)\]\[(\d+)\]\[(\d+)\]/);
+                var groupIndex=parseInt(matches[2]);
+                var fieldIndex=parseInt(matches[3]);
+                var args={
+                    fieldName:matches[1],
+                    index:groupIndex===1&&fieldIndex===1?'':"<"+groupIndex+","+fieldIndex+">",
+                    filter:'',
+                    separator:'',
+                    before:'',
+                    after:''
+                };
+                var html=template.replace(/\$#(\w+)#/g,function(match,match1){
+                    if(args.hasOwnProperty(match1)){return args[match1];}
+                    return '';
+                });
+                jQuery(this.parentNode).append(html);
             });
-            jQuery(this.parentNode).append(html);
-        });
-        jQuery("div.image_wrap").each(function(){
-            var $this=jQuery(this);
-            if($this.parents("div.mf-field").find("div.mf2tk-field-input-optional").length){return;}
-            var name=$this.parents("div.image_layout").find("div.image_input div.mf_custom_field input[type='hidden']")[0].name;
-            var matches=name.match(/^magicfields\[(\w+)\]\[(\d+)\]\[(\d+)\]$/);
-            var groupIndex=parseInt(matches[2]);
-            var fieldIndex=parseInt(matches[3]);
-            var args={
-                fieldName:matches[1],
-                index:groupIndex===1&&fieldIndex===1?"":"<"+groupIndex+","+fieldIndex+">",
-                before:' before="<img src=&#39;"',
-                after:' after="&#39;>"'
-            };
-            var html=template.replace(/\$#(\w+)#/g,function(match,match1){
-                if(args.hasOwnProperty(match1)){return args[match1];}
-                return '';
+            jQuery(this).find("div.image_wrap").each(function(){
+                var $this=jQuery(this);
+                if($this.parents("div.mf-field-ui").find("div.mf2tk-field-input-optional").length){return;}
+                var name=$this.parents("div.image_layout").find("div.image_input div.mf_custom_field input[type='hidden']")[0].name;
+                var matches=name.match(/^magicfields\[(\w+)\]\[(\d+)\]\[(\d+)\]$/);
+                var groupIndex=parseInt(matches[2]);
+                var fieldIndex=parseInt(matches[3]);
+                var args={
+                    fieldName:matches[1],
+                    index:groupIndex===1&&fieldIndex===1?"":"<"+groupIndex+","+fieldIndex+">",
+                    before:' before="<img src=&#39;"',
+                    after:' after="&#39;>"'
+                };
+                var html=template.replace(/\$#(\w+)#/g,function(match,match1){
+                    if(args.hasOwnProperty(match1)){return args[match1];}
+                    return '';
+                });
+                $this.parents("div.image_layout").append(html);
             });
-            $this.parents("div.image_layout").append(html);
-        });
-        jQuery("div.file_input").each(function(){
-            var $this=jQuery(this);
-            if($this.parents("div.mf-field").find("div.mf2tk-field-input-optional").length){return;}
-            var name=$this.find("input[type='hidden']")[0].name;
-            var matches=name.match(/^magicfields\[(\w+)\]\[(\d+)\]\[(\d+)\]$/);
-            if(!matches){return;}
-            var groupIndex=parseInt(matches[2]);
-            var fieldIndex=parseInt(matches[3]);
-            var args={
-                fieldName:matches[1],
-                index:groupIndex===1&&fieldIndex===1?"":"<"+groupIndex+","+fieldIndex+">",
-                filter:' filter="url_to_link2"'
-            };
-            var html=template.replace(/\$#(\w+)#/g,function(match,match1){
-                if(args.hasOwnProperty(match1)){return args[match1];}
-                return '';
+            jQuery(this).find("div.file_input").each(function(){
+                var $this=jQuery(this);
+                if($this.parents("div.mf-field-ui").find("div.mf2tk-field-input-optional").length){return;}
+                var name=$this.find("input[type='hidden']")[0].name;
+                var matches=name.match(/^magicfields\[(\w+)\]\[(\d+)\]\[(\d+)\]$/);
+                if(!matches){return;}
+                var groupIndex=parseInt(matches[2]);
+                var fieldIndex=parseInt(matches[3]);
+                var args={
+                    fieldName:matches[1],
+                    index:groupIndex===1&&fieldIndex===1?"":"<"+groupIndex+","+fieldIndex+">",
+                    filter:' filter="url_to_link2"'
+                };
+                var html=template.replace(/\$#(\w+)#/g,function(match,match1){
+                    if(args.hasOwnProperty(match1)){return args[match1];}
+                    return '';
+                });
+                jQuery(this.parentNode).append(html);
             });
-            jQuery(this.parentNode).append(html);
-        });
-        jQuery("div.mf-checkbox-list-box").each(function(){
-            var $this=jQuery(this);
-            if($this.parents("div.mf-field").find("div.mf2tk-field-input-optional").length){return;}
-            var name=$this.find("input.checkbox_list_mf[type='checkbox']")[0].name;
-            var matches=name.match(/magicfields\[(\w+)\]\[(\d+)\]\[(\d+)\]/);
-            var groupIndex=parseInt(matches[2]);
-            var fieldIndex=parseInt(matches[3]);
-            var args={
-                fieldName:matches[1],
-                index:groupIndex===1&&fieldIndex===1?'':"<"+groupIndex+","+fieldIndex+">",
-                filter:'',
-                separator:' separator=", "',
-                before:'',
-                after:''
-            };
-            var html=template.replace(/\$#(\w+)#/g,function(match,match1){
-                if(args.hasOwnProperty(match1)){return args[match1];}
-                return '';
+            jQuery(this).find("div.mf-checkbox-list-box").each(function(){
+                var $this=jQuery(this);
+                if($this.parents("div.mf-field-ui").find("div.mf2tk-field-input-optional").length){return;}
+                var name=$this.find("input.checkbox_list_mf[type='checkbox']")[0].name;
+                var matches=name.match(/magicfields\[(\w+)\]\[(\d+)\]\[(\d+)\]/);
+                var groupIndex=parseInt(matches[2]);
+                var fieldIndex=parseInt(matches[3]);
+                var args={
+                    fieldName:matches[1],
+                    index:groupIndex===1&&fieldIndex===1?'':"<"+groupIndex+","+fieldIndex+">",
+                    filter:'',
+                    separator:' separator=", "',
+                    before:'',
+                    after:''
+                };
+                var html=template.replace(/\$#(\w+)#/g,function(match,match1){
+                    if(args.hasOwnProperty(match1)){return args[match1];}
+                    return '';
+                });
+                jQuery(this.parentNode).append(html);
             });
-            jQuery(this.parentNode).append(html);
-        });
-        jQuery("div.mf-dropdown-box").each(function(){
-            var $this=jQuery(this);
-            if($this.parents("div.mf-field").find("div.mf2tk-field-input-optional").length){return;}
-            var select=$this.find("select.dropdown_mf");
-            var name=select[0].name;
-            var matches=name.match(/magicfields\[(\w+)\]\[(\d+)\]\[(\d+)\]\[\]/);
-            if(!matches){return;}
-            var groupIndex=parseInt(matches[2]);
-            var fieldIndex=parseInt(matches[3]);
-            var args={
-                fieldName:matches[1],
-                index:groupIndex===1&&fieldIndex===1?'':"<"+groupIndex+","+fieldIndex+">",
-                filter:'',
-                separator:select.attr('multiple')?' separator=", "':'',
-                before:'',
-                after:''
-            };
-            var html=template.replace(/\$#(\w+)#/g,function(match,match1){
-                if(args.hasOwnProperty(match1)){return args[match1];}
-                return '';
+            jQuery(this).find("div.mf-dropdown-box").each(function(){
+                var $this=jQuery(this);
+                if($this.parents("div.mf-field-ui").find("div.mf2tk-field-input-optional").length){return;}
+                var select=$this.find("select.dropdown_mf");
+                var name=select[0].name;
+                var matches=name.match(/magicfields\[(\w+)\]\[(\d+)\]\[(\d+)\]\[\]/);
+                if(!matches){return;}
+                var groupIndex=parseInt(matches[2]);
+                var fieldIndex=parseInt(matches[3]);
+                var args={
+                    fieldName:matches[1],
+                    index:groupIndex===1&&fieldIndex===1?'':"<"+groupIndex+","+fieldIndex+">",
+                    filter:'',
+                    separator:select.attr('multiple')?' separator=", "':'',
+                    before:'',
+                    after:''
+                };
+                var html=template.replace(/\$#(\w+)#/g,function(match,match1){
+                    if(args.hasOwnProperty(match1)){return args[match1];}
+                    return '';
+                });
+                jQuery(this.parentNode).append(html);
             });
-            jQuery(this.parentNode).append(html);
-        });
-        jQuery("div.mf-dropdown-box").each(function(){
-            var $this=jQuery(this);
-            if($this.parents("div.mf-field").find("div.mf2tk-field-input-optional").length){return;}
-            var select=$this.find("select.dropdown_mf");
-            var name=select[0].name;
-            var matches=name.match(/^magicfields\[(\w+)\]\[(\d+)\]\[(\d+)\]$/);
-            if(!matches){return;}
-            var option=select.find("option[value!='']").first();
-            var groupIndex=parseInt(matches[2]);
-            var fieldIndex=parseInt(matches[3]);
-            var args={
-                fieldName:matches[1],
-                index:groupIndex===1&&fieldIndex===1?'':"<"+groupIndex+","+fieldIndex+">",
-                filter:jQuery.isNumeric(option.val())?' filter="url_to_link2"':''
-            };
-            var html=template.replace(/\$#(\w+)#/g,function(match,match1){
-                if(args.hasOwnProperty(match1)){return args[match1];}
-                return '';
+            jQuery(this).find("div.mf-dropdown-box").each(function(){
+                var $this=jQuery(this);
+                if($this.parents("div.mf-field-ui").find("div.mf2tk-field-input-optional").length){return;}
+                var select=$this.find("select.dropdown_mf");
+                var name=select[0].name;
+                var matches=name.match(/^magicfields\[(\w+)\]\[(\d+)\]\[(\d+)\]$/);
+                if(!matches){return;}
+                var option=select.find("option[value!='']").first();
+                var groupIndex=parseInt(matches[2]);
+                var fieldIndex=parseInt(matches[3]);
+                var args={
+                    fieldName:matches[1],
+                    index:groupIndex===1&&fieldIndex===1?'':"<"+groupIndex+","+fieldIndex+">",
+                    filter:jQuery.isNumeric(option.val())?' filter="url_to_link2"':''
+                };
+                var html=template.replace(/\$#(\w+)#/g,function(match,match1){
+                    if(args.hasOwnProperty(match1)){return args[match1];}
+                    return '';
+                });
+                jQuery(this.parentNode).append(html);
             });
-            jQuery(this.parentNode).append(html);
-        });
-        jQuery("div.mf-field").each(function(){
             jQuery(this).find("label.mf-radio-field").first().each(function(){
                 var $this=jQuery(this);
-                if($this.parents("div.mf-field").find("div.mf2tk-field-input-optional").length){return;}
+                if($this.parents("div.mf-field-ui").find("div.mf2tk-field-input-optional").length){return;}
                 var name=$this.find("input[type='radio']")[0].name;
                 var matches=name.match(/^magicfields\[(\w+)\]\[(\d+)\]\[(\d+)\]$/);
                 if(!matches){return;}
@@ -213,143 +213,162 @@ jQuery(document).ready(function(){
                 });
                 jQuery(this.parentNode.parentNode).append(html);
             });
-        });
-        jQuery("input.datepicker_mf[type='text']").parent().each(function(){
-            var $this=jQuery(this);
-            if($this.parents("div.mf-field").find("div.mf2tk-field-input-optional").length){return;}
-            var name=$this.find("input[type='hidden']")[0].name;
-            var matches=name.match(/^magicfields\[(\w+)\]\[(\d+)\]\[(\d+)\]$/);
-            if(!matches){return;}
-            var groupIndex=parseInt(matches[2]);
-            var fieldIndex=parseInt(matches[3]);
-            var args={
-                fieldName:matches[1],
-                index:groupIndex===1&&fieldIndex===1?'':"<"+groupIndex+","+fieldIndex+">",
-                filter:'',
-                separator:'',
-                before:'',
-                after:''
-            };
-            var html=template.replace(/\$#(\w+)#/g,function(match,match1){
-                if(args.hasOwnProperty(match1)){return args[match1];}
-                return '';
+            jQuery(this).find("input.datepicker_mf[type='text']").parent().each(function(){
+                var $this=jQuery(this);
+                if($this.parents("div.mf-field-ui").find("div.mf2tk-field-input-optional").length){return;}
+                var name=$this.find("input[type='hidden']")[0].name;
+                var matches=name.match(/^magicfields\[(\w+)\]\[(\d+)\]\[(\d+)\]$/);
+                if(!matches){return;}
+                var groupIndex=parseInt(matches[2]);
+                var fieldIndex=parseInt(matches[3]);
+                var args={
+                    fieldName:matches[1],
+                    index:groupIndex===1&&fieldIndex===1?'':"<"+groupIndex+","+fieldIndex+">",
+                    filter:'',
+                    separator:'',
+                    before:'',
+                    after:''
+                };
+                var html=template.replace(/\$#(\w+)#/g,function(match,match1){
+                    if(args.hasOwnProperty(match1)){return args[match1];}
+                    return '';
+                });
+                jQuery(this.parentNode).append(html);
             });
-            jQuery(this.parentNode).append(html);
-        });
-        jQuery("div.multiline_custom_field").each(function(){
-            var $this=jQuery(this);
-            if($this.parents("div.mf-field").find("div.mf2tk-field-input-optional").length){return;}
-            var name=$this.find("textarea.mf_editor")[0].name;
-            var matches=name.match(/^magicfields\[(\w+)\]\[(\d+)\]\[(\d+)\]$/);
-            if(!matches){return;}
-            var groupIndex=parseInt(matches[2]);
-            var fieldIndex=parseInt(matches[3]);
-            var args={
-                fieldName:matches[1],
-                index:groupIndex===1&&fieldIndex===1?'':"<"+groupIndex+","+fieldIndex+">",
-                before:' before="<div style=&#39;border:2px solid black;padding:5px;&#39;>"',
-                after:' after="</div>"'
-            };
-            var html=template.replace(/\$#(\w+)#/g,function(match,match1){
-                if(args.hasOwnProperty(match1)){return args[match1];}
-                return '';
+            jQuery(this).find("div.multiline_custom_field").each(function(){
+                var $this=jQuery(this);
+                if($this.parents("div.mf-field-ui").find("div.mf2tk-field-input-optional").length){return;}
+                var name=$this.find("textarea.mf_editor")[0].name;
+                var matches=name.match(/^magicfields\[(\w+)\]\[(\d+)\]\[(\d+)\]$/);
+                if(!matches){return;}
+                var groupIndex=parseInt(matches[2]);
+                var fieldIndex=parseInt(matches[3]);
+                var args={
+                    fieldName:matches[1],
+                    index:groupIndex===1&&fieldIndex===1?'':"<"+groupIndex+","+fieldIndex+">",
+                    before:' before="<div style=&#39;border:2px solid black;padding:5px;&#39;>"',
+                    after:' after="</div>"'
+                };
+                var html=template.replace(/\$#(\w+)#/g,function(match,match1){
+                    if(args.hasOwnProperty(match1)){return args[match1];}
+                    return '';
+                });
+                jQuery(this.parentNode).append(html);
             });
-            jQuery(this.parentNode).append(html);
-        });
-        jQuery("div.markItUp").each(function(){
-            var $this=jQuery(this);
-            if($this.parents("div.mf-field").find("div.mf2tk-field-input-optional").length){return;}
-            var name=$this.find("textarea.markdowntextboxinterface")[0].name;
-            var matches=name.match(/^magicfields\[(\w+)\]\[(\d+)\]\[(\d+)\]$/);
-            if(!matches){return;}
-            var groupIndex=parseInt(matches[2]);
-            var fieldIndex=parseInt(matches[3]);
-            var args={
-                fieldName:matches[1],
-                index:groupIndex===1&&fieldIndex===1?'':"<"+groupIndex+","+fieldIndex+">",
-                before:' before="<div style=&#39;border:2px solid black;padding:5px;&#39;>"',
-                after:' after="</div>"'
-            };
-            var html=template.replace(/\$#(\w+)#/g,function(match,match1){
-                if(args.hasOwnProperty(match1)){return args[match1];}
-                return '';
+            jQuery(this).find("div.markItUp").each(function(){
+                var $this=jQuery(this);
+                if($this.parents("div.mf-field-ui").find("div.mf2tk-field-input-optional").length){return;}
+                var name=$this.find("textarea.markdowntextboxinterface")[0].name;
+                var matches=name.match(/^magicfields\[(\w+)\]\[(\d+)\]\[(\d+)\]$/);
+                if(!matches){return;}
+                var groupIndex=parseInt(matches[2]);
+                var fieldIndex=parseInt(matches[3]);
+                var args={
+                    fieldName:matches[1],
+                    index:groupIndex===1&&fieldIndex===1?'':"<"+groupIndex+","+fieldIndex+">",
+                    before:' before="<div style=&#39;border:2px solid black;padding:5px;&#39;>"',
+                    after:' after="</div>"'
+                };
+                var html=template.replace(/\$#(\w+)#/g,function(match,match1){
+                    if(args.hasOwnProperty(match1)){return args[match1];}
+                    return '';
+                });
+                jQuery(this.parentNode).append(html);
             });
-            jQuery(this.parentNode).append(html);
-        });
-        jQuery("input.checkbox_mf[type='checkbox']").each(function(){
-            var $this=jQuery(this);
-            if($this.parents("div.mf-field").find("div.mf2tk-field-input-optional").length){return;}
-            var matches=this.name.match(/^magicfields\[(\w+)\]\[(\d+)\]\[(\d+)\]$/);
-            var groupIndex=parseInt(matches[2]);
-            var fieldIndex=parseInt(matches[3]);
-            var args={
-                fieldName:matches[1],
-                index:groupIndex===1&&fieldIndex===1?'':"<"+groupIndex+","+fieldIndex+">",
-                filter:' filter="tk_value_as_checkbox"',
-                field_before:' field_before="<!--$Field-->:"'
-            };
-            var html=template.replace(/\$#(\w+)#/g,function(match,match1){
-                if(args.hasOwnProperty(match1)){return args[match1];}
-                return '';
+            jQuery(this).find("input.checkbox_mf[type='checkbox']").each(function(){
+                var $this=jQuery(this);
+                if($this.parents("div.mf-field-ui").find("div.mf2tk-field-input-optional").length){return;}
+                var matches=this.name.match(/^magicfields\[(\w+)\]\[(\d+)\]\[(\d+)\]$/);
+                var groupIndex=parseInt(matches[2]);
+                var fieldIndex=parseInt(matches[3]);
+                var args={
+                    fieldName:matches[1],
+                    index:groupIndex===1&&fieldIndex===1?'':"<"+groupIndex+","+fieldIndex+">",
+                    filter:' filter="tk_value_as_checkbox"',
+                    field_before:' field_before="<!--$Field-->:"'
+                };
+                var html=template.replace(/\$#(\w+)#/g,function(match,match1){
+                    if(args.hasOwnProperty(match1)){return args[match1];}
+                    return '';
+                });
+                jQuery(this.parentNode.parentNode).append(html);
             });
-            jQuery(this.parentNode.parentNode).append(html);
-        });
-        jQuery("input.clrpckr").each(function(){
-            var $this=jQuery(this);
-            if($this.parents("div.mf-field").find("div.mf2tk-field-input-optional").length){return;}
-            var matches=this.name.match(/^magicfields\[(\w+)\]\[(\d+)\]\[(\d+)\]$/);
-            var groupIndex=parseInt(matches[2]);
-            var fieldIndex=parseInt(matches[3]);
-            var args={
-                fieldName:matches[1],
-                index:groupIndex===1&&fieldIndex===1?'':"<"+groupIndex+","+fieldIndex+">",
-                before:' before="<div style=&#39;display:inline-block;width:0.66em;height:0.66em;padding:0;border:1px solid black;background-color:"',
-                after:' after=";&#39></div>"',
-                field_before:' field_before="<!--$Field-->:"'
-            };
-            var html=template.replace(/\$#(\w+)#/g,function(match,match1){
-                if(args.hasOwnProperty(match1)){return args[match1];}
-                return '';
+            jQuery(this).find("input.clrpckr").each(function(){
+                var $this=jQuery(this);
+                if($this.parents("div.mf-field-ui").find("div.mf2tk-field-input-optional").length){return;}
+                var matches=this.name.match(/^magicfields\[(\w+)\]\[(\d+)\]\[(\d+)\]$/);
+                var groupIndex=parseInt(matches[2]);
+                var fieldIndex=parseInt(matches[3]);
+                var args={
+                    fieldName:matches[1],
+                    index:groupIndex===1&&fieldIndex===1?'':"<"+groupIndex+","+fieldIndex+">",
+                    before:' before="<div style=&#39;display:inline-block;width:0.66em;height:0.66em;padding:0;border:1px solid black;background-color:"',
+                    after:' after=";&#39></div>"',
+                    field_before:' field_before="<!--$Field-->:"'
+                };
+                var html=template.replace(/\$#(\w+)#/g,function(match,match1){
+                    if(args.hasOwnProperty(match1)){return args[match1];}
+                    return '';
+                });
+                jQuery(this.parentNode).append(html);
             });
-            jQuery(this.parentNode).append(html);
-        });
-        jQuery("div.image_input.audio_frame").each(function(){
-            var $this=jQuery(this);
-            if($this.parents("div.mf-field").find("div.mf2tk-field-input-optional").length){return;}
-            var name=$this.find("input[type='hidden']")[0].name;
-            var matches=name.match(/^magicfields\[(\w+)\]\[(\d+)\]\[(\d+)\]$/);
-            if(!matches){return;}
-            var groupIndex=parseInt(matches[2]);
-            var fieldIndex=parseInt(matches[3]);
-            var args={
-                fieldName:matches[1],
-                index:groupIndex===1&&fieldIndex===1?'':"<"+groupIndex+","+fieldIndex+">",
-                filter:' filter="tk_value_as_audio"'
-            };
-            var html=template.replace(/\$#(\w+)#/g,function(match,match1){
-                if(args.hasOwnProperty(match1)){return args[match1];}
-                return '';
+            jQuery(this).find("div.image_input.audio_frame").each(function(){
+                var $this=jQuery(this);
+                if($this.parents("div.mf-field-ui").find("div.mf2tk-field-input-optional").length){return;}
+                var name=$this.find("input[type='hidden']")[0].name;
+                var matches=name.match(/^magicfields\[(\w+)\]\[(\d+)\]\[(\d+)\]$/);
+                if(!matches){return;}
+                var groupIndex=parseInt(matches[2]);
+                var fieldIndex=parseInt(matches[3]);
+                var args={
+                    fieldName:matches[1],
+                    index:groupIndex===1&&fieldIndex===1?'':"<"+groupIndex+","+fieldIndex+">",
+                    filter:' filter="tk_value_as_audio"'
+                };
+                var html=template.replace(/\$#(\w+)#/g,function(match,match1){
+                    if(args.hasOwnProperty(match1)){return args[match1];}
+                    return '';
+                });
+                jQuery(this.parentNode).append(html);
             });
-            jQuery(this.parentNode).append(html);
-        });
-        jQuery("div.mf_slider_field").parent().each(function(){
-            var $this=jQuery(this);
-            if($this.parents("div.mf-field").find("div.mf2tk-field-input-optional").length){return;}
-            var name=$this.find("input[type='hidden']")[0].name;
-            var matches=name.match(/^magicfields\[(\w+)\]\[(\d+)\]\[(\d+)\]$/);
-            if(!matches){return;}
-            var groupIndex=parseInt(matches[2]);
-            var fieldIndex=parseInt(matches[3]);
-            var args={
-                fieldName:matches[1],
-                index:groupIndex===1&&fieldIndex===1?'':"<"+groupIndex+","+fieldIndex+">",
-            };
-            var html=template.replace(/\$#(\w+)#/g,function(match,match1){
-                if(args.hasOwnProperty(match1)){return args[match1];}
-                return '';
+            jQuery(this).find("div.mf_slider_field").parent().each(function(){
+                var $this=jQuery(this);
+                if($this.parents("div.mf-field-ui").find("div.mf2tk-field-input-optional").length){return;}
+                var name=$this.find("input[type='hidden']")[0].name;
+                var matches=name.match(/^magicfields\[(\w+)\]\[(\d+)\]\[(\d+)\]$/);
+                if(!matches){return;}
+                var groupIndex=parseInt(matches[2]);
+                var fieldIndex=parseInt(matches[3]);
+                var args={
+                    fieldName:matches[1],
+                    index:groupIndex===1&&fieldIndex===1?'':"<"+groupIndex+","+fieldIndex+">",
+                };
+                var html=template.replace(/\$#(\w+)#/g,function(match,match1){
+                    if(args.hasOwnProperty(match1)){return args[match1];}
+                    return '';
+                });
+                jQuery(this).append(html);
             });
-            jQuery(this).append(html);
         });
+    }
+}
+
+jQuery(document).ready(function(){
+    mf2tkInsertHowToUse(document.body);
+    if(typeof mf2tkDisableHowToUse==="undefined"||!mf2tkDisableHowToUse){
+        var template=
+       '<div style="clear:both;"></div>\
+        <div class="mf2tk-field-input-optional">\
+            <button class="mf2tk-field_value_pane_button">Open</button>\
+            <h6>How to Use with the Toolkit\'s Shortcode</h6>\
+            <div class="mf2tk-field_value_pane" style="display:none;clear:both;">\
+                <input type="text" class="mf2tk-how-to-use" size="50" readonly\
+                    value=\'[show_custom_field field="$#fieldName#$#index#"$#filter#$#separator#$#before#$#after#$#field_before#$#field_after#]\'><br>\
+                - <button class="mf2tk-how-to-use">select,</button> copy and paste this into editor above in\
+                    <strong>Text</strong> mode\
+            </div>\
+        </div>';
+        
         jQuery("div#postbox-container-1").find("div.postbox[id^='tagsdiv-']").each(function(){
             var args={
                 fieldName:this.id.substr(8),
@@ -457,3 +476,46 @@ function mf2tk_resize_mejs_video_elements(selector){
   f();
 }
 
+// adapted from magic-fields-2/js/mf_field_base.js
+
+jQuery(document).ready(function($) {    
+  $(document).on("click",'a.duplicate-field',function(){
+    id = jQuery(this).attr("id");
+    pattern =  /mf\_field\_repeat\-(([0-9]+)\_([0-9]+)\_([0-9]+)\_([0-9]+))/i;
+    var item =  pattern.exec(id);
+
+    group_id = item[2];
+    group_index = item[3];
+    field_id = item[4];
+    counter_id = '#mf_counter_'+group_id+'_'+group_index+'_'+field_id;
+    
+    var field=$($(counter_id)[0].parentNode);
+    var count=field.find("div.mf-field-ui").length;
+    var check=function(){
+        var duplicates=field.find("div.mf-field-ui");
+        if(duplicates.length>count){
+            duplicate=$(duplicates[count]);
+            if(!duplicate.find("div.mf2tk-field-input-main").length){
+                mf2tkInsertHowToUse(duplicate[0].parentNode);
+            }
+            duplicate.find("button.mf2tk-field_value_pane_button").click(function(event){
+                if(jQuery(this).text()=="Open"){
+                    jQuery(this).text("Hide");
+                    jQuery("div.mf2tk-field_value_pane",this.parentNode).css("display","block");
+                }else{
+                    jQuery(this).text("Open");
+                    jQuery("div.mf2tk-field_value_pane",this.parentNode).css("display","none");
+                }
+                return false;
+            });
+            duplicate.find("button.mf2tk-how-to-use").click(function(){
+                jQuery(this.parentNode).find("input.mf2tk-how-to-use, textarea.mf2tk-how-to-use")[0].select();
+                return false;
+            });
+            return false;
+        }
+        window.setTimeout(check,1000);
+    };
+    window.setTimeout(check,1000);
+  });
+});

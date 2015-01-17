@@ -39,7 +39,7 @@ class Magic_Fields_2_Toolkit_Dumb_Shortcodes {
                     if ( function_exists( $filter ) ) {
                         $value = call_user_func( $filter, $value, $field, $type, $classes, $group_index, $field_index,
                             $post_id );
-                    } else if ( preg_match( '/(\w+__)(\w+)/', $filter, $matches ) ) {
+                    } else if ( preg_match( '/(\w+?__)(\w+)/', $filter, $matches ) ) {
                         if ( function_exists( $matches[1] ) ) {
                             $value = call_user_func( $matches[1], $matches[2], $value, $field, $type, $classes, $group_index,
                                 $field_index, $post_id );
@@ -292,10 +292,12 @@ EOD
 									}
 									foreach ( $field_indices as $field_index ) {
 										$data = (array) $the_field_data[$field];
-										$dataz = get_data( $field, $group_index, $field_index, $post_id );
-                                        $value = ( $data['type'] === 'alt_numeric' )
-                                            ? alt_numeric_field::get_numeric( $field, $group_index, $field_index, $post_id )
-                                            : get( $field, $group_index, $field_index, $post_id );
+										#$dataz = get_data( $field, $group_index, $field_index, $post_id );
+                                        $value = in_array( 'tk_use_raw_value', explode( ';', $filter ) )
+                                            ? get_data( $field, $group_index, $field_index, $post_id )['meta_value']
+                                            : ( ( $data['type'] === 'alt_numeric' )
+                                                ? alt_numeric_field::get_numeric( $field, $group_index, $field_index, $post_id )
+                                                : get( $field, $group_index, $field_index, $post_id ) );
 										preg_match( '/\[\*([a-zA-Z0-9_]+,?)+\*\]/', $data['description'], $classes );
 										if ( $classes ) { $classes = explode( ',', trim( $classes[0], '[]*' ) ); }
 										if ( $the_classes && ( !$classes || !array_intersect( $the_classes, $classes ) ) ) {
@@ -479,6 +481,53 @@ EOD
                 return $rtn;
             }
         } );
+        add_shortcode( 'mt_show_gallery', function( $atts ) use ( &$show_custom_field ) {
+            global $post;
+            extract( shortcode_atts( array(
+                'field'   => 'something',
+                'post_id' => NULL,
+                'filter'  => NULL,
+                'final'   => NULL
+            ), $atts ) );
+            if ( $post_id === NULL ) { $post_id = $post->ID; }
+            if ( is_numeric( $post_id) ) {
+                # single numeric post id
+                $rtn = $show_custom_field( $post_id, $field, '', '', ',',
+                    'tk_use_raw_value;tk_filter_by_type__image_media__alt_image',
+                    '', '', ',', '', '', '', '', '', NULL, NULL, NULL, NULL, '' );
+            } else {
+                # handle multiple posts
+                # first get list of post ids
+                $post_ids = Magic_Fields_2_Toolkit_Dumb_Shortcodes::get_posts_with_spec( $post_id );
+                $rtn = '';
+                foreach ( $post_ids as $post_id ) {
+                    # do each post accumulating the output in $rtn
+                    $rtn .= ',' . $show_custom_field( $post_id, $field, '', '', ',',
+                        'tk_use_raw_value;tk_filter_by_type__image_media__alt_image',
+                        '', '', ',', '', '', '', '', '', NULL, NULL, NULL, NULL, '' );
+                }
+            }
+            $upload_base_url = wp_upload_dir()['baseurl'];
+            $upload_base_url_length = strlen( $upload_base_url );
+            $rtn = array_filter( array_map( function( $v ) use ( $upload_base_url, $upload_base_url_length ) {
+                global $wpdb;
+                if ( is_numeric( $v ) ) { return $v; }
+                if ( strpos( $v, $upload_base_url ) !== 0 ) { return false; }
+                $path = substr( $v, $upload_base_url_length + 1 );
+                $post_id = $wpdb->get_col(
+                    "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '_wp_attached_file' AND meta_value = '$path'" );
+                if ( $post_id ) { return $post_id[0]; }
+                return false;
+            }, explode( ',', $rtn ) ) );
+            $rtn = implode( ',', $rtn );
+            $gallery = "[gallery ids=\"$rtn\""; 
+            $atts = array_diff_key( $atts, [ 'field' => true, 'post_id' => true, 'filter' => true, 'final' => true ] );
+            foreach ( $atts as $key => $value ) {
+                $gallery .= " $key=\"$value\"";
+            }
+            $gallery .= ']';
+            return do_shortcode( $gallery );
+        } );
         remove_filter( 'the_content', 'wpautop' );
     }
 }   
@@ -634,4 +683,11 @@ function media_url_to_link( $value, $field, $type ) {
     }
     return $value;
 }
+
+function tk_filter_by_type__( $parm, $value, $field, $type, $classes, $group_index, $field_index, $post_id ) {
+    $types = explode( '__', $parm );
+    if ( in_array( $type, $types) ) { return $value; }
+    return '';
+}
+
 ?>
