@@ -96,6 +96,18 @@ class alt_audio_field extends mf_custom_fields {
                     'value'       => '',
                     'div_class'   => '',
                     'class'       => ''
+                ),
+                'class_name'  => array(
+                    'type'        =>  'text',
+                    'id'          =>  'class_name',
+                    'label'       =>  __( 'Class Name', $mf_domain ),
+                    'name'        =>  'mf_field[option][class_name]',
+                    'default'     =>  '',
+                    'description' =>  'This is the class option of the WordPress caption shortcode' .
+                        ' and is set only if a caption is specified',
+                    'value'       =>  '',
+                    'div_class'   =>  '',
+                    'class'       =>  ''
                 )
             )
         );
@@ -134,8 +146,10 @@ EOD;
         if ( $caption ) {
             $width = !empty( $atts['width'] ) ? $atts['width'] : $data['options']['max_width'];
             if ( !$width ) { $width = 160; }
-            $html = img_caption_shortcode( array( 'width' => $width, 'align' => $data['options']['align'], 'caption' => $caption ),
-                $html );
+            $class_name = array_key_exists( 'class_name', $data['options'] ) ? $data['options']['class_name'] : null;
+            if ( !$class_name ) { $class_name = "mf2tk-{$data['type']}-{$field_name}"; }
+            $html = img_caption_shortcode( array( 'width' => $width, 'align' => $data['options']['align'],
+                'class' => $class_name, 'caption' => $caption ), $html );
             $html = preg_replace_callback( '/<div\s.*?style=".*?(width:\s*\d+px)/', function( $matches ) use ( $width ) {
                 return str_replace( $matches[1], "width:{$width}px;max-width:100%", $matches[0] );  
             }, $html, 1 );
