@@ -43,6 +43,7 @@ class Magic_Fields_2_Toolkit_Dumb_Macros {
             if ( get_post_type( $post ) == 'content_macro' ) { unset( $actions['view'] ); }
             return $actions;
         }, 10, 2 );
+        # $alt_template() outputs the HTML for selecting the content template 
         $alt_template = function( ) {
 ?>
 <!-- start alt_template -->
@@ -58,37 +59,58 @@ class Magic_Fields_2_Toolkit_Dumb_Macros {
 </div>
 <!-- end alt_template -->
 <?php
-        };
+        };   # $alt_template = function( ) {
         add_action( 'admin_footer-post.php', $alt_template );
         add_action( 'admin_footer-post-new.php', $alt_template );
-        $do_macro = function( $atts, $macro ) {
+        $do_macro = null;
+        $do_macro = function( $atts, $macro ) use ( &$do_macro ) {
             global $post;
             global $wpdb;
             $mf_table_custom_groups = MF_TABLE_CUSTOM_GROUPS;
             $mf_table_custom_fields = MF_TABLE_CUSTOM_FIELDS;
             $mf_table_post_meta = MF_TABLE_POST_META;
             static $saved_inline_macros = array();
-            #error_log( '##### shortcode:show_macro:$atts=' . print_r( $atts, TRUE ) );
+            #if ( $macro ) { $macro = htmlspecialchars_decode( $macro ); }
+            # first check if the macro invocation has an iterator parameter of the format
+            # group_iterator="iterator_name:group_name" or field_iterator="iterator_name:field_name<group_index>"
+            # only one iterator parameter is allowed per macro invocation but macros can be nested to allow nested iterations
             if ( $group = array_key_exists( 'group_iterator', $atts )
                 or $field = array_key_exists( 'field_iterator', $atts ) ) {
-                #$indexes = $wpdb->get_col( "SELECT $column FROM " . MF_TABLE_POST_META
-                #    . " WHERE post_id = $post->ID AND field_name = '$field_name'" );
                 if ( $group ) {
+                    # find the group indexes
                     list( $iterator_name, $group_name ) = explode( ':', $atts['group_iterator'] );
                     unset( $atts['group_iterator'] );
                     $indexes = $wpdb->get_col( $wpdb->prepare( <<<EOD
 SELECT m.group_count FROM $mf_table_custom_groups g, $mf_table_custom_fields f, $mf_table_post_meta m
-    WHERE g.id = f.custom_group_id AND f.name = m.field_name AND g.name = %s AND m.post_id = $post->ID
+    WHERE g.id = f.custom_group_id AND f.name = m.field_name
+        AND g.name = %s AND g.post_type = '$post->post_type' AND m.post_id = $post->ID
+    GROUP BY m.group_count ORDER BY m.group_count
 EOD
                     , $group_name ) );
                 } else if ( $field ) {
-                    preg_match( '^/(\w+):(\w+)<(\d+)>$/', $atts['field_iterator'], $matches );
-                    unset( $atts['field_iterator'] );
-                    $indexes = $wpdb->get_col( $wpdb->prepare( <<<EOD
-SELECT m.field_count FROM $mf_table_post_meta m WHERE m.field_name = %s AND m.post_id = $post->ID AND m.group_count = %d
+                    # find the field indexes; * for group index means over all groups
+                    if ( preg_match( '/^(\w+):(\w+)(<(\*|\d+)>)?$/', $atts['field_iterator'], $matches ) ) {
+                        unset( $atts['field_iterator'] );
+                        if ( array_key_exists( 4, $matches ) and $matches[4] !== '*' ) {
+                            $indexes = $wpdb->get_col( $wpdb->prepare( <<<EOD
+SELECT m.field_count FROM $mf_table_post_meta m
+    WHERE m.field_name = %s AND m.post_id = $post->ID AND m.group_count = %d ORDER BY m.field_count
 EOD
-                        , $matches[2], $matches[3] ) );
-                    $iterator_name = $matches[1];
+                                , $matches[2], $matches[4] ) );
+                        } else {
+                            $indexes = $wpdb->get_col( $wpdb->prepare( <<<EOD
+SELECT m.field_count FROM $mf_table_post_meta m
+    WHERE m.field_name = %s AND m.post_id = $post->ID GROUP BY m.field_count ORDER BY m.field_count
+EOD
+                                , $matches[2] ) );
+                        }
+                        $iterator_name = $matches[1];
+                    }
+                }
+                if ( empty( $indexes ) ) {
+                    return <<<EOD
+<div style="border:2px solid red;padding:5px;">Error: invalid group_iterator or field_iterator parameter</div>
+EOD;
                 }
                 $result = '';
                 foreach ( $indexes as $index ) {
@@ -115,7 +137,6 @@ EOD
                 }
             } else {
                 # There is an inline macro definition
-                #error_log( '##### shortcode:show_macro:$macro=' . print_r( $macro, TRUE ) );
                 if ( !empty( $atts['save_inline_macro_as'] ) ) {
                     # save inline macro defintion for later use in the same session
                     $saved_inline_macros[$atts['save_inline_macro_as']] = $macro;
@@ -124,7 +145,6 @@ EOD
             unset( $atts['macro'] );
             # scan for defaults of the form <!-- $#alpha# = "beta"; --> or <!-- $#alpha# = 'beta'; -->
             preg_match_all( '/<!--\s*\$#([\w-]+)#\s*=\s*(("([^"]+)")|(\'([^\']+)\'));\s*-->/', $macro, $assignments, PREG_SET_ORDER );
-            #error_log( '##### shortcode:show_macro:$assignments=' . print_r( $assignments, TRUE ) );
             foreach ( $assignments as $assignment ) {
                 if ( !array_key_exists( $assignment[1], $atts ) ) {
                     $atts[$assignment[1]] = trim( $assignment[2], '"\'' );
@@ -210,13 +230,13 @@ EOD
             foreach ( $atts as $att => $val ) {
                 $macro = str_replace( '$#' . $att . '#', $val, $macro );
             }
-            #error_log( '##### shortcode:show_macro:$macro=' . print_r( $macro, TRUE ) );
             $macro = do_shortcode( $macro );
-            #error_log( '##### shortcode:show_macro:$macro=' . print_r( $macro, TRUE ) );
             return $macro;
-        };
+        };   # $do_macro = function( $atts, $macro ) {
         add_shortcode( 'show_macro', $do_macro );
-    }
+        for ( $i = 1; $i < 9; $i++ ) { add_shortcode( 'show_macro' . $i, $do_macro ); }
+    }   # public function __construct() {
+
 }   
 
 new Magic_Fields_2_Toolkit_Dumb_Macros();
