@@ -4,7 +4,7 @@ Donate link:
 Tags: shortcodes, templates, custom fields, post copier
 Requires at least: 3.6
 Tested up to: 4.1
-Stable tag: 0.5.4
+Stable tag: 0.5.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 A toolkit for the Magic Fields 2 plugin for CMS web design by non programmers.
@@ -69,6 +69,9 @@ Version 0.4.6 has a new default content macro for sortable tables. However, the 
 == Screenshots ==
 
 == Changelog ==
+
+= 0.5.5 =
+* content templates now support iterators for group and field indexes
 
 = 0.5.4 =
 * added a gallery shortcode for "image media" and "alt_image" fields
@@ -283,3 +286,6 @@ added fields for embed, audio and video
 = 0.5.4 =
 * added a gallery shortcode for "image media" and "alt_image" fields
 * "how to use" now works for duplicated fields
+
+= 0.5.5 =
+* content templates now support iterators for group and field indexes
