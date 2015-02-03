@@ -69,9 +69,35 @@ class Magic_Fields_2_Toolkit_Dumb_Macros {
             $mf_table_custom_groups = MF_TABLE_CUSTOM_GROUPS;
             $mf_table_custom_fields = MF_TABLE_CUSTOM_FIELDS;
             $mf_table_post_meta = MF_TABLE_POST_META;
-            static $saved_inline_macros = array();
+            static $saved_inline_macros = [];
             #if ( $macro ) { $macro = htmlspecialchars_decode( $macro ); }
-            # first check if the macro invocation has an iterator parameter of the format
+            # first check if the macro invocation has a post parameter of the form a comma separated list of post ids
+            # or related_type fields or alt_related_type fields
+            if ( array_key_exists( 'post', $atts ) ) {
+                $att_post = $atts['post'];
+                unset( $atts['post'] );
+                $result = '';
+                foreach ( explode( ';', $att_post ) as $post_id ) {
+                    if ( !is_numeric( $post_id ) ) {
+                        # post parameter is a related_type field or alt_related_type field
+                        $post_ids = explode( ',', do_shortcode( <<<EOD
+[show_custom_field field="$post_id" separator="," filter="tk_filter_by_type__related_type__alt_related_type"]
+EOD
+                        ) );
+                    } else {
+                        $post_ids = [ $post_id ];
+                    }
+                    $save_post = $post;
+                    foreach ( $post_ids as $post_id1 ) {
+                        if ( !$post_id1 ) { continue; }
+                        $post = get_post( $post_id1 );
+                        $result .= $do_macro( $atts, $macro );
+                    }
+                    $post = $save_post;
+                }
+                return $result;
+            }
+            # next check if the macro invocation has an iterator parameter of the format
             # group_iterator="iterator_name:group_name" or field_iterator="iterator_name:field_name<group_index>"
             # only one iterator parameter is allowed per macro invocation but macros can be nested to allow nested iterations
             if ( $group = array_key_exists( 'group_iterator', $atts )

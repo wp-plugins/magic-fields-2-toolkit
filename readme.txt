@@ -4,7 +4,7 @@ Donate link:
 Tags: shortcodes, templates, custom fields, post copier
 Requires at least: 3.6
 Tested up to: 4.1
-Stable tag: 0.5.5
+Stable tag: 0.5.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 A toolkit for the Magic Fields 2 plugin for CMS web design by non programmers.
@@ -24,7 +24,7 @@ The current features are:
 * [field for WordPress's video and audio shortcodes](http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4-2/#alt_media).
 * [alternative related type field](http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4-2/#alt_related) which uses multiple selection checkboxes instead of a single selection dropdown.
 * [numeric field](http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4-2/#alt_numeric) with support for measurement units suffix and/or currency symbol prefix.
-* [URL field](http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4-2/#alt_url) contains the data for a HTML <a> element.
+* [URL field](http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4-2/#alt_url) contains the data for a HTML &lt;a&gt; element.
 * [pseudo field for generating a table of Magic Field names and values](http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4-2/#alt_table).
 * field for WordPress's embed shortcode.
 * alternative textbox field that allows you to select previously entered data.
@@ -69,6 +69,10 @@ Version 0.4.6 has a new default content macro for sortable tables. However, the 
 == Screenshots ==
 
 == Changelog ==
+
+= 0.5.6 =
+* content templates now support a post iterator
+* fix bugs with the alt_video field type
 
 = 0.5.5 =
 * content templates now support iterators for group and field indexes
@@ -289,3 +293,7 @@ added fields for embed, audio and video
 
 = 0.5.5 =
 * content templates now support iterators for group and field indexes
+
+= 0.5.6 =
+* content templates now support a post iterator
+* fix bugs with the alt_video field type

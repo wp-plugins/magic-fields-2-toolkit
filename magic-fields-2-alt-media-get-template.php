@@ -34,29 +34,14 @@ if ( $poster   ) { $atts['poster']   = $poster;   }
 $atts = array_diff_key( $atts, $invalid_atts );
 $atts = array_filter( $atts, function( $v ) { return $v !== 'off'; } );
 $html = call_user_func( $wp_media_shortcode, $atts );
-if ( !$height && preg_match( '/<video\s+class="wp-video-shortcode"\s+id="([^"]+)"/', $html, $matches ) ) {
+if ( ( !$height || !$width ) && preg_match( '/<video\s+class="wp-video-shortcode"\s+id="([^"]+)"/', $html, $matches ) ) {
     $id = $matches[1];
+    $aspect_ratio = array_key_exists( 'aspect_ratio', $options ) ? $options['aspect_ratio'] : '4:3';
+    if ( preg_match( '/([\d\.]+):([\d\.]+)/', $aspect_ratio, $matches ) ) { $aspect_ratio = $matches[1] / $matches[2]; }
+    $do_width = !$width ? 'true' : 'false';
     $html .= <<<EOD
-<script>
-jQuery(document).ready(function(){
-  var v=jQuery("video.wp-video-shortcode#$id");
-  var f=function(){
-    if(!v.length){return;}
-    if(v[0].videoWidth&&v[0].videoHeight){
-      var e=v.parents("div.mejs-container");
-      if(e.length){
-        v=v[0];
-        v.height=(v.videoHeight/v.videoWidth)*v.width;
-        e[0].style.height=v.height+"px";
-        e.parents("div.wp-video")[0].style.height=v.height+"px";
-        e.find("div.mejs-layer").css("height",v.height+"px");
-        return;
-      }
-    }
-    window.setTimeout(f,1000);
-  };
-  f();
-});
+<script type="text/javascript">
+    jQuery(document).ready(function(){mf2tkResizeVideo("video.wp-video-shortcode#$id",$aspect_ratio,$do_width);});
 </script>
 EOD;
 }

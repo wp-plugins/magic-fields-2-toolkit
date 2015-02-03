@@ -32,20 +32,19 @@ $html .= <<<EOD
     if ( typeof _wpmejsSettings !== 'undefined' ) {
         settings.pluginPath = _wpmejsSettings.pluginPath;
     }
-	$('.mf2tk-new-wp-media-shortcode .wp-audio-shortcode, .mf2tk-new-wp-media-shortcode .wp-video-shortcode')
+	$('div.mf2tk-new-wp-media-shortcode .wp-audio-shortcode, div.mf2tk-new-wp-media-shortcode .wp-video-shortcode')
         .mediaelementplayer( settings );
-	$('.mf2tk-new-wp-media-shortcode').removeClass('mf2tk-new-wp-media-shortcode');
 }(jQuery));
-</script>
 EOD;
-if ( !$options['max_height'] && preg_match( '/<video\s+class="wp-video-shortcode"\s+id="([^"]+)"/', $html, $matches ) ) {
+if ( ( !$options['max_height'] || !$options['max_width'] )
+    && preg_match( '/<video\s+class="wp-video-shortcode"\s+id="([^"]+)"/', $html, $matches ) ) {
     $id = $matches[1];
-    $html .= <<<EOD
-<script>
-mf2tk_resize_mejs_video_elements("video.wp-video-shortcode#$id");
-</script>
-EOD;
+    $aspect_ratio = array_key_exists( 'aspect_ratio', $options ) ? $options['aspect_ratio'] : '4:3';
+    if ( preg_match( '/([\d\.]+):([\d\.]+)/', $aspect_ratio, $matches ) ) { $aspect_ratio = $matches[1] / $matches[2]; }
+    $do_width = !$options['max_width'] ? 'true' : 'false';
+    $html .= "mf2tkResizeVideo(\"div.mf2tk-new-wp-media-shortcode video.wp-video-shortcode#$id\",$aspect_ratio,$do_width);";
 }
+$html .= 'jQuery("div.mf2tk-new-wp-media-shortcode").removeClass("mf2tk-new-wp-media-shortcode");</script>';
 echo $html;
 die();
 ?>

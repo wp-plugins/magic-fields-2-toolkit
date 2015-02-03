@@ -292,12 +292,13 @@ EOD
 									}
 									foreach ( $field_indices as $field_index ) {
 										$data = (array) $the_field_data[$field];
-										#$dataz = get_data( $field, $group_index, $field_index, $post_id );
-                                        $value = in_array( 'tk_use_raw_value', explode( ';', $filter ) )
-                                            ? get_data( $field, $group_index, $field_index, $post_id )['meta_value']
-                                            : ( ( $data['type'] === 'alt_numeric' )
-                                                ? alt_numeric_field::get_numeric( $field, $group_index, $field_index, $post_id )
-                                                : get( $field, $group_index, $field_index, $post_id ) );
+                                        if ( in_array( 'tk_use_raw_value', explode( ';', $filter ) ) ) {
+                                            $value = get_data( $field, $group_index, $field_index, $post_id )['meta_value'];
+                                        } else if ( $data['type'] === 'alt_numeric' ) {
+                                            $value = alt_numeric_field::get_numeric( $field, $group_index, $field_index, $post_id );
+                                        } else {
+                                            $value = get( $field, $group_index, $field_index, $post_id );
+                                        }
 										preg_match( '/\[\*([a-zA-Z0-9_]+,?)+\*\]/', $data['description'], $classes );
 										if ( $classes ) { $classes = explode( ',', trim( $classes[0], '[]*' ) ); }
 										if ( $the_classes && ( !$classes || !array_intersect( $the_classes, $classes ) ) ) {
@@ -529,6 +530,10 @@ EOD
             return do_shortcode( $gallery );
         } );
         remove_filter( 'the_content', 'wpautop' );
+        add_action( 'wp_enqueue_scripts', function( ) {
+            wp_enqueue_script( 'mf2tk_alt_media', plugins_url( 'magic-fields-2-toolkit/js/mf2tk_alt_media.js' ),
+                array( 'jquery' ) );
+        } );
     }
 }   
 
@@ -637,25 +642,37 @@ function tk_value_as_image__( $parm, $value, $field, $type ) {
 }
 
 function tk_value_as_video__( $parm, $value, $field, $type, $classes, $group_index, $field_index, $post_id ) {
+    static $i = 0;
     if ( $type === 'alt_video' ) {
+        $int_height = 0;
         $height = '';
+        $int_width = 0;
         $width = '';
         if ( substr( $parm, 0, 1 ) === 'h' ) {
-            $height = ' height="' . substr( $parm, 1 ) . '"';
+            $int_height = substr( $parm, 1 );
+            $height = ' height="' . $int_height . '"';
         } else if ( substr( $parm, 0, 1 ) === 'w' ) {
-            $width  = ' width="'  . substr( $parm, 1 ) . '"';
+            $int_width = substr( $parm, 1 );
+            $width  = ' width="'  . $int_width . '"';
         }
+        ++$i;
+        $id = "tk_video-$i";
         $srcs = _mf2tk_get_media_srcs( $field, $group_index, $field_index, $post_id, 'alt_video_field' );
         if ( count( $srcs ) === 1 ) {
-            $value = "<video src=\"$value\" controls=\"controls\"{$width}{$height}></video>";
+            $url = reset( $srcs );
+            $type = key( $srcs );
+            if ( $type === 'flv' ) { if ( $int_width ) { $height = ' height="' . intval( 3 * $int_width / 4 ) . '"'; }
+            else { $width = ' width="' . intval( 4 * $int_height / 3 ) . '"'; } }
+            $value = "<video id=\"$id\" src=\"$url\"{$width}{$height} controls=\"controls\"></video>";
         } else if ( count( $srcs ) > 1 ) {
-            $value = "<video controls=\"controls\"{$width}{$height}>";
+            $value = "<video id=\"$id\"{$width}{$height} controls=\"controls\">";
             foreach ( $srcs as $type => $url ) {
+                if ( $type === 'flv' ) { $type = 'x-flv'; }
                 $value .= "<source src=\"$url\" type=\"video/$type\">";
             }
             $value .= '</video>';
         } else {
-             $value = 'Invalid video sources';
+            $value = 'Invalid video sources';
         }
     }
     return $value;
