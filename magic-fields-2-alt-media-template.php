@@ -175,14 +175,15 @@ $html = <<<EOD
 </div>
 <br>
 EOD;
-if ( !$height && preg_match_all( '/<video\s+class="wp-video-shortcode"\s+id="([^"]+)"/', $html, $matches,
-    PREG_PATTERN_ORDER ) ) {
+if ( $media_type === 'video' && ( !$height || !$width )
+    && preg_match_all( '/<video\s+class="wp-video-shortcode"\s+id="([^"]+)"/', $html, $matches, PREG_PATTERN_ORDER ) ) {
+    $aspect_ratio = array_key_exists( 'aspect_ratio', $field['options'] ) ? $field['options']['aspect_ratio'] : '4:3';
+    if ( preg_match( '/([\d\.]+):([\d\.]+)/', $aspect_ratio, $matches1 ) ) { $aspect_ratio = $matches1[1] / $matches1[2]; }
+    $do_width = !$width ? 'true' : 'false';
     foreach( $matches[1] as $id ) {
         $html .= <<<EOD
-<script>
-jQuery(document).ready(function(){
-  mf2tk_resize_mejs_video_elements("video.wp-video-shortcode#$id");
-});
+<script type="text/javascript">
+    jQuery(document).ready(function(){mf2tkResizeVideo("video.wp-video-shortcode#$id",$aspect_ratio,$do_width);});
 </script>
 EOD;
     }

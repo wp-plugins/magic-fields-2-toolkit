@@ -35,7 +35,8 @@ class alt_video_field extends mf_custom_fields {
                     'name'        =>  'mf_field[option][max_height]',
                     'default'     =>  '0',
                     'description' =>  'height in pixels - 0 lets the browser set the height to preserve the aspect ratio' .
-                                      ' - recommended',
+                                      ' - recommended but you must at least load the meta data on page load ' .
+                                      ' - 0 does not work for Flash videos',
                     'value'       =>  '0',
                     'div_class'   =>  '',
                     'class'       =>  ''
@@ -106,6 +107,18 @@ class alt_video_field extends mf_custom_fields {
                     'description' =>  'This is the class option of the WordPress caption shortcode' .
                         ' and is set only if a caption is specified',
                     'value'       =>  '',
+                    'div_class'   =>  '',
+                    'class'       =>  ''
+                ),
+                'aspect_ratio'  => array(
+                    'type'        =>  'text',
+                    'id'          =>  'aspect_ratio',
+                    'label'       =>  __( 'Default Aspect Ratio - width:height, e.g. 16:9', $mf_domain ),
+                    'name'        =>  'mf_field[option][aspect_ratio]',
+                    'default'     =>  '4:3',
+                    'description' =>  'If the browser determines the height then use this as the aspect ratio ' .
+                                      'when the browser is unable to determine the aspect ratio - i.e. for Flash videos',
+                    'value'       =>  '4:3',
                     'div_class'   =>  '',
                     'class'       =>  ''
                 )

@@ -35,6 +35,8 @@ and activated.</div>
             wp_enqueue_style( 'admin', plugins_url( 'admin.css', __FILE__ ) );
             wp_enqueue_script( 'mf2tk_alt_media_admin', plugins_url( 'magic-fields-2-toolkit/js/mf2tk_alt_media_admin.js' ),
                 array( 'jquery' ) );
+            wp_enqueue_script( 'mf2tk_alt_media', plugins_url( 'magic-fields-2-toolkit/js/mf2tk_alt_media.js' ),
+                array( 'jquery' ) );
             $options = get_option( 'magic_fields_2_toolkit_enabled', [ ] );
             $mf2tkDisableHowToUse = array_key_exists( 'dumb_shortcodes', $options ) ? 'false' : 'true';
             $wp_scripts->add_data( 'mf2tk_alt_media_admin', 'data', "var mf2tkDisableHowToUse=$mf2tkDisableHowToUse;" );
