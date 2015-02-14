@@ -4,7 +4,7 @@ Donate link:
 Tags: shortcodes, templates, custom fields, post copier
 Requires at least: 3.6
 Tested up to: 4.1
-Stable tag: 0.5.6
+Stable tag: 0.5.7
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 A toolkit for the Magic Fields 2 plugin for CMS web design by non programmers.
@@ -17,8 +17,8 @@ The current features are:
 
 = Support for coding HTML templates without the need for PHP programming =
 * [shortcode for showing Magic Fields 2 custom fields and taxonomies](http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4-2/#shortcode). In particular, the shortcodes makes it easy to display a table of custom field names and their values.
-* [gallery shortcode for showing Magic Fields Media Library images](http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4-2/#gallery).
 * [post content templates for HTML and WordPress shortcodes](http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4-2/#macros) - these templates do not need PHP code.
+* [gallery shortcode for showing Magic Fields Media Library images](http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4-2/#gallery).
 
 = Additional custom fields =
 * [field for WordPress's video and audio shortcodes](http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4-2/#alt_media).
@@ -69,6 +69,11 @@ Version 0.4.6 has a new default content macro for sortable tables. However, the 
 == Screenshots ==
 
 == Changelog ==
+
+= 0.5.7 =
+* support assigning custom field values to content template variables
+* modify content template conditional inclusion to require both definition and truthy
+* support iteration for content template variables
 
 = 0.5.6 =
 * content templates now support a post iterator
@@ -297,3 +302,8 @@ added fields for embed, audio and video
 = 0.5.6 =
 * content templates now support a post iterator
 * fix bugs with the alt_video field type
+
+= 0.5.7 =
+* support assigning custom field values to content template variables
+* modify content template conditional inclusion to require both definition and truthy
+* support iteration for content template variables
