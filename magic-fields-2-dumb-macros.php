@@ -39,7 +39,6 @@ class Magic_Fields_2_Toolkit_Dumb_Macros {
             ) );
         } );
         add_filter( 'post_row_actions', function( $actions, $post ) {
-            #error_log( '###### action:post_row_actions:$actions=' . print_r( $actions, TRUE ) );
             if ( get_post_type( $post ) == 'content_macro' ) { unset( $actions['view'] ); }
             return $actions;
         }, 10, 2 );
@@ -66,14 +65,15 @@ class Magic_Fields_2_Toolkit_Dumb_Macros {
         $do_macro = function( $atts, $macro ) use ( &$do_macro ) {
             global $post;
             global $wpdb;
+            static $saved_inline_macros = [ ];
             $mf_table_custom_groups = MF_TABLE_CUSTOM_GROUPS;
             $mf_table_custom_fields = MF_TABLE_CUSTOM_FIELDS;
             $mf_table_post_meta = MF_TABLE_POST_META;
-            static $saved_inline_macros = [];
+            if ( !$atts ) { $atts = [ ]; }
             #if ( $macro ) { $macro = htmlspecialchars_decode( $macro ); }
             # first check if the macro invocation has a post parameter of the form a comma separated list of post ids
             # or related_type fields or alt_related_type fields
-            if ( array_key_exists( 'post', $atts ) ) {
+            if ( is_array( $atts ) && array_key_exists( 'post', $atts ) ) {
                 $att_post = $atts['post'];
                 unset( $atts['post'] );
                 $result = '';
@@ -100,8 +100,8 @@ EOD
             # next check if the macro invocation has an iterator parameter of the format
             # group_iterator="iterator_name:group_name" or field_iterator="iterator_name:field_name<group_index>"
             # only one iterator parameter is allowed per macro invocation but macros can be nested to allow nested iterations
-            if ( $group = array_key_exists( 'group_iterator', $atts )
-                or $field = array_key_exists( 'field_iterator', $atts ) ) {
+            if ( is_array( $atts ) && ( $group = array_key_exists( 'group_iterator', $atts )
+                or $field = array_key_exists( 'field_iterator', $atts ) ) ) {
                 if ( $group ) {
                     # find the group indexes
                     list( $iterator_name, $group_name ) = explode( ':', $atts['group_iterator'] );
@@ -131,6 +131,7 @@ EOD
                                 , $matches[2] ) );
                         }
                         $iterator_name = $matches[1];
+                    } else {
                     }
                 }
                 if ( empty( $indexes ) ) {
@@ -141,6 +142,45 @@ EOD;
                 $result = '';
                 foreach ( $indexes as $index ) {
                     $atts[$iterator_name] = $index;
+                    $result .= $do_macro( $atts, $macro );
+                }
+                return $result;
+            }
+            # finally check for generic iterator parameter - iterator="name:12345;"abcde";'abcde';alpha<1,1>"
+            if ( is_array( $atts ) && array_key_exists( 'iterator', $atts ) ) {
+                if ( ( $ret = preg_match( '#^(\w+):((\s*(\d+|"[^"]*"|\'[^\']*\'|[^;]+)(;|$))+)#',
+                    $atts['iterator'], $matches ) ) === 1 ) {
+                    unset( $atts['iterator'] );
+                    $iterator_name = $matches[1];
+                    if ( ( $ret = preg_match_all( '#(\s*(\d+)|\s*"([^"]*)"|\s*\'([^\']*)\'|\s*([^\s;]+))(;|$)#',
+                        $matches[2], $matches1, PREG_SET_ORDER ) ) !== false && $ret !== 0 ) {
+                        $iterator_values = [];
+                        foreach( $matches1 as $matches2 ) {
+                            if ( $matches2[2] ) {          # number
+                                $iterator_values[] = $matches2[2];
+                            } else if ( $matches2[3] ) {   # double quoted string
+                                $iterator_values[] = $matches2[3];
+                            } else if ( $matches2[4] ) {   # single quoted string
+                                $iterator_values[] = $matches2[4];
+                            } else if ( $matches2[5] ) {   # magic field specifier
+                                $iterator_values = array_merge( $iterator_values, explode( '!@#$%', do_shortcode( <<<EOD
+[show_custom_field field="$matches2[5]" separator="!@#$%"]
+EOD
+                                ) ) );
+                            }
+                        }
+                    } else {
+                        return '<div style="border:2px solid red;color:red;padding:5px;">show_macro error: '
+                            . 'invalid iterator parameter.</div>';
+                    }           
+                } else {
+                    return '<div style="border:2px solid red;color:red;padding:5px;">show_macro error: '
+                        . 'invalid iterator parameter.</div>';
+                }    
+                $result = '';
+                foreach ( $iterator_values as $iterator_value ) {
+                    if ( !$iterator_value ) { continue; }
+                    $atts[$iterator_name] = $iterator_value;
                     $result .= $do_macro( $atts, $macro );
                 }
                 return $result;
@@ -170,11 +210,24 @@ EOD;
             }
             unset( $atts['macro'] );
             # scan for defaults of the form <!-- $#alpha# = "beta"; --> or <!-- $#alpha# = 'beta'; -->
-            preg_match_all( '/<!--\s*\$#([\w-]+)#\s*=\s*(("([^"]+)")|(\'([^\']+)\'));\s*-->/', $macro, $assignments, PREG_SET_ORDER );
-            foreach ( $assignments as $assignment ) {
-                if ( !array_key_exists( $assignment[1], $atts ) ) {
-                    $atts[$assignment[1]] = trim( $assignment[2], '"\'' );
-                    #error_log( '##### shortcode:show_macro:$atts[\'' . $assignment[1] . '\']=\'' . $atts[$assignment[1]] . '\';' );
+            # or <!-- $#alpha = beta<1,1>; -->
+            if ( preg_match_all( '/<!--\s*\$#([\w-]+)#\s*=\s*(("([^"]+)")|(\'([^\']+)\')|([^;]+));\s*-->/',
+                $macro, $assignments, PREG_SET_ORDER ) ) {
+                foreach ( $assignments as $assignment ) {
+                    if ( !array_key_exists( $assignment[1], $atts ) ) {
+                        if ( array_key_exists( 7, $assignment ) ) {
+                            # assignment is to value of custom field
+                            $atts[$assignment[1]] = do_shortcode( <<<EOD
+[show_custom_field field="$assignment[7]" separator=","]
+EOD
+                            );
+                        } else {
+                            # assignment is to a string constant
+                            $atts[$assignment[1]] = trim( $assignment[2], '"\'' );
+                        }
+         
+                    } else {
+                    }
                 }
             }
             # first handle conditional text inclusion
@@ -185,7 +238,8 @@ EOD;
             #error_log( '##### shortcode:show_macro:$end_matches=' . print_r( $end_matches, TRUE ) );
             if ( $if_count && $if_count == $end_count ) {
                 $includes = array_map( function( $match ) use ( $atts ) {
-                    return ( array_key_exists( $match[1][0], $atts ) );
+                    # return ( array_key_exists( $match[1][0], $atts ) );
+                    return array_key_exists( $match[1][0], $atts ) && !is_null( $atts[$match[1][0]] ) && $atts[$match[1][0]] !== '';
                 }, $if_matches );
                 $i = 0;
                 while ( $if_matches && $end_matches ) {
