@@ -707,4 +707,12 @@ function tk_filter_by_type__( $parm, $value, $field, $type, $classes, $group_ind
     return '';
 }
 
+function tk_field_name( $value, $field ) {
+    return $field;
+}
+
+function tk_field_type( $value, $field, $type ) {
+    return $type;
+}
+
 ?>

@@ -217,10 +217,19 @@ EOD
                     if ( !array_key_exists( $assignment[1], $atts ) ) {
                         if ( array_key_exists( 7, $assignment ) ) {
                             # assignment is to value of custom field
-                            $atts[$assignment[1]] = do_shortcode( <<<EOD
+                            if ( $filter = strpos( $assignment[7], "@" ) ) {
+                                $field = substr( $assignment[7], 0, $filter );
+                                $filter = substr( $assignment[7], $filter + 1 );
+                                $atts[$assignment[1]] = do_shortcode( <<<EOD
+[show_custom_field field="$field" filter="$filter" separator=","]
+EOD
+                                );
+                            } else {
+                                $atts[$assignment[1]] = do_shortcode( <<<EOD
 [show_custom_field field="$assignment[7]" separator=","]
 EOD
-                            );
+                                );
+                            }
                         } else {
                             # assignment is to a string constant
                             $atts[$assignment[1]] = trim( $assignment[2], '"\'' );
@@ -231,15 +240,33 @@ EOD
                 }
             }
             # first handle conditional text inclusion
-            $if_count = preg_match_all( '/#if\(\s*\$#([\w-]+)#\s*\)#/', $macro, $if_matches,
-                PREG_SET_ORDER | PREG_OFFSET_CAPTURE );
-            #error_log( '##### shortcode:show_macro:$if_matches=' . print_r( $if_matches, TRUE ) );
+            # if statement is #if($#alpha#)# or #if($#alpha#=$#beta#)# or #if($#alpha#="gamma")# or #if($#alpha#='delta')#
+            $if_count = preg_match_all(
+                '/#if\(\s*\$#([\w-]+)#(\s*=\s*((\$#([\w-]+)#)|(("|\'|&#8217;|&#8221;)(.*?)\7)|(&#8220;(.*?)&#8221;)|(&#8216;(.*?)&#8217;)))?\s*\)#/',
+                $macro, $if_matches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE );
             $end_count = preg_match_all( '/#endif#/', $macro, $end_matches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE );
-            #error_log( '##### shortcode:show_macro:$end_matches=' . print_r( $end_matches, TRUE ) );
             if ( $if_count && $if_count == $end_count ) {
                 $includes = array_map( function( $match ) use ( $atts ) {
-                    # return ( array_key_exists( $match[1][0], $atts ) );
-                    return array_key_exists( $match[1][0], $atts ) && !is_null( $atts[$match[1][0]] ) && $atts[$match[1][0]] !== '';
+                    if ( !array_key_exists( $match[1][0], $atts ) ) { return false; }
+                    $value = $atts[$match[1][0]];
+                    if ( array_key_exists( 11, $match ) ) {
+                        # #if($#alpha#='gamma')#
+                        return $value === $match[12][0];
+                    } else if ( array_key_exists( 9, $match ) ) {
+                        # #if($#alpha#="gamma")#
+                        return $value === $match[10][0];
+                    } else if ( array_key_exists( 7, $match ) ) {
+                        # #if($#alpha#='delta')#
+                        # #if($#alpha#="gamma")#
+                        return $value === $match[8][0];
+                    } else if ( array_key_exists( 4, $match ) ) {
+                        # #if($#alpha#=$#beta#)#
+                        if ( array_key_exists( $match[5][0], $atts ) ) { return $atts[$match[5][0]] === $value; }
+                        return $value === '';
+                    } else if ( !array_key_exists( 2, $match ) ) {
+                        # #if($#alpha#)#
+                        return !is_null( $value ) && $value !== '';
+                    }
                 }, $if_matches );
                 $i = 0;
                 while ( $if_matches && $end_matches ) {
