@@ -4,7 +4,7 @@ Donate link:
 Tags: shortcodes, templates, custom fields, post copier
 Requires at least: 3.6
 Tested up to: 4.1
-Stable tag: 0.5.7
+Stable tag: 0.5.7.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 A toolkit for the Magic Fields 2 plugin for CMS web design by non programmers.
@@ -69,6 +69,11 @@ Version 0.4.6 has a new default content macro for sortable tables. However, the 
 == Screenshots ==
 
 == Changelog ==
+
+= 0.5.7.1 =
+* variable assignments now support filters
+* if statement now supports an equality condition
+* added filters to return field name and field type
 
 = 0.5.7 =
 * support assigning custom field values to content template variables
@@ -307,3 +312,8 @@ added fields for embed, audio and video
 * support assigning custom field values to content template variables
 * modify content template conditional inclusion to require both definition and truthy
 * support iteration for content template variables
+
+= 0.5.7.1 =
+* variable assignments now support filters
+* if statement now supports an equality condition
+* added filters to return field name and field type
