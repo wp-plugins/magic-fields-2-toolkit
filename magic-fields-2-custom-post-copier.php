@@ -77,7 +77,7 @@ add_action( 'admin_action_magic_fields_2_toolkit_copy_post', function() {
                 || $row['meta_key'] == 'edit_lock' ) { continue; }
             $old_meta_id = $row['meta_id'];
             unset( $row['meta_id'] );
-            $row[post_id] = $id;
+            $row['post_id'] = $id;
             #error_log( 'postmeta row=' . print_r( $row, TRUE ) );
             $wpdb->insert( $wpdb->postmeta, $row );
             $new_meta_id[$old_meta_id] = (int) $wpdb->insert_id;
