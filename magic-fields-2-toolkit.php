@@ -396,7 +396,7 @@ EOD
                     if ( $hook_suffix === 'post.php' || $hook_suffix === 'post-new.php' ) {
 ?>
 <script type="text/javascript">
-    (function(){
+    jQuery(document).ready(function(){
         var a=document.createElement("a");
         a.className="button";
         a.href="#";
@@ -410,6 +410,10 @@ EOD
                 alert(r);
             });
         });
+        var divTemplate=jQuery("div#mf2tk-alt-template");
+        divTemplate.find("button#button-mf2tk-alt-template-close").click(function(){
+            this.parentNode.style.display="none";
+        });
         var a=document.createElement("a");
         a.className="button";
         a.href="#";
@@ -420,8 +424,7 @@ EOD
             var windowHeight=jQuery(window).height();
             var width=windowWidth>800?800:Math.floor(windowWidth*9/10);
             var height=Math.floor(windowHeight*9/10);
-            var div=jQuery("div#mf2tk-alt-template");
-            var style=div[0].style;
+            var style=divTemplate[0].style;
             style.position="fixed";
             style.width=width+"px";
             style.height=height+"px";
@@ -432,11 +435,61 @@ EOD
             style.border="3px solid black";
             style.zIndex=100000;
             style.display="block";
-            div.find("button#button-mf2tk-alt-template-close").click(function(){
-                this.parentNode.style.display="none";
+        });
+        var divShortcode=jQuery("div#mf2tk-shortcode-tester");
+        divShortcode.find("button#button-mf2tk-shortcode-tester-close").click(function(){
+            this.parentNode.style.display="none";
+        });
+        divShortcode.find("button#m2tfk-shortcode-tester-evaluate").click(function(){
+            var post_id=jQuery("form#post input#post_ID[type='hidden']").val();
+            var source=jQuery("div#mf2tk-shortcode-tester div#m2tfk-shortcode-tester-area-source textarea").val();
+            jQuery.post(ajaxurl,{action:'mf2tk_eval_post_content',post_id:post_id,post_content:source},function(r){
+                jQuery("div#mf2tk-shortcode-tester div#m2tfk-shortcode-tester-area-result textarea").val(r);
             });
         });
-    }());
+        divShortcode.find("button#m2tfk-shortcode-tester-show-both").click(function(){
+            divShortcode.find("div#m2tfk-shortcode-tester-area-source")
+                .css({display:"block",width:"49%",float:"left","margin-left":"3px"}).find("textarea").css("width","99%");
+            divShortcode.find("div#m2tfk-shortcode-tester-area-result")
+                .css({display:"block",width:"49%",float:"right","margin-right":"3px"}).find("textarea").css("width","99%");
+        });
+        divShortcode.find("button#m2tfk-shortcode-tester-show-source").click(function(){
+            divShortcode.find("div#m2tfk-shortcode-tester-area-source")
+                .css({display:"block",width:"99%",float:"none","margin-left":"auto","margin-right":"auto"})
+                .find("textarea").css("width","99%");
+            divShortcode.find("div#m2tfk-shortcode-tester-area-result").css("display","none");
+        });
+        divShortcode.find("button#m2tfk-shortcode-tester-show-result").click(function(){
+            divShortcode.find("div#m2tfk-shortcode-tester-area-source").css("display","none");
+            divShortcode.find("div#m2tfk-shortcode-tester-area-result")
+                .css({display:"block",width:"99%",float:"none","margin-left":"auto","margin-right":"auto"})
+                .find("textarea").css("width","99%");
+        });
+        var a=document.createElement("a");
+        a.className="button";
+        a.href="#";
+        a.textContent="Shortcode Tester";
+        jQuery("a#insert-media-button").after(a);
+        jQuery(a).click(function(){
+            var windowWidth=jQuery(window).width();
+            var windowHeight=jQuery(window).height();
+            var width=Math.floor(windowWidth*9/10);
+            var height=Math.floor(windowHeight*9/10);
+            var style=divShortcode[0].style;
+            style.position="fixed";
+            style.width=width+"px";
+            style.height=height+"px";
+            style.overflow="auto";
+            style.left=Math.floor((windowWidth-width)/2)+"px";
+            style.top=Math.floor((windowHeight-height)/2)+"px";
+            style.backgroundColor="lightgray";
+            style.border="4px solid black";
+            style.zIndex=100000;
+            style.display="block";
+            jQuery("div#mf2tk-shortcode-tester div#m2tfk-shortcode-tester-area-source textarea").val("");
+            jQuery("div#mf2tk-shortcode-tester div#m2tfk-shortcode-tester-area-result textarea").val("");
+        });
+    });
 </script>
 <?php
                     }   # if ( $hook_suffix === 'post.php' ) {
@@ -466,6 +519,10 @@ EOD
                             : ( !empty( $id1 ) ? "Content template $id1 created."
                                 : "Error: Content template not created/updated." ) );
                     } ); # add_action( 'wp_ajax_mf2tk_update_content_macro', function() {
+                    add_action( 'wp_ajax_mf2tk_eval_post_content', function() {
+                        die( Magic_Fields_2_Toolkit_Dumb_Macros::do_macro( [ 'post' => $_POST['post_id'] ],
+                            $_POST['post_content'] ) );
+                    } ); # add_action( 'wp_ajax_mf2tk_eval_post_content', function() {
                 } #   if ( is_admin() ) {
             } #   if ( array_key_exists( 'dumb_macros', $options ) ) {
         }   # if ( is_array( $options ) ) {

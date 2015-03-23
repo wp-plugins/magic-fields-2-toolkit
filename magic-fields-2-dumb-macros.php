@@ -24,6 +24,9 @@
 */
 
 class Magic_Fields_2_Toolkit_Dumb_Macros {
+    
+    public static $do_macro;
+    
     public function __construct() {
         add_action( 'init', function() {
             register_post_type( 'content_macro', array(
@@ -59,10 +62,41 @@ class Magic_Fields_2_Toolkit_Dumb_Macros {
 <!-- end alt_template -->
 <?php
         };   # $alt_template = function( ) {
+        # $shortcode_tester() outputs the HTML for selecting the content template 
+        $shortcode_tester = function( ) {
+?>
+<!-- start shortcode tester -->
+<div id="mf2tk-shortcode-tester" style="display:none;">
+    <h3 style="float:left;padding:5px 20px;margin:0;">Shortcode Tester</h3>
+    <button id="button-mf2tk-shortcode-tester-close" style="float:right;">X</button>
+    <div style="padding:0;margin:0;clear:both;">
+        <div style="padding:0px 20px;margin:0;">
+            Enter post content fragment with show_custom_field and/or show_macro shortcodes in the Source text area.<br />
+            Click the Evaluate button to display the generated HTML from shortcode processing in the Result text area.<br />
+            <button id="m2tfk-shortcode-tester-evaluate">Evaluate</button>
+            <button id="m2tfk-shortcode-tester-show-source">Show Source Only</button>
+            <button id="m2tfk-shortcode-tester-show-result">Show Result Only</button>
+            <button id="m2tfk-shortcode-tester-show-both">Show Both</button>
+        </div>
+        <div id="m2tfk-shortcode-tester-area-source" style="width:49%;border:2px solid black;margin-left:3px;float:left;">
+            <h3 style="padding:0px 30px;margin:0;">Source</h3>
+            <textarea rows="12" style="display:block;width:99%;margin-left:auto;margin-right:auto;"></textarea>
+        </div>
+        <div id="m2tfk-shortcode-tester-area-result" style="width:49%;border:2px solid black;margin-right:3px;float:right;">
+            <h3 style="padding:0px 30px;margin:0">Result</h3>
+            <textarea rows="12" readonly style="display:block;width:99%;margin-left:auto;margin-right:auto;"></textarea>
+        </div>
+    </div>
+</div>
+<!-- end shortcode tester -->
+<?php
+        };   # $shortcode_tester = function( ) {
         add_action( 'admin_footer-post.php', $alt_template );
         add_action( 'admin_footer-post-new.php', $alt_template );
+        add_action( 'admin_footer-post.php', $shortcode_tester );
+        add_action( 'admin_footer-post-new.php', $shortcode_tester );
         $do_macro = null;
-        $do_macro = function( $atts, $macro ) use ( &$do_macro ) {
+        self::$do_macro = $do_macro = function( $atts, $macro ) use ( &$do_macro ) {
             global $post;
             global $wpdb;
             static $saved_inline_macros = [ ];
@@ -234,10 +268,11 @@ EOD
                             # assignment is to a string constant
                             $atts[$assignment[1]] = trim( $assignment[2], '"\'' );
                         }
-         
                     } else {
                     }
                 }
+                # remove variable assigments
+                $macro = preg_replace( '/<!--\s*\$#([\w-]+)#\s*=\s*(("([^"]+)")|(\'([^\']+)\')|([^;]+));\s*-->\r?\n?/', '', $macro );
             }
             # first handle conditional text inclusion
             # if statement is #if($#alpha#)# or #if($#alpha#=$#beta#)# or #if($#alpha#="gamma")# or #if($#alpha#='delta')#
@@ -344,6 +379,13 @@ EOD
         for ( $i = 1; $i < 9; $i++ ) { add_shortcode( 'show_macro' . $i, $do_macro ); }
     }   # public function __construct() {
 
+    public static function do_macro( $atts, $macro ) {
+        require_once( MF_PATH . '/mf_front_end.php' );
+        $macro = stripslashes( $macro );
+        $do_macro = self::$do_macro;
+        $result = $do_macro( $atts, $macro );
+        return $result;
+    }
 }   
 
 new Magic_Fields_2_Toolkit_Dumb_Macros();
