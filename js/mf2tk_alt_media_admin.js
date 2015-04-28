@@ -14,10 +14,14 @@ function mf2tk_refresh_media(e){
     }
 }
 
+var mf2tk_media_library_button_click;
+var mf2tk_alt_media_admin_refresh_click;
+var mf2tk_alt_embed_admin_refresh_click;
+
 jQuery(document).ready(function(){
     // Select media from Media Library
     // adapted from http://stackoverflow.com/questions/13847714/wordpress-3-5-custom-media-upload-for-your-theme-options
-    jQuery('button.mf2tk-media-library-button').click(function(){
+    function media_library_button_click(){
         var i=jQuery(this).attr("id").replace(".media-library-button","");
         var e=jQuery("#"+i);
         n=e.attr("name").replace("magicfields[","").replace("mf2tk_","").replace(/\]/,"");
@@ -33,15 +37,19 @@ jQuery(document).ready(function(){
         })
         .open();
         return false;
-    });
+    }
+    jQuery('button.mf2tk-media-library-button').click(media_library_button_click);
+    mf2tk_media_library_button_click=media_library_button_click;
     // Reload media using URL from input box
-    jQuery("button.mf2tk-alt_media_admin-refresh").click(function(e){
+    function alt_media_admin_refresh_click(e){
         var i=jQuery(this).attr("id").replace(".refresh-button","");
         var e=jQuery("#"+i);
         mf2tk_refresh_media(e);
         return false;
-    });
-    jQuery("button.mf2tk-alt_embed_admin-refresh").click(function(){
+    }
+    jQuery("button.mf2tk-alt_media_admin-refresh").click(alt_media_admin_refresh_click);
+    mf2tk_alt_media_admin_refresh_click=alt_media_admin_refresh_click;
+    function alt_embed_admin_refresh_click(){
         var embed=jQuery("div.mf2tk-alt_embed_admin-embed",this.parentNode);
         jQuery.post(ajaxurl,{action:'mf2tk_alt_embed_admin_refresh',
             field:jQuery("input.mf2tk-alt_embed_admin-url",this.parentNode).attr("name"),
@@ -49,7 +57,9 @@ jQuery(document).ready(function(){
                 embed.html(response);
             });
         return false;
-    });
+    }
+    jQuery("button.mf2tk-alt_embed_admin-refresh").click(alt_embed_admin_refresh_click);
+    mf2tk_alt_embed_admin_refresh_click=alt_embed_admin_refresh_click;
 });
 
 function mf2tkInsertHowToUse(root){
@@ -492,6 +502,9 @@ jQuery(document).ready(function($) {
                 jQuery(this.parentNode).find("input.mf2tk-how-to-use, textarea.mf2tk-how-to-use")[0].select();
                 return false;
             });
+            duplicate.find('button.mf2tk-media-library-button').click(mf2tk_media_library_button_click);
+            duplicate.find('button.mf2tk-alt_media_admin-refresh').click(mf2tk_alt_media_admin_refresh_click);
+            duplicate.find('button.mf2tk-alt_embed_admin-refresh').click(mf2tk_alt_embed_admin_refresh_click);
             return false;
         }
         window.setTimeout(check,1000);

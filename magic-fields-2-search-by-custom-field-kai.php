@@ -931,7 +931,7 @@ table.mf2tk-<?php echo $post_type; ?>-table th{background-color:rgb(128,128,128)
     background-image:url(data:image/gif;base64,R0lGODlhFQAJAIAAACMtMP///yH5BAEAAAEALAAAAAAVAAkAAAIXjI+AywnaYnhUMoqt3gZXPmVg94yJVQAAOw==);
     background-position:100% 50%;background-repeat:no-repeat;color:black;text-align:center;}
 &lt;/style&gt;
-&lt;table class="mf2tk-<?php echo $post_type; ?>-table tablesorter"&gt;
+&lt;table class="mf2tk-<?php echo $post_type; ?>-table scpbcfw-result-table tablesorter"&gt;
 [show_custom_field
     post_id="$#a_post#"
     field="<?php echo $fields; ?>"

@@ -293,7 +293,7 @@ EOD
 									foreach ( $field_indices as $field_index ) {
 										$data = (array) $the_field_data[$field];
                                         if ( in_array( 'tk_use_raw_value', explode( ';', $filter ) ) ) {
-                                            $value = get_data( $field, $group_index, $field_index, $post_id )['meta_value'];
+                                            $value = get_data2( $field, $group_index, $field_index, $post_id )['meta_value'];
                                         } else if ( $data['type'] === 'alt_numeric' ) {
                                             $value = alt_numeric_field::get_numeric( $field, $group_index, $field_index, $post_id );
                                         } else {

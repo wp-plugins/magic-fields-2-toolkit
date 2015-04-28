@@ -80,7 +80,7 @@ EOT;
     public static function get_url( $field_name, $group_index = 1, $field_index = 1, $post_id = null ) {
         global $post;
         if ( $post_id === null ) { $post_id = $post->ID; }
-        $data = get_data( $field_name, $group_index, $field_index, $post_id );
+        $data = get_data2( $field_name, $group_index, $field_index, $post_id );
         $value = $data['meta_value'];
         $target = '_' . $data['options']['target'];
         $label = _mf2tk_get_optional_field( $field_name, $group_index, $field_index, $post_id, self::$suffix_label );

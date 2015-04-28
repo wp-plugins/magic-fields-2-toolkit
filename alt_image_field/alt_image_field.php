@@ -4,6 +4,7 @@ class alt_image_field extends mf_custom_fields {
 
     private static $suffix_caption = '_mf2tk_caption';
     private static $suffix_link    = '_mf2tk_link';
+    private static $suffix_hover   = '_mf2tk_hover';
     
     public function _update_description(){
         global $mf_domain;
@@ -67,6 +68,39 @@ class alt_image_field extends mf_custom_fields {
                     'value'       =>  '',
                     'div_class'   =>  '',
                     'class'       =>  ''
+                ),
+                'popup_width'  => array(
+                    'type'        =>  'text',
+                    'id'          =>  'popup_width',
+                    'label'       =>  __( 'Mouseover Popup Width', $mf_domain ),
+                    'name'        =>  'mf_field[option][popup_width]',
+                    'default'     =>  '320',
+                    'description' =>  'mouseover popup width in pixels',
+                    'value'       =>  '320',
+                    'div_class'   =>  '',
+                    'class'       =>  ''
+                ),
+                'popup_height'  => array(
+                    'type'        =>  'text',
+                    'id'          =>  'popup_height',
+                    'label'       =>  __( 'Mouseover Popup Height', $mf_domain ),
+                    'name'        =>  'mf_field[option][popup_height]',
+                    'default'     =>  '240',
+                    'description' =>  'mouseover popup height in pixels',
+                    'value'       =>  '240',
+                    'div_class'   =>  '',
+                    'class'       =>  ''
+                ),
+                'popup_style'  => array(
+                    'type'        =>  'text',
+                    'id'          =>  'popup_style',
+                    'label'       =>  __( 'Mouseover Popup Style', $mf_domain ),
+                    'name'        =>  'mf_field[option][popup_style]',
+                    'default'     =>  'background-color:white;border:2px solid black;',
+                    'description' =>  'mouseover popup style',
+                    'value'       =>  'background-color:white;border:2px solid black;',
+                    'div_class'   =>  '',
+                    'class'       =>  ''
                 )
             )
         );
@@ -92,6 +126,11 @@ class alt_image_field extends mf_custom_fields {
         $link_input_name = sprintf( 'magicfields[%s][%d][%d]', $link_field_name, $group_index, $field_index );
         $link_input_value = ( !empty( $mf_post_values[$link_field_name][$group_index][$field_index] ) )
             ? $mf_post_values[$link_field_name][$group_index][$field_index] : '';
+        #set up hover field
+        $hover_field_name = $field['name'] . self::$suffix_hover;
+        $hover_input_name = sprintf( 'magicfields[%s][%d][%d]', $hover_field_name, $group_index, $field_index );
+        $hover_input_value = ( !empty( $mf_post_values[$hover_field_name][$group_index][$field_index] ) )
+            ? $mf_post_values[$hover_field_name][$group_index][$field_index] : '';
         $index = $group_index === 1 && $field_index === 1 ? '' : "<$group_index,$field_index>";
         $output = <<<EOD
 <div class="text_field_mf">
@@ -130,6 +169,15 @@ class alt_image_field extends mf_custom_fields {
                 window.open(this.parentNode.querySelector('input[type=\'url\']').value,'_blank');">Test Load</button>
         </div>
     </div>
+    <!-- optional hover field -->
+    <div class="mf2tk-field-input-optional">
+        <button class="mf2tk-field_value_pane_button">Open</button>
+        <h6>Optional Mouseover Popup for Image</h6>
+        <div class="mf2tk-field_value_pane" style="display:none;clear:both;">
+            <textarea name="$hover_input_name" rows="8" cols="80"
+                placeholder="Enter post content fragment with show_custom_field and/or show_macro shortcodes. This will be displayed as a popup when the mouse is over the image. Although this could be plain HTML, using a reusable content template is probably more convenient.">$hover_input_value</textarea>
+        </div>
+    </div>
     <!-- usage instructions -->    
     <div class="mf2tk-field-input-optional">
         <button class="mf2tk-field_value_pane_button">Open</button>
@@ -161,18 +209,38 @@ EOD;
     }
   
     static function get_image( $field_name, $group_index = 1, $field_index = 1, $post_id = NULL, $atts = array() ) {
-        $data = get_data( $field_name, $group_index, $field_index, $post_id );
+        global $post;
+        if ( !$post_id ) { $post_id = $post->ID; }
+        $data = get_data2( $field_name, $group_index, $field_index, $post_id );
         $width  = !empty( $atts['width'] )  ? $atts['width']  : $data['options']['max_width'];
         $height = !empty( $atts['height'] ) ? $atts['height'] : $data['options']['max_height'];
+        $popup_width  = !empty( $atts['popup_width'] )  ? $atts['popup_width']  : $data['options']['popup_width'];
+        $popup_height = !empty( $atts['popup_height'] ) ? $atts['popup_height'] : $data['options']['popup_height'];
+        $popup_style  = !empty( $atts['popup_style'] )  ? $atts['popup_style']  : $data['options']['popup_style'];
         # get optional caption
         $caption = _mf2tk_get_optional_field( $field_name, $group_index, $field_index, $post_id, self::$suffix_caption );
         $link    = _mf2tk_get_optional_field( $field_name, $group_index, $field_index, $post_id, self::$suffix_link    );
+        $hover   = _mf2tk_get_optional_field( $field_name, $group_index, $field_index, $post_id, self::$suffix_hover   );
+        $hover   = Magic_Fields_2_Toolkit_Dumb_Macros::do_macro( [ 'post' => $post_id ], $hover );
         $attrWidth  = $width  ? " width=\"$width\""   : '';
         $attrHeight = $height ? " height=\"$height\"" : '';
+        if ( $hover ) {
+            $hover_class = 'mf2tk-hover';
+            $overlay = <<<EOD
+<div class="mf2tk-overlay"
+    style="display:none;position:absolute;z-index:10000;text-align:center;width:{$popup_width}px;height:{$popup_height}px;{$popup_style}">
+    $hover
+</div>
+EOD;
+        } else {
+            $hover_class = '';
+            $overlay = '';
+        }
         $html = <<<EOD
-            <div style="display:inline-block;width:{$width}px;padding:0px;">
-                <a href="$link" target="_blank"><img src="$data[meta_value]"{$attrWidth}{$attrHeight}></a>
-            </div>
+<div class="$hover_class" style="display:inline-block;width:{$width}px;padding:0px;">
+    <a href="$link" target="_blank"><img src="$data[meta_value]"{$attrWidth}{$attrHeight}></a>
+    $overlay
+</div>
 EOD;
         # attach optional caption
         if ( $caption ) {
@@ -185,7 +253,7 @@ EOD;
                 return str_replace( $matches[1], "width:{$width}px;max-width:100%", $matches[0] );  
             }, $html, 1 );
             $html = preg_replace_callback( '/(<img\s.*?)>/', function( $matches ) {
-                return $matches[1] . 'style="margin:0;max-width:100%">';  
+                return $matches[1] . ' style="margin:0;max-width:100%">';  
             }, $html, 1 );
         }
         #error_log( '##### alt_image_field::get_image():$html=' . $html );
