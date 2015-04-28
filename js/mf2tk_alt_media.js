@@ -49,3 +49,36 @@ function mf2tkResizeVideo(id,aspectRatio,doWidth){
   };
   f();
 };
+
+jQuery(document).ready(function(){
+    jQuery("div.mf2tk-hover").hover(
+        function(){
+            var jqThis=jQuery(this);
+            var overlay=jqThis.find("div.mf2tk-overlay");
+            var parent=jqThis.offsetParent();
+            var position=jqThis.position();
+            var overlayWidth=overlay.outerWidth();
+            var parentWidth=parent.outerWidth();
+            if(overlayWidth<parentWidth){
+                var x=position.left+(jqThis.outerWidth()-overlayWidth)/2;
+                if(x<0){
+                    x=0;
+                }else{
+                    var overflow=(x+overlayWidth)-parentWidth;
+                    if(overflow>0){x-=overflow;}
+                }
+            }else{
+            }
+            overlay[0].style.left=x+"px";
+            overlay[0].style.top=position.top+"px";
+            overlay.show();
+        },
+        function(){
+            jQuery(this).find("div.mf2tk-overlay").hide();
+        }
+    );
+    jQuery("div.mf2tk-hover div.mf2tk-overlay").click(function(e){
+        jQuery(this.parentNode).find("a")[0].click();
+    });
+});
+

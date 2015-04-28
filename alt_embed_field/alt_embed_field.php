@@ -137,8 +137,9 @@ EOD;
   
     static function get_embed( $field_name, $group_index = 1, $field_index = 1, $post_id = NULL, $max_width = NULL,
         $max_height = NULL ) {
-        global $wpdb;
-        $data = get_data( $field_name, $group_index, $field_index, $post_id );
+        global $wpdb, $post;
+        if ( !$post_id ) { $post_id = $post->ID; }
+        $data = get_data2( $field_name, $group_index, $field_index, $post_id );
         # get optional caption
         $caption = _mf2tk_get_optional_field( $field_name, $group_index, $field_index, $post_id, self::$suffix_caption );
         #error_log( '##### embed_field::get_embed():$caption=' . $caption );

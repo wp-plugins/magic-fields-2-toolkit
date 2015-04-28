@@ -14,7 +14,7 @@ $caption = _mf2tk_get_optional_field( $field_name, $group_index, $field_index, $
 $poster = _mf2tk_get_optional_field( $field_name, $group_index, $field_index, $post_id, self::$suffix_poster );
 
 # merge call attributes with magic field attributes
-$options = get_data( $field_name, $group_index, $field_index, $post_id )['options'];
+$options = get_data2( $field_name, $group_index, $field_index, $post_id )['options'];
 $defaults = array(
     'loop'     => $options['loop'] ? 'on' : 'off',
     'autoplay' => $options['autoplay'] ? 'on' : 'off',

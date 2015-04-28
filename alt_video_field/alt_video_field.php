@@ -137,9 +137,11 @@ class alt_video_field extends mf_custom_fields {
   
     
     static function get_video( $field_name, $group_index = 1, $field_index = 1, $post_id = NULL, $atts = array() ) {
+        global $post;
+        if ( !$post_id ) { $post_id = $post->ID; }
         $wp_get_media_extensions = 'wp_get_video_extensions';
         $wp_media_shortcode = 'wp_video_shortcode';
-        $data = get_data( $field_name, $group_index, $field_index, $post_id );
+        $data = get_data2( $field_name, $group_index, $field_index, $post_id );
         $invalid_atts = array();
         include WP_PLUGIN_DIR . '/magic-fields-2-toolkit/magic-fields-2-alt-media-get-template.php';
         #error_log( '##### alt_video_field::get_video():$html=' . $html );

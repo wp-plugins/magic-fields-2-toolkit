@@ -129,7 +129,7 @@ class alt_related_type_field extends mf_custom_fields {
                     - <button class="mf2tk-how-to-use">select,</button> copy and paste this into editor above in
                         <strong>Text</strong> mode
                 <li style="list-style:square inside">Call the PHP function:<br>
-                    get_data( "$field[name]", $group_index, $field_index, \$post_id )
+                    get_data2( "$field[name]", $group_index, $field_index, \$post_id )
             </ul>
         </div>
     </div>

@@ -123,9 +123,11 @@ class alt_audio_field extends mf_custom_fields {
     }
   
     static function get_audio( $field_name, $group_index = 1, $field_index = 1, $post_id = NULL, $atts = array() ) {
+        global $post;
+        if ( !$post_id ) { $post_id = $post->ID; }
         $wp_get_media_extensions = 'wp_get_audio_extensions';
         $wp_media_shortcode = 'wp_audio_shortcode';
-        $data = get_data( $field_name, $group_index, $field_index, $post_id );
+        $data = get_data2( $field_name, $group_index, $field_index, $post_id );
         $width  = !empty( $atts['width'] )  ? $atts['width']  : $data['options']['max_width'];
         $height = !empty( $atts['height'] ) ? $atts['height'] : $data['options']['max_height'];
         $attrWidth  = $width  ? " width=\"$width\""   : '';
@@ -154,7 +156,7 @@ EOD;
                 return str_replace( $matches[1], "width:{$width}px;max-width:100%", $matches[0] );  
             }, $html, 1 );
             $html = preg_replace_callback( '/(<img\s.*?)>/', function( $matches ) {
-                return $matches[1] . 'style="margin:0;max-width:100%">';  
+                return $matches[1] . ' style="margin:0;max-width:100%">';  
             }, $html, 1 );
         }
         #error_log( '##### alt_audio_field::get_audio():$html=' . $html );

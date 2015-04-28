@@ -27,7 +27,7 @@ if ( !function_exists( '_mf2tk_get_media_srcs' ) ) {
             return [];
         }
         # get main src
-        $src = get_data( $field_name, $group_index, $field_index, $post_id )['meta_value'];
+        $src = get_data2( $field_name, $group_index, $field_index, $post_id )['meta_value'];
         # get optional fallback
         $fallback = _mf2tk_get_optional_field( $field_name, $group_index, $field_index, $post_id,
             $class_name::$suffix_fallback );

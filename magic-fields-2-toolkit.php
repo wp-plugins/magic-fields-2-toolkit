@@ -519,10 +519,16 @@ EOD
                             : ( !empty( $id1 ) ? "Content template $id1 created."
                                 : "Error: Content template not created/updated." ) );
                     } ); # add_action( 'wp_ajax_mf2tk_update_content_macro', function() {
+                    # handle HTML fragments from post content editor shortcode tester
                     add_action( 'wp_ajax_mf2tk_eval_post_content', function() {
                         die( Magic_Fields_2_Toolkit_Dumb_Macros::do_macro( [ 'post' => $_POST['post_id'] ],
                             $_POST['post_content'] ) );
                     } ); # add_action( 'wp_ajax_mf2tk_eval_post_content', function() {
+                    # also allow access to post content shortcode evaluator from frontend
+                    add_action( 'wp_ajax_nopriv_mf2tk_eval_post_content', function() {
+                        die( Magic_Fields_2_Toolkit_Dumb_Macros::do_macro( [ 'post' => $_POST['post_id'] ],
+                            $_POST['post_content'] ) );
+                    } ); # add_action( 'wp_ajax_nopriv_mf2tk_eval_post_content', function() {
                 } #   if ( is_admin() ) {
             } #   if ( array_key_exists( 'dumb_macros', $options ) ) {
         }   # if ( is_array( $options ) ) {
@@ -549,3 +555,43 @@ EOD
 }
 
 new Magic_Fields_2_Toolkit_Init();
+
+# copied from magic-fields-2\mf_front_end.php and modified to fix this problem:
+# If you use the same field name in two different custom post types get_data is apparently returning the options of the first
+# entry in the wp_mf_custom_fields table with a matching field name ignoring the post type.
+# https://wordpress.org/support/topic/get_data-returns-wrong-options
+
+function get_data2( $field_name, $group_index=1, $field_index=1, $post_id ){
+  global $wpdb;
+
+  $field_name = str_replace(" ","_",$field_name);
+
+  $sql = sprintf(
+    "SELECT m.meta_id,w.meta_value,f.type,f.options,f.description,f.label " .
+    "FROM %s m " .
+    "JOIN %s w ON m.meta_id = w.meta_id " .
+    "JOIN %s f ON m.field_name = f.name " .
+    "JOIN %s p ON w.post_id = p.ID " .
+    "WHERE m.post_id = %d AND m.field_name = '%s' AND m.group_count = %d AND m.field_count = %d AND f.post_type = p.post_type",
+    MF_TABLE_POST_META,
+    $wpdb->postmeta,
+    MF_TABLE_CUSTOM_FIELDS,
+    $wpdb->posts,
+    $post_id,
+    $field_name,
+    $group_index,
+    $field_index
+  );
+
+  $result = $wpdb->get_row($sql,ARRAY_A);
+  
+  if( empty($result) ) return NULL;
+
+  $result['options'] = unserialize($result['options']);
+
+  if(is_serialized($result['meta_value'])){
+    $result['meta_value'] = unserialize( $result['meta_value'] );
+  }
+  
+  return $result;
+}
