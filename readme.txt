@@ -4,7 +4,7 @@ Donate link:
 Tags: shortcodes, templates, custom fields, post copier
 Requires at least: 3.6
 Tested up to: 4.2
-Stable tag: 0.5.8.1
+Stable tag: 0.5.8.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 A toolkit for the Magic Fields 2 plugin for CMS web design by non programmers.
@@ -72,6 +72,8 @@ Version 0.4.6 has a new default content macro for sortable tables. However, the 
 == Screenshots ==
 
 == Changelog ==
+= 0.5.8.2 =
+* fix the really annoying bug where the should be optional mouseover overlay had to be specified
 
 = 0.5.8.1 =
 * alt media fields now support showing popups on mouseover
@@ -334,3 +336,6 @@ added fields for embed, audio and video
 = 0.5.8.1 =
 * alt media fields now support showing popups on mouseover 
 * fix [problem](https://wordpress.org/support/topic/get_data-returns-wrong-options)with Magic Fields get_data function by replacing with function alt_get_data
+
+= 0.5.8.2 =
+* fix the really annoying bug where the should be optional mouseover overlay had to be specified
