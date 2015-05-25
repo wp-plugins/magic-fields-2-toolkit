@@ -221,10 +221,11 @@ EOD;
         $caption = _mf2tk_get_optional_field( $field_name, $group_index, $field_index, $post_id, self::$suffix_caption );
         $link    = _mf2tk_get_optional_field( $field_name, $group_index, $field_index, $post_id, self::$suffix_link    );
         $hover   = _mf2tk_get_optional_field( $field_name, $group_index, $field_index, $post_id, self::$suffix_hover   );
-        $hover   = Magic_Fields_2_Toolkit_Dumb_Macros::do_macro( [ 'post' => $post_id ], $hover );
         $attrWidth  = $width  ? " width=\"$width\""   : '';
         $attrHeight = $height ? " height=\"$height\"" : '';
+        # if mouseover popup specified let the containing div handle the hover event 
         if ( $hover ) {
+            $hover = Magic_Fields_2_Toolkit_Dumb_Macros::do_macro( [ 'post' => $post_id ], $hover );
             $hover_class = 'mf2tk-hover';
             $overlay = <<<EOD
 <div class="mf2tk-overlay"
