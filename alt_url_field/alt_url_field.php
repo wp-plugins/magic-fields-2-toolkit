@@ -22,7 +22,8 @@ class alt_url_field extends mf_custom_fields {
                                          'parent' => '_parent'
                                      ],
                     'add_empty'   => false,
-                    'description' => 'where to open the linked document',
+                    'description' => 'where to open the linked document - this value can be overridden by specifying' .
+                                     ' a "target" parameter with the "show_custom_field" shortcode',
                     'value'       => '',
                     'div_class'   => '',
                     'class'       => ''
@@ -32,13 +33,11 @@ class alt_url_field extends mf_custom_fields {
     }
   
     public function display_field( $field, $group_index = 1, $field_index = 1 ) {
-        global $mf_post_values;
         $value = array_key_exists( 'input_value', $field ) ? $field['input_value'] : '';
         $label_field_name = $field['name'] . self::$suffix_label;
         $label_field_id = "mf2tk-$label_field_name-$group_index-$field_index";
         $label_input_name = "magicfields[$label_field_name][$group_index][$field_index]";
-        $label_input_value = ( !empty( $mf_post_values[$label_field_name][$group_index][$field_index] ) )
-            ? $mf_post_values[$label_field_name][$group_index][$field_index] : '';
+        $label_input_value = mf2tk\get_mf_post_value( $label_field_name, $group_index, $field_index, '' );
         $index = $group_index === 1 && $field_index === 1 ? '' : "<$group_index,$field_index>";
         return <<<EOT
 <div class="text_field_mf">
@@ -77,13 +76,15 @@ class alt_url_field extends mf_custom_fields {
 EOT;
     }
     
-    public static function get_url( $field_name, $group_index = 1, $field_index = 1, $post_id = null ) {
+    public static function get_url( $field_name, $group_index = 1, $field_index = 1, $post_id = NULL, $atts = [ ] ) {
         global $post;
-        if ( $post_id === null ) { $post_id = $post->ID; }
-        $data = get_data2( $field_name, $group_index, $field_index, $post_id );
+        if ( $post_id === NULL ) {
+            $post_id = $post->ID;
+        }
+        $data = mf2tk\get_data2( $field_name, $group_index, $field_index, $post_id );
         $value = $data['meta_value'];
-        $target = '_' . $data['options']['target'];
-        $label = _mf2tk_get_optional_field( $field_name, $group_index, $field_index, $post_id, self::$suffix_label );
+        $target = '_' . mf2tk\get_data_option( 'target', $atts, $data['options'], '_blank' );
+        $label = mf2tk\get_optional_field( $field_name, $group_index, $field_index, $post_id, self::$suffix_label );
         return "<a href=\"$value\" target=\"$target\">$label</a>";
     }
 

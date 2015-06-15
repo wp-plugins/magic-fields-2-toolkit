@@ -16,6 +16,8 @@
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+namespace {
+  
 class Magic_Fields_2_Toolkit_Init {
     public function __construct() {
         global $wpdb;
@@ -32,14 +34,12 @@ and activated.</div>
         add_action( 'admin_enqueue_scripts', function( $hook ) {
             global $wp_scripts;
             if ( $hook !== 'post.php' && $hook !== 'post-new.php' ) { return; }
-            wp_enqueue_style( 'admin', plugins_url( 'admin.css', __FILE__ ) );
-            wp_enqueue_script( 'mf2tk_alt_media_admin', plugins_url( 'magic-fields-2-toolkit/js/mf2tk_alt_media_admin.js' ),
-                array( 'jquery' ) );
-            wp_enqueue_script( 'mf2tk_alt_media', plugins_url( 'magic-fields-2-toolkit/js/mf2tk_alt_media.js' ),
-                array( 'jquery' ) );
+            wp_enqueue_style( 'admin', plugins_url( 'css/admin.css', __FILE__ ) );
+            wp_enqueue_script( 'mf2tk_admin', plugins_url( 'js/mf2tk_admin.js', __FILE__ ), [ 'jquery' ] );
+            wp_enqueue_script( 'mf2tk_alt_media', plugins_url( 'js/mf2tk_alt_media.js', __FILE__ ), [ 'jquery' ] );
             $options = get_option( 'magic_fields_2_toolkit_enabled', [ ] );
             $mf2tkDisableHowToUse = array_key_exists( 'dumb_shortcodes', $options ) ? 'false' : 'true';
-            $wp_scripts->add_data( 'mf2tk_alt_media_admin', 'data', "var mf2tkDisableHowToUse=$mf2tkDisableHowToUse;" );
+            $wp_scripts->add_data( 'mf2tk_admin', 'data', "var mf2tkDisableHowToUse=$mf2tkDisableHowToUse;" );
         } );
         include( dirname(__FILE__) . '/magic-fields-2-toolkit-settings.php' );
         $options = get_option( 'magic_fields_2_toolkit_enabled', [ ] );
@@ -55,19 +55,8 @@ and activated.</div>
                     . '/magic-fields-2-dumb-shortcodes-kai.php' );
             }
             if ( array_key_exists( 'dumb_macros', $options ) ) {
-                #include( dirname(__FILE__)
-                #    . '/magic-fields-2-dumb-macros-kai.php' );
-                #include( dirname(__FILE__)
-                #    . '/magic-fields-2-field-spec-to-field-list.php' );
-                include( dirname(__FILE__)
-                    . '/magic-fields-2-dumb-macros.php' );
+                include( dirname( __FILE__ ) . '/magic-fields-2-dumb-macros.php' );
                 # posts some pre-defined content macros as useful examples
-				#if ( !get_posts( array(
-				#    'name' => 'table',
-				#	'post_type' => 'content_macro',
-				#	#'post_status' => 'publish',
-				#	'posts_per_page' => 1
-				#) ) ) {
                 if ( !$wpdb->get_var( <<<EOD
                     SELECT COUNT(*) FROM $wpdb->posts WHERE post_type = 'content_macro'
                         AND post_title = 'Table' AND post_status = 'publish'
@@ -111,12 +100,6 @@ EOD
 EOD
 					) );
 				}
-				#if ( !get_posts( array(
-				#    'name' => 'horizontal-table-for-group',
-				#	'post_type' => 'content_macro',
-				#	#'post_status' => 'publish',
-				#	'posts_per_page' => 1
-				#) ) ) {
                 if ( !$wpdb->get_var( <<<EOD
                     SELECT COUNT(*) FROM $wpdb->posts WHERE post_type = 'content_macro'
                         AND post_title = 'Horizontal Table for a Group' AND post_status = 'publish'
@@ -155,12 +138,6 @@ EOD
 EOD
 					) );
 				}
-				#if ( !get_posts( array(
-				#    'name' => 'horizontal-table-for-group-with-group-columns',
-				#	'post_type' => 'content_macro',
-				#	#'post_status' => 'publish',
-				#	'posts_per_page' => 1
-				#) ) ) {
                 if ( !$wpdb->get_var( <<<EOD
                     SELECT COUNT(*) FROM $wpdb->posts WHERE post_type = 'content_macro'
                         AND post_title = 'Horizontal Table for a Group with Group Columns' AND post_status = 'publish'
@@ -202,12 +179,6 @@ EOD
 EOD
 					) );
 				}
-				#if ( !get_posts( array(
-				#    'name' => 'boxes-by-group',
-				#	'post_type' => 'content_macro',
-				#	#'post_status' => 'publish',
-				#	'posts_per_page' => 1
-				#) ) ) {
                 if ( !$wpdb->get_var( <<<EOD
                     SELECT COUNT(*) FROM $wpdb->posts WHERE post_type = 'content_macro'
                         AND post_title = 'Boxes by Group' AND post_status = 'publish'
@@ -387,150 +358,10 @@ EOD
                 } );
             }
             if ( array_key_exists( 'alt_video_field', $options ) || array_key_exists( 'alt_audio_field', $options )
-                || array_key_exists( 'alt_embed_field', $options ) || array_key_exists( 'alt_image_field', $options ) ) {
+                || array_key_exists( 'alt_embed_field', $options ) || array_key_exists( 'alt_image_field', $options )
+                || array_key_exists( 'alt_url_field', $options ) ) {
                 include_once dirname( __FILE__ ) . '/magic-fields-2-get-optional-field.php';
             }
-            if ( array_key_exists( 'dumb_macros', $options ) ) {
-                add_action( 'admin_print_footer_scripts', function() {
-                    global $hook_suffix;
-                    if ( $hook_suffix === 'post.php' || $hook_suffix === 'post-new.php' ) {
-?>
-<script type="text/javascript">
-    jQuery(document).ready(function(){
-        var a=document.createElement("a");
-        a.className="button";
-        a.href="#";
-        a.textContent="Save as Template";
-        jQuery("a#insert-media-button").after(a);
-        jQuery(a).click(function(){
-            var slug=jQuery("div#slugdiv input#post_name").val();
-            var title=jQuery("div#post-body-content div#titlediv input#title").val();
-            var text=jQuery("div#post-body-content div#wp-content-editor-container textarea#content").val();
-            jQuery.post(ajaxurl,{action:'mf2tk_update_content_macro',slug:slug,title:title,text:text},function(r){
-                alert(r);
-            });
-        });
-        var divTemplate=jQuery("div#mf2tk-alt-template");
-        divTemplate.find("button#button-mf2tk-alt-template-close").click(function(){
-            this.parentNode.style.display="none";
-        });
-        var a=document.createElement("a");
-        a.className="button";
-        a.href="#";
-        a.textContent="Insert Template";
-        jQuery("a#insert-media-button").after(a);
-        jQuery(a).click(function(){
-            var windowWidth=jQuery(window).width();
-            var windowHeight=jQuery(window).height();
-            var width=windowWidth>800?800:Math.floor(windowWidth*9/10);
-            var height=Math.floor(windowHeight*9/10);
-            var style=divTemplate[0].style;
-            style.position="fixed";
-            style.width=width+"px";
-            style.height=height+"px";
-            style.overflow="auto";
-            style.left=Math.floor((windowWidth-width)/2)+"px";
-            style.top=Math.floor((windowHeight-height)/2)+"px";
-            style.backgroundColor="lightgray";
-            style.border="3px solid black";
-            style.zIndex=100000;
-            style.display="block";
-        });
-        var divShortcode=jQuery("div#mf2tk-shortcode-tester");
-        divShortcode.find("button#button-mf2tk-shortcode-tester-close").click(function(){
-            this.parentNode.style.display="none";
-        });
-        divShortcode.find("button#m2tfk-shortcode-tester-evaluate").click(function(){
-            var post_id=jQuery("form#post input#post_ID[type='hidden']").val();
-            var source=jQuery("div#mf2tk-shortcode-tester div#m2tfk-shortcode-tester-area-source textarea").val();
-            jQuery.post(ajaxurl,{action:'mf2tk_eval_post_content',post_id:post_id,post_content:source},function(r){
-                jQuery("div#mf2tk-shortcode-tester div#m2tfk-shortcode-tester-area-result textarea").val(r);
-            });
-        });
-        divShortcode.find("button#m2tfk-shortcode-tester-show-both").click(function(){
-            divShortcode.find("div#m2tfk-shortcode-tester-area-source")
-                .css({display:"block",width:"49%",float:"left","margin-left":"3px"}).find("textarea").css("width","99%");
-            divShortcode.find("div#m2tfk-shortcode-tester-area-result")
-                .css({display:"block",width:"49%",float:"right","margin-right":"3px"}).find("textarea").css("width","99%");
-        });
-        divShortcode.find("button#m2tfk-shortcode-tester-show-source").click(function(){
-            divShortcode.find("div#m2tfk-shortcode-tester-area-source")
-                .css({display:"block",width:"99%",float:"none","margin-left":"auto","margin-right":"auto"})
-                .find("textarea").css("width","99%");
-            divShortcode.find("div#m2tfk-shortcode-tester-area-result").css("display","none");
-        });
-        divShortcode.find("button#m2tfk-shortcode-tester-show-result").click(function(){
-            divShortcode.find("div#m2tfk-shortcode-tester-area-source").css("display","none");
-            divShortcode.find("div#m2tfk-shortcode-tester-area-result")
-                .css({display:"block",width:"99%",float:"none","margin-left":"auto","margin-right":"auto"})
-                .find("textarea").css("width","99%");
-        });
-        var a=document.createElement("a");
-        a.className="button";
-        a.href="#";
-        a.textContent="Shortcode Tester";
-        jQuery("a#insert-media-button").after(a);
-        jQuery(a).click(function(){
-            var windowWidth=jQuery(window).width();
-            var windowHeight=jQuery(window).height();
-            var width=Math.floor(windowWidth*9/10);
-            var height=Math.floor(windowHeight*9/10);
-            var style=divShortcode[0].style;
-            style.position="fixed";
-            style.width=width+"px";
-            style.height=height+"px";
-            style.overflow="auto";
-            style.left=Math.floor((windowWidth-width)/2)+"px";
-            style.top=Math.floor((windowHeight-height)/2)+"px";
-            style.backgroundColor="lightgray";
-            style.border="4px solid black";
-            style.zIndex=100000;
-            style.display="block";
-            jQuery("div#mf2tk-shortcode-tester div#m2tfk-shortcode-tester-area-source textarea").val("");
-            jQuery("div#mf2tk-shortcode-tester div#m2tfk-shortcode-tester-area-result textarea").val("");
-        });
-    });
-</script>
-<?php
-                    }   # if ( $hook_suffix === 'post.php' ) {
-                } );   # add_action( 'admin_print_footer_scripts', function() {
-                if ( is_admin() ) {
-                    add_action( 'wp_ajax_mf2tk_update_content_macro', function() {
-                        global $wpdb;
-                        $ids = $wpdb->get_col( <<<EOD
-SELECT ID FROM $wpdb->posts WHERE post_type = 'content_macro'
-    AND post_title = '$_POST[title]' AND post_status = 'publish'
-EOD
-                        );
-                        $post = [
-                            'post_type' => 'content_macro',
-                            'post_name' => $_POST['slug'],
-                            'post_title' => $_POST['title'],
-                            'post_status' => 'publish',
-                            'post_content' => $_POST['text']
-                        ];
-                        if ( $ids ) {
-                            $post['ID'] = $ids[0];
-                            $id0 = wp_update_post( $post );
-                        } else {
-                            $id1 = wp_insert_post( $post );
-                        }
-                        die( !empty ( $id0 ) ? "Content template $id0 updated."
-                            : ( !empty( $id1 ) ? "Content template $id1 created."
-                                : "Error: Content template not created/updated." ) );
-                    } ); # add_action( 'wp_ajax_mf2tk_update_content_macro', function() {
-                    # handle HTML fragments from post content editor shortcode tester
-                    add_action( 'wp_ajax_mf2tk_eval_post_content', function() {
-                        die( Magic_Fields_2_Toolkit_Dumb_Macros::do_macro( [ 'post' => $_POST['post_id'] ],
-                            $_POST['post_content'] ) );
-                    } ); # add_action( 'wp_ajax_mf2tk_eval_post_content', function() {
-                    # also allow access to post content shortcode evaluator from frontend
-                    add_action( 'wp_ajax_nopriv_mf2tk_eval_post_content', function() {
-                        die( Magic_Fields_2_Toolkit_Dumb_Macros::do_macro( [ 'post' => $_POST['post_id'] ],
-                            $_POST['post_content'] ) );
-                    } ); # add_action( 'wp_ajax_nopriv_mf2tk_eval_post_content', function() {
-                } #   if ( is_admin() ) {
-            } #   if ( array_key_exists( 'dumb_macros', $options ) ) {
         }   # if ( is_array( $options ) ) {
         #add_filter( 'plugin_row_meta', function( $plugin_meta, $plugin_file, $plugin_data, $status ) {
         #    #error_log( '##### filter:plugin_row_meta:$plugin_file=' . $plugin_file );
@@ -556,34 +387,37 @@ EOD
 
 new Magic_Fields_2_Toolkit_Init();
 
+# global functions are bad especially if they have common names but for compatibility with old code we need to keep
+# these functions for now. should replace these functions with the namespace qualified version
+
+function get_data2( $field_name, $group_index = 1, $field_index = 1, $post_id ) {
+    return mf2tk\get_data2( $field_name, $group_index, $field_index, $post_id );
+}
+
+}
+
+namespace mf2tk {
+  
+# helper functions
+
 # copied from magic-fields-2\mf_front_end.php and modified to fix this problem:
 # If you use the same field name in two different custom post types get_data is apparently returning the options of the first
 # entry in the wp_mf_custom_fields table with a matching field name ignoring the post type.
 # https://wordpress.org/support/topic/get_data-returns-wrong-options
 
-function get_data2( $field_name, $group_index=1, $field_index=1, $post_id ){
+function get_data2( $field_name, $group_index = 1, $field_index = 1, $post_id ) {
   global $wpdb;
 
   $field_name = str_replace(" ","_",$field_name);
 
-  $sql = sprintf(
-    "SELECT m.meta_id,w.meta_value,f.type,f.options,f.description,f.label " .
-    "FROM %s m " .
-    "JOIN %s w ON m.meta_id = w.meta_id " .
-    "JOIN %s f ON m.field_name = f.name " .
-    "JOIN %s p ON w.post_id = p.ID " .
-    "WHERE m.post_id = %d AND m.field_name = '%s' AND m.group_count = %d AND m.field_count = %d AND f.post_type = p.post_type",
-    MF_TABLE_POST_META,
-    $wpdb->postmeta,
-    MF_TABLE_CUSTOM_FIELDS,
-    $wpdb->posts,
-    $post_id,
-    $field_name,
-    $group_index,
-    $field_index
-  );
-
-  $result = $wpdb->get_row($sql,ARRAY_A);
+  $sql = $wpdb->prepare(
+    'SELECT m.meta_id, w.meta_value, f.type, f.options, f.description, f.label FROM ' . MF_TABLE_POST_META . ' m ' .
+    "JOIN $wpdb->postmeta w ON m.meta_id = w.meta_id JOIN " . MF_TABLE_CUSTOM_FIELDS . ' f ON m.field_name = f.name ' .
+    "JOIN $wpdb->posts p ON w.post_id = p.ID " .
+    "WHERE m.post_id = %d AND m.field_name = %s AND m.group_count = %d AND m.field_count = %d AND f.post_type = p.post_type",
+    $post_id, $field_name, $group_index, $field_index );
+    
+  $result = $wpdb->get_row( $sql, ARRAY_A );
   
   if( empty($result) ) return NULL;
 
@@ -595,3 +429,52 @@ function get_data2( $field_name, $group_index=1, $field_index=1, $post_id ){
   
   return $result;
 }
+
+# get_data_option() gets the value for $option and does not generate an error if the option is missing which can happen
+# $option is the option name, $atts are the shortcode parameters, $opts are the field options i.e., get_data2()['options']
+# $opts_name is the name for $opts - needed when $atts option name is different from $opts option name
+# get_data_option() searches the shortcode parameters $atts, then the field options get_data2()['options'] for $option.
+# If $option is not found then $default is returned. 
+ 
+function get_data_option( $option, &$atts, &$opts, $default = "", $opts_name = NULL ) {
+    if ( is_array( $atts ) && array_key_exists( $option, $atts ) ) {
+        return $atts[ $option ];
+    }
+    # the $opts name can be different from the $atts name so
+    if ( $opts_name === NULL ) {
+        $opts_name = $option;
+    }
+    if ( is_array( $opts) && array_key_exists( $opts_name, $opts ) ) {
+        return $opts[ $opts_name ];
+    }
+    return $default;
+}
+
+# get_mf_post_value() is a wrapper to access $mf_post_values and handle the non existant key case gracefully
+
+function get_mf_post_value( $name, $group_index, $field_index, $default ) {
+    global $mf_post_values;
+    if ( isset( $mf_post_values[ $name ][ $group_index ][ $field_index ] ) ) {
+        return $mf_post_values[ $name ][ $group_index ][ $field_index ];
+    }
+    return $default;
+}
+
+# re_align translates an align option into a standard WordPress align option
+
+function re_align( $option ) {
+    if ( $option === 'center' ) { return 'aligncenter'; }
+    if ( $option === 'left'   ) { return 'alignleft';   }
+    if ( $option === 'right'  ) { return 'alignright';  }
+    return $option;
+}
+
+# MF2 unfortunately defines some very badly named global functions
+# These should be replaced with a namespaced version 
+
+function get( $field_name, $group_index = 1, $field_index = 1, $post_id = NULL ) {
+    return \get( $field_name, $group_index, $field_index, $post_id );
+}
+
+}
+

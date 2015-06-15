@@ -552,7 +552,7 @@ add_action( 'widgets_init', function() {
 
 if ( is_admin() ) {
     add_action( 'admin_enqueue_scripts', function() {
-        wp_enqueue_style( 'admin', plugins_url( 'admin.css', __FILE__ ) );
+        wp_enqueue_style( 'admin', plugins_url( 'css/admin.css', __FILE__ ) );
     } );
     add_action('admin_head', function() {
 ?>
@@ -1136,7 +1136,7 @@ EOD
 }   # if ( is_admin() ) {
 else {
     add_action( 'wp_enqueue_scripts', function() {
-        wp_enqueue_style( 'search', plugins_url( 'search.css', __FILE__ ) );
+        wp_enqueue_style( 'search', plugins_url( 'css/search.css', __FILE__ ) );
         wp_enqueue_script( 'jquery' );
     } );
     add_action( 'parse_query', function( &$query ) {
@@ -1350,11 +1350,15 @@ EOD
         }, 10, 2 );
         add_action( 'wp_enqueue_scripts', function() {
             # use post type specific css file if it exists otherwise use the default css file
-            if ( file_exists( dirname( __FILE__ ) . "/search-results-table-$_REQUEST[post_type].css") ) {
+            if ( file_exists( dirname( __FILE__ ) . "/css/search-results-table-$_REQUEST[post_type].css") ) {
+                wp_enqueue_style( 'search_results_table', plugins_url( "css/search-results-table-$_REQUEST[post_type].css",
+                  __FILE__ ) );
+            } else if ( file_exists( dirname( __FILE__ ) . "/search-results-table-$_REQUEST[post_type].css") ) {
+                # older version stored .css files directly in plugin directory
                 wp_enqueue_style( 'search_results_table', plugins_url( "search-results-table-$_REQUEST[post_type].css",
                   __FILE__ ) );
             } else {
-                wp_enqueue_style( 'search_results_table', plugins_url( 'search-results-table.css',
+                wp_enqueue_style( 'search_results_table', plugins_url( 'css/search-results-table.css',
                   __FILE__ ) );
             }
         } );
@@ -1364,9 +1368,7 @@ EOD
             if ( !class_exists( 'Magic_Fields_2_Toolkit_Dumb_Shortcodes' ) ) {
                 include_once( dirname( __FILE__ ) . '/magic-fields-2-dumb-shortcodes-kai.php' );
             }
-            if ( !class_exists( 'Magic_Fields_2_Toolkit_Dumb_Macros' ) ) {
-                include_once( dirname( __FILE__ ) . '/magic-fields-2-dumb-macros.php' );
-            }
+            include_once( dirname( __FILE__ ) . '/magic-fields-2-dumb-macros.php' );
             # get the list of posts
             if ( !$wp_query->posts ) {
                 get_header();
@@ -1432,7 +1434,7 @@ EOD;
             # finally output all the HTML
             # first do the header
             wp_enqueue_script( 'jquery' );
-            wp_enqueue_script( 'jquery.tablesorter.min', plugins_url( 'jquery.tablesorter.min.js', __FILE__ ),
+            wp_enqueue_script( 'jquery.tablesorter.min', plugins_url( 'js/jquery.tablesorter.min.js', __FILE__ ),
                 array( 'jquery' ) );
             add_action( 'wp_head', function () {
 ?>

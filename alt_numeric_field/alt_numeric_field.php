@@ -14,8 +14,9 @@ class alt_numeric_field extends mf_custom_fields {
                     'id'          => 'numeric_precision',
                     'label'       => __( 'Precision', 'mf2tk' ),
                     'name'        => 'mf_field[option][precision]',
-                    'description' => __( 'number of decimal places; 0 for integers - second parameter to number_format()',
-                                         'mf2tk' ),
+                    'description' => __( 'number of decimal places; 0 for integers - second parameter to PHP\'s number_format()' .
+                                     ' - this value can be overridden by specifying a "precision" parameter' .
+                                     ' with the "show_custom_field" shortcode', 'mf2tk' ),
                     'value'       => '2',
                     'div_class'   => '',
                     'class'       => ''
@@ -26,8 +27,10 @@ class alt_numeric_field extends mf_custom_fields {
                     'label'       => __( 'Unit of Measurement', 'mf2tk' ),
                     'name'        => 'mf_field[option][unit]',
                     'description' => esc_attr__( 'unit of measurement, e.g. "in", "sq mi", " fl oz", ... or "%" ' .
-                                         'or counter e.g. "item:items", " man: men" given as singular:plural pair ' .
-                                         '- really just a suffix to append to the value', 'mf2tk' ),
+                                     'or counter e.g. "item:items", " man: men" given as singular:plural pair ' .
+                                     '- really just a suffix to append to the value' .
+                                     ' - this value can be overridden by specifying a "unit" parameter' .
+                                     ' with the "show_custom_field" shortcode', 'mf2tk' ),
                     'value'       => '',
                     'div_class'   => '',
                     'class'       => ''
@@ -38,8 +41,10 @@ class alt_numeric_field extends mf_custom_fields {
                     'label'       => __( 'Currency', 'mf2tk' ),
                     'name'        => 'mf_field[option][currency]',
                     'description' => __( 'currency code e.g. $, &amp;euro;, &amp;#128;, &amp;#x80; ... ' .
-                                         '- really just a prefix to prepend to the value', 'mf2tk' ),
-                    'value'       => '$',
+                                     '- really just a prefix to prepend to the value' .
+                                     ' - this value can be overridden by specifying a "currency" parameter' .
+                                     ' with the "show_custom_field" shortcode', 'mf2tk' ),
+                    'value'       => '',
                     'div_class'   => '',
                     'class'       => ''
                 ],
@@ -78,7 +83,9 @@ class alt_numeric_field extends mf_custom_fields {
                     'id'          => 'numeric_decimal_point',
                     'label'       => __( 'Decimal Point', 'mf2tk' ),
                     'name'        => 'mf_field[option][decimal_point]',
-                    'description' => __( 'The separator for the decimal point - third parameter to number_format()', 'mf2tk' ),
+                    'description' => __( 'The separator for the decimal point - third parameter to PHP\'s number_format()' .
+                                     ' - this value can be overridden by specifying a "decimal_point" parameter' .
+                                     ' with the "show_custom_field" shortcode', 'mf2tk' ),
                     'value'       => '.',
                     'div_class'   => '',
                     'class'       => ''
@@ -88,7 +95,9 @@ class alt_numeric_field extends mf_custom_fields {
                     'id'          => 'numeric_thousands_separator',
                     'label'       => __( 'Thousands Separator', 'mf2tk' ),
                     'name'        => 'mf_field[option][thousands_separator]',
-                    'description' => __( 'The thousands separator - fourth parameter to number_format()', 'mf2tk' ),
+                    'description' => __( 'The thousands separator - fourth parameter to PHP\'s number_format()' .
+                                     ' - this value can be overridden by specifying a "thousands_separator" parameter' .
+                                     ' with the "show_custom_field" shortcode', 'mf2tk' ),
                     'value'       => ',',
                     'div_class'   => '',
                     'class'       => ''
@@ -145,20 +154,28 @@ class alt_numeric_field extends mf_custom_fields {
 EOT;
     }
     
-    public static function get_numeric( $field_name, $group_index = 1, $field_index = 1, $post_id = null ) {
+    public static function get_numeric( $field_name, $group_index = 1, $field_index = 1, $post_id = NULL, $atts = [ ] ) {
         global $post;
-        if ( $post_id === null ) { $post_id = $post->ID; }
-        $data = get_data2( $field_name, $group_index, $field_index, $post_id );
-        $value   = $data['meta_value'];
-        $options = $data['options'];
-        $unit    = array_key_exists( 'unit', $options ) ? $options['unit'] : '';
+        if ( $post_id === NULL ) {
+            $post_id = $post->ID;
+        }
+        $data = mf2tk\get_data2( $field_name, $group_index, $field_index, $post_id );
+        $value = $data[ 'meta_value' ];
+        $opts  = $data[ 'options'    ];
+        $currency            = mf2tk\get_data_option( 'currency',            $atts, $opts      );
+        $precision           = mf2tk\get_data_option( 'precision',           $atts, $opts, 2   );
+        $decimal_point       = mf2tk\get_data_option( 'decimal_point',       $atts, $opts, '.' );
+        $thousands_separator = mf2tk\get_data_option( 'thousands_separator', $atts, $opts, ',' );
+        $unit                = mf2tk\get_data_option( 'unit',                $atts, $opts      );
         if ( strpos( $unit, ':' ) ) {
             $unit = explode( ':', $unit ); 
-            if ( $value == 1 ) { $unit = $unit[0]; }
-            else { $unit = $unit[1]; }
+            if ( $value == 1 ) {
+                $unit = $unit[0];
+            } else {
+                $unit = $unit[1];
+            }
         }        
-        return $options['currency']. number_format( (double) $value, $options['precision'], $options['decimal_point'],
-            $options['thousands_separator'] ) . $unit;
+        return $currency . number_format( (double) $value, $precision, $decimal_point, $thousands_separator ) . $unit;
     }
 
 }

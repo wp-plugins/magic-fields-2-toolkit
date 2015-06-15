@@ -61,7 +61,7 @@ class Magic_Fields_2_Toolkit_Settings {
     }
     public function __construct() {
         add_action( 'admin_enqueue_scripts', function( ) {
-            wp_enqueue_style( 'admin', plugins_url( 'admin.css', __FILE__ ) );
+            wp_enqueue_style( 'admin', plugins_url( 'css/admin.css', __FILE__ ) );
             wp_enqueue_style( 'dashicons' );
         } );
         add_action( 'admin_init', function() {

@@ -23,6 +23,8 @@
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+namespace {
+
 class Magic_Fields_2_Toolkit_Dumb_Macros {
     
     public static $do_macro;
@@ -41,60 +43,175 @@ class Magic_Fields_2_Toolkit_Dumb_Macros {
                 'menu_position' => 50
             ) );
         } );
-        add_filter( 'post_row_actions', function( $actions, $post ) {
-            if ( get_post_type( $post ) == 'content_macro' ) { unset( $actions['view'] ); }
-            return $actions;
-        }, 10, 2 );
-        # $alt_template() outputs the HTML for selecting the content template 
-        $alt_template = function( ) {
+        
+        if ( is_admin( ) ) {
+
+            $options = (object) [ 'shortcode_name' => 'show_macro', 'content_macro_post_type' => 'content_macro' ];
+
+            # AJAX action 'mf2tk_update_content_macro' handles "save as template" action from post content editor
+
+            add_action( 'wp_ajax_mf2tk_update_content_macro', function() use ( $options ) {
+                global $wpdb;
+                $ids = $wpdb->get_col( $wpdb->prepare( <<<EOD
+SELECT ID FROM $wpdb->posts WHERE post_type = %s AND post_title = %s AND post_status = 'publish'
+EOD
+                , $options->content_macro_post_type, $_POST[ 'title' ] ) );
+                $post = [
+                    'post_type'    => $options->content_macro_post_type,
+                    'post_name'    => $_POST['slug'],
+                    'post_title'   => $_POST['title'],
+                    'post_status'  => 'publish',
+                    'post_content' => $_POST['text']
+                ];
+                if ( $ids ) {
+                    $post['ID'] = $ids[0];
+                    $id0 = wp_update_post( $post );
+                } else {
+                    $id1 = wp_insert_post( $post );
+                }
+                die( !empty ( $id0 ) ? "Content template $id0 updated."
+                    : ( !empty( $id1 ) ? "Content template $id1 created."
+                        : "Error: Content template not created/updated." ) );
+            } ); # add_action( 'wp_ajax_mf2tk_update_content_macro', function() {
+
+            # AJAX action 'wp_ajax_mf2tk_eval_post_content'
+            # handles evaluate HTML fragments from post content editor shortcode tester
+            
+            add_action( 'wp_ajax_mf2tk_eval_post_content', function( ) use ( &$do_macro ) {
+                require_once( MF_PATH . '/mf_front_end.php' );   # MF2 only
+                echo $do_macro( [ 'post' => $_POST[ 'post_id' ] ], stripslashes( $_POST[ 'post_content' ] ) );
+                exit;
+            } );   # add_action( 'wp_ajax_mf2tk_eval_post_content', function( ) use ( &$do_macro ) {
+         
+            # content macros should not be viewable
+
+            add_filter( 'post_row_actions', function( $actions, $post ) {
+                if ( get_post_type( $post ) == 'content_macro' ) { unset( $actions['view'] ); }
+                return $actions;
+            }, 10, 2 );
+
+            # things to do only on post.php and post-new.php admin pages
+
+            $post_editor_actions = function( ) use ( $options ) {
+
+                # insert Content Template database into head of document
+                # later JavaScript code will read this database and build the options for the select HTML element
+                # of "Insert Template" popup
+
+                add_action( 'admin_head', function( ) use ( $options ) {
+                    global $wpdb;
+                    $additional_select_clause_for_content_macros = " AND post_name NOT LIKE 'search-result-template-for-%%'";   # MF2 only
+                    $results = $wpdb->get_results( $wpdb->prepare( <<<EOD
+SELECT post_name, post_title, post_content FROM $wpdb->posts
+    WHERE post_type = %s AND post_status = 'publish'$additional_select_clause_for_content_macros ORDER BY post_title
+EOD
+                    , $options->content_macro_post_type ), OBJECT );
 ?>
-<!-- start alt_template -->
-<div id="mf2tk-alt-template" style="display:none;">
-    <h3 style="float:left;">Get Content Template</h3>
-    <button id="button-mf2tk-alt-template-close" style="float:right;">X</button>
-    <div style="clear:both;">
+<script type="text/javascript">
+var mf2tk_globals=mf2tk_globals||{};
+mf2tk_globals.mf2tk_alt_template={templates:{}};
+var templates=mf2tk_globals.mf2tk_alt_template.templates;
 <?php
-            $alt_template = new alt_template_field();
-            echo $alt_template->display_field( null, null, null );
+    # generate javascript assignment statements: templates[ name ] = { content: content, title: title };
+    echo implode( "\n\n", array_map( function( $result ) {
+        return "templates['$result->post_name']={content:'" . str_replace( "\n", "\\n\\\n",
+            str_replace( "\r", '', htmlentities( $result->post_content, ENT_QUOTES, 'UTF-8' ) ) )
+            . "',title:'" . $result->post_title . "'};";
+    }, $results ) ) . "\n\n";
 ?>
+</script> 
+<?php   
+                } );
+
+                add_action( 'admin_enqueue_scripts', function( $hook ) {
+                    if ( $hook !== 'post.php' && $hook !== 'post-new.php' ) {
+                        return;
+                    }
+                    wp_enqueue_style(  'mf2tk_macros_admin', plugins_url( 'css/mf2tk_macros_admin.css', __FILE__ ) );
+                    wp_enqueue_script( 'mf2tk_macros_admin', plugins_url(  'js/mf2tk_macros_admin.js',  __FILE__ ), [ 'jquery' ] );
+                } );
+
+                # $insert_template() outputs the HTML for the "Insert Template" popup
+
+                $insert_template = function( ) {
+?>
+<!-- start insert_template -->
+<div id="mf2tk-popup-outer" style="display:none;">
+</div>
+<div id="mf2tk-alt-template" class="mf2tk-popup" style="display:none;">
+    <h3>Get Content Template</h3>
+    <button id="button-mf2tk-alt-template-close">X</button>
+    <div style="clear:both;">
+        <div class="mf2tk-field-input-optional">
+            <h6>How to Use</h6>
+            <div class="mf2tk-field_value_pane" style="clear:both;">
+                <select id="mf2tk-alt_template-select"></select>
+                <input id="mf2tk-alt_template-post_name" type="text" class="mf2tk-how-to-use value="" readonly><br>
+- To display this content template <button class="mf2tk-how-to-use">select,</button> copy and paste this into editor
+above in <strong>Text</strong> mode.<br>
+            </div>
+        </div>
+        <div class="mf2tk-field-input-optional">
+            <button class="mf2tk-field_value_pane_button">Open</button>
+            <h6>Template Definition</h6>';
+            <div class="mf2tk-field_value_pane" style="display:none;clear:both;">
+                <textarea id='mf2tk-alt_template-post_content' rows='8' readonly></textarea>
+            </div>
+        </div>
     </div>
 </div>
-<!-- end alt_template -->
+<!-- end insert_template -->
 <?php
-        };   # $alt_template = function( ) {
-        # $shortcode_tester() outputs the HTML for selecting the content template 
-        $shortcode_tester = function( ) {
+                };   # $insert_template = function( ) {
+
+                # $shortcode_tester() outputs the HTML for the "Shortcode Tester" popup
+
+                $shortcode_tester = function( ) use ( $options ) {
 ?>
 <!-- start shortcode tester -->
-<div id="mf2tk-shortcode-tester" style="display:none;">
-    <h3 style="float:left;padding:5px 20px;margin:0;">Shortcode Tester</h3>
-    <button id="button-mf2tk-shortcode-tester-close" style="float:right;">X</button>
+<div id="mf2tk-shortcode-tester" class="mf2tk-popup" style="display:none;">
+    <h3>Shortcode Tester</h3>
+    <button id="button-mf2tk-shortcode-tester-close">X</button>
     <div style="padding:0;margin:0;clear:both;">
         <div style="padding:0px 20px;margin:0;">
-            Enter post content fragment with show_custom_field and/or show_macro shortcodes in the Source text area.<br />
-            Click the Evaluate button to display the generated HTML from shortcode processing in the Result text area.<br />
-            <button id="m2tfk-shortcode-tester-evaluate">Evaluate</button>
-            <button id="m2tfk-shortcode-tester-show-source">Show Source Only</button>
-            <button id="m2tfk-shortcode-tester-show-result">Show Result Only</button>
-            <button id="m2tfk-shortcode-tester-show-both">Show Both</button>
+            Enter post content fragment with HTML, [show_custom_field], [<?php echo $options->shortcode_name; ?>]
+            or other WordPress shortcodes in the Source text area.<br />
+            Click the Evaluate button to display the generated HTML from WordPress shortcode processing
+            in the Result text area.<br />
+            <button id="mf2tk-shortcode-tester-evaluate" class="mf2tk-shortcode-tester-button">Evaluate</button>
+            <button id="mf2tk-shortcode-tester-show-source" class="mf2tk-shortcode-tester-button">Show Source Only</button>
+            <button id="mf2tk-shortcode-tester-show-result" class="mf2tk-shortcode-tester-button">Show Result Only</button>
+            <button id="mf2tk-shortcode-tester-show-both" class="mf2tk-shortcode-tester-button">Show Both</button>
         </div>
-        <div id="m2tfk-shortcode-tester-area-source" style="width:49%;border:2px solid black;margin-left:3px;float:left;">
-            <h3 style="padding:0px 30px;margin:0;">Source</h3>
-            <textarea rows="12" style="display:block;width:99%;margin-left:auto;margin-right:auto;"></textarea>
+        <div class="mf2tk-shortcode-tester-half">
+            <div id="mf2tk-shortcode-tester-area-source" class="mf2tk-shortcode-tester-area">
+                <h3>Source</h3>
+                <textarea rows="12"></textarea>
+            </div>
         </div>
-        <div id="m2tfk-shortcode-tester-area-result" style="width:49%;border:2px solid black;margin-right:3px;float:right;">
-            <h3 style="padding:0px 30px;margin:0">Result</h3>
-            <textarea rows="12" readonly style="display:block;width:99%;margin-left:auto;margin-right:auto;"></textarea>
+        <div class="mf2tk-shortcode-tester-half">
+            <div  id="mf2tk-shortcode-tester-area-result" class="mf2tk-shortcode-tester-area">
+                <h3>Result</h3>
+                <textarea rows="12" readonly></textarea>
+            </div>
         </div>
     </div>
 </div>
 <!-- end shortcode tester -->
 <?php
-        };   # $shortcode_tester = function( ) {
-        add_action( 'admin_footer-post.php', $alt_template );
-        add_action( 'admin_footer-post-new.php', $alt_template );
-        add_action( 'admin_footer-post.php', $shortcode_tester );
-        add_action( 'admin_footer-post-new.php', $shortcode_tester );
+                };   # $shortcode_tester = function( ) {
+
+                # the "Insert Template" and "Shortcode Tester" are only injected on post.php and post-new.php admin pages
+                add_action( 'admin_footer-post.php',     $insert_template  );
+                add_action( 'admin_footer-post-new.php', $insert_template  );
+                add_action( 'admin_footer-post.php',     $shortcode_tester );
+                add_action( 'admin_footer-post-new.php', $shortcode_tester );
+                
+            };
+            add_action( 'load-post-new.php', $post_editor_actions );
+            add_action( 'load-post.php',     $post_editor_actions );
+        }
+
         $do_macro = null;
         self::$do_macro = $do_macro = function( $atts, $macro ) use ( &$do_macro ) {
             global $post;
@@ -389,5 +506,19 @@ EOD
 }   
 
 new Magic_Fields_2_Toolkit_Dumb_Macros();
+
+}
+        
+namespace mf2tk {
+
+    function do_macro( $atts, $macro ) {
+        global $mf2tk_the_do_macro;
+        require_once( MF_PATH . '/mf_front_end.php' );
+        $macro = stripslashes( $macro );
+        $result = \Magic_Fields_2_Toolkit_Dumb_Macros::do_macro( $atts, $macro );
+        return $result;
+    }
+
+}
 
 ?>

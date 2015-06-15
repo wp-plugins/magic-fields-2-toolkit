@@ -1,4 +1,6 @@
-function mf2tk_refresh_media(e){
+var mf2tk_globals=mf2tk_globals||{};
+
+mf2tk_globals.mf2tk_refresh_media=function(e){
     var m=jQuery("div.mf2tk-media",e.get(0).parentNode);
     var v=jQuery("div.mf2tk-media video",e.get(0).parentNode);
     var s=jQuery("div.mf2tk-media audio",e.get(0).parentNode);
@@ -14,56 +16,72 @@ function mf2tk_refresh_media(e){
     }
 }
 
-var mf2tk_media_library_button_click;
-var mf2tk_alt_media_admin_refresh_click;
-var mf2tk_alt_embed_admin_refresh_click;
+// Media specific handlers
 
+// Select media from Media Library
+// adapted from http://stackoverflow.com/questions/13847714/wordpress-3-5-custom-media-upload-for-your-theme-options
+mf2tk_globals.mf2tk_media_library_button_click=function(){
+    var i=jQuery(this).attr("id").replace(".media-library-button","");
+    var e=jQuery("#"+i);
+    n=e.attr("name").replace("magicfields[","").replace("mf2tk_","").replace(/\]/,"");
+    var t=null;
+    if(e.hasClass("mf2tk-video")){t="video";}
+    else if(e.hasClass("mf2tk-audio")){t="audio";}
+    else if(e.hasClass("mf2tk-img")){t="img";}
+    var custom_uploader = wp.media({title:"Select "+t+" for "+n,button:{text:"Set "+n+" to Selected"},multiple:false})
+    .on('select',function(){
+        var a=custom_uploader.state().get('selection').first().toJSON();
+        e.val(a.url);
+        //mf2tk_refresh_media(e);
+    })
+    .open();
+    return false;
+}
+// Reload media using URL from input box
+mf2tk_globals.mf2tk_alt_media_admin_refresh_click=function(e){
+    var i=jQuery(this).attr("id").replace(".refresh-button","");
+    var e=jQuery("#"+i);
+    mf2tk_globals.mf2tk_refresh_media(e);
+    return false;
+}
+mf2tk_globals.mf2tk_alt_embed_admin_refresh_click=function(){
+    var embed=jQuery("div.mf2tk-alt_embed_admin-embed",this.parentNode);
+    jQuery.post(ajaxurl,{action:'mf2tk_alt_embed_admin_refresh',
+        field:jQuery("input.mf2tk-alt_embed_admin-url",this.parentNode).attr("name"),
+        url:jQuery("input.mf2tk-alt_embed_admin-url",this.parentNode).val()},function(response){
+            embed.html(response);
+        });
+    return false;
+}
+// the "how to use" HTML for alt_media fields depends on whether the media field has a caption or not
+mf2tk_globals.caption_field_change=function(){
+    var usage=jQuery(this.parentNode.parentNode.parentNode).find("div.mf2tk-field-input-optional.mf2tk-usage-field");
+    var withCaption=usage.find("li.mf2tk-how-to-use-with-caption");
+    var noCaption=usage.find("li.mf2tk-how-to-use-no-caption");
+    if(this.value){
+        // show the HTML for media with caption
+        withCaption.css("display","list-item");
+        noCaption.css("display","none");
+    }else{
+        // show the HTML for media without caption
+        withCaption.css("display","none");
+        noCaption.css("display","list-item");
+    }
+};
+    
 jQuery(document).ready(function(){
-    // Select media from Media Library
-    // adapted from http://stackoverflow.com/questions/13847714/wordpress-3-5-custom-media-upload-for-your-theme-options
-    function media_library_button_click(){
-        var i=jQuery(this).attr("id").replace(".media-library-button","");
-        var e=jQuery("#"+i);
-        n=e.attr("name").replace("magicfields[","").replace("mf2tk_","").replace(/\]/,"");
-        var t=null;
-        if(e.hasClass("mf2tk-video")){t="video";}
-        else if(e.hasClass("mf2tk-audio")){t="audio";}
-        else if(e.hasClass("mf2tk-img")){t="img";}
-        var custom_uploader = wp.media({title:"Select "+t+" for "+n,button:{text:"Set "+n+" to Selected"},multiple:false})
-        .on('select',function(){
-            var a=custom_uploader.state().get('selection').first().toJSON();
-            e.val(a.url);
-            //mf2tk_refresh_media(e);
-        })
-        .open();
-        return false;
-    }
-    jQuery('button.mf2tk-media-library-button').click(media_library_button_click);
-    mf2tk_media_library_button_click=media_library_button_click;
-    // Reload media using URL from input box
-    function alt_media_admin_refresh_click(e){
-        var i=jQuery(this).attr("id").replace(".refresh-button","");
-        var e=jQuery("#"+i);
-        mf2tk_refresh_media(e);
-        return false;
-    }
-    jQuery("button.mf2tk-alt_media_admin-refresh").click(alt_media_admin_refresh_click);
-    mf2tk_alt_media_admin_refresh_click=alt_media_admin_refresh_click;
-    function alt_embed_admin_refresh_click(){
-        var embed=jQuery("div.mf2tk-alt_embed_admin-embed",this.parentNode);
-        jQuery.post(ajaxurl,{action:'mf2tk_alt_embed_admin_refresh',
-            field:jQuery("input.mf2tk-alt_embed_admin-url",this.parentNode).attr("name"),
-            url:jQuery("input.mf2tk-alt_embed_admin-url",this.parentNode).val()},function(response){
-                embed.html(response);
-            });
-        return false;
-    }
-    jQuery("button.mf2tk-alt_embed_admin-refresh").click(alt_embed_admin_refresh_click);
-    mf2tk_alt_embed_admin_refresh_click=alt_embed_admin_refresh_click;
+    // wire up media specific handlers
+    var mfField=jQuery("div.media_field_mf");
+    mfField.find('button.mf2tk-media-library-button').click(mf2tk_globals.mf2tk_media_library_button_click);
+    mfField.find("button.mf2tk-alt_media_admin-refresh").click(mf2tk_globals.mf2tk_alt_media_admin_refresh_click);
+    mfField.find("button.mf2tk-alt_embed_admin-refresh").click(mf2tk_globals.mf2tk_alt_embed_admin_refresh_click);
+    mfField.find("div.mf2tk-field-input-optional.mf2tk-caption-field input").change(mf2tk_globals.caption_field_change);
 });
 
 function mf2tkInsertHowToUse(root){
     if(typeof mf2tkDisableHowToUse === "undefined"||!mf2tkDisableHowToUse){
+        // template is a template for the HTML to be inserted for each Magic Field to implement the how to use feature
+        // it is parameterized by $#parameter# placeholders which will be appropriately replaced
         var template=
        '<div style="clear:both;"></div>\
         <div class="mf2tk-field-input-optional">\
@@ -77,9 +95,12 @@ function mf2tkInsertHowToUse(root){
             </div>\
         </div>';
         jQuery("div.mf-field-ui",root).each(function(){
+            // check if field is a toolkit alt_* field
+            if(jQuery(this).find("div.mf2tk-field-input-optional").length){return;}
+            var found=false;
+            // textbox_field
             jQuery(this).find("div.text_field_mf").each(function(){
                 var $this=jQuery(this);
-                if($this.parents("div.mf-field-ui").find("div.mf2tk-field-input-optional").length){return;}
                 var name=$this.find("input[type='text']")[0].name;
                 var matches=name.match(/magicfields\[(\w+)\]\[(\d+)\]\[(\d+)\]/);
                 var groupIndex=parseInt(matches[2]);
@@ -97,10 +118,12 @@ function mf2tkInsertHowToUse(root){
                     return '';
                 });
                 jQuery(this.parentNode).append(html);
+                found=true;
             });
+            if(found){return;}
+            // image_field & image_media_field
             jQuery(this).find("div.image_wrap").each(function(){
                 var $this=jQuery(this);
-                if($this.parents("div.mf-field-ui").find("div.mf2tk-field-input-optional").length){return;}
                 var name=$this.parents("div.image_layout").find("div.image_input div.mf_custom_field input[type='hidden']")[0].name;
                 var matches=name.match(/^magicfields\[(\w+)\]\[(\d+)\]\[(\d+)\]$/);
                 var groupIndex=parseInt(matches[2]);
@@ -116,10 +139,12 @@ function mf2tkInsertHowToUse(root){
                     return '';
                 });
                 $this.parents("div.image_layout").append(html);
+                found=true;
             });
+            if(found){return;}
+            // file_field
             jQuery(this).find("div.file_input").each(function(){
                 var $this=jQuery(this);
-                if($this.parents("div.mf-field-ui").find("div.mf2tk-field-input-optional").length){return;}
                 var name=$this.find("input[type='hidden']")[0].name;
                 var matches=name.match(/^magicfields\[(\w+)\]\[(\d+)\]\[(\d+)\]$/);
                 if(!matches){return;}
@@ -135,10 +160,12 @@ function mf2tkInsertHowToUse(root){
                     return '';
                 });
                 jQuery(this.parentNode).append(html);
+                found=true;
             });
+            if(found){return;}
+            // checkbox_list_field
             jQuery(this).find("div.mf-checkbox-list-box").each(function(){
                 var $this=jQuery(this);
-                if($this.parents("div.mf-field-ui").find("div.mf2tk-field-input-optional").length){return;}
                 var name=$this.find("input.checkbox_list_mf[type='checkbox']")[0].name;
                 var matches=name.match(/magicfields\[(\w+)\]\[(\d+)\]\[(\d+)\]/);
                 var groupIndex=parseInt(matches[2]);
@@ -156,54 +183,59 @@ function mf2tkInsertHowToUse(root){
                     return '';
                 });
                 jQuery(this.parentNode).append(html);
+                found=true;
             });
+            if(found){return;}
+            // dropdown_field, related_type_field & term_field
             jQuery(this).find("div.mf-dropdown-box").each(function(){
                 var $this=jQuery(this);
-                if($this.parents("div.mf-field-ui").find("div.mf2tk-field-input-optional").length){return;}
                 var select=$this.find("select.dropdown_mf");
                 var name=select[0].name;
+                // dropdown_field
                 var matches=name.match(/magicfields\[(\w+)\]\[(\d+)\]\[(\d+)\]\[\]/);
-                if(!matches){return;}
-                var groupIndex=parseInt(matches[2]);
-                var fieldIndex=parseInt(matches[3]);
-                var args={
-                    fieldName:matches[1],
-                    index:groupIndex===1&&fieldIndex===1?'':"<"+groupIndex+","+fieldIndex+">",
-                    filter:'',
-                    separator:select.attr('multiple')?' separator=", "':'',
-                    before:'',
-                    after:''
-                };
-                var html=template.replace(/\$#(\w+)#/g,function(match,match1){
-                    if(args.hasOwnProperty(match1)){return args[match1];}
-                    return '';
-                });
-                jQuery(this.parentNode).append(html);
-            });
-            jQuery(this).find("div.mf-dropdown-box").each(function(){
-                var $this=jQuery(this);
-                if($this.parents("div.mf-field-ui").find("div.mf2tk-field-input-optional").length){return;}
-                var select=$this.find("select.dropdown_mf");
-                var name=select[0].name;
+                if(matches){
+                    var groupIndex=parseInt(matches[2]);
+                    var fieldIndex=parseInt(matches[3]);
+                    var args={
+                        fieldName:matches[1],
+                        index:groupIndex===1&&fieldIndex===1?'':"<"+groupIndex+","+fieldIndex+">",
+                        filter:'',
+                        separator:select.attr('multiple')?' separator=", "':'',
+                        before:'',
+                        after:''
+                    };
+                    var html=template.replace(/\$#(\w+)#/g,function(match,match1){
+                        if(args.hasOwnProperty(match1)){return args[match1];}
+                        return '';
+                    });
+                    jQuery(this.parentNode).append(html);
+                    found=true;
+                    return;
+                }
+                // related_type_field
                 var matches=name.match(/^magicfields\[(\w+)\]\[(\d+)\]\[(\d+)\]$/);
-                if(!matches){return;}
-                var option=select.find("option[value!='']").first();
-                var groupIndex=parseInt(matches[2]);
-                var fieldIndex=parseInt(matches[3]);
-                var args={
-                    fieldName:matches[1],
-                    index:groupIndex===1&&fieldIndex===1?'':"<"+groupIndex+","+fieldIndex+">",
-                    filter:jQuery.isNumeric(option.val())?' filter="url_to_link2"':''
-                };
-                var html=template.replace(/\$#(\w+)#/g,function(match,match1){
-                    if(args.hasOwnProperty(match1)){return args[match1];}
-                    return '';
-                });
-                jQuery(this.parentNode).append(html);
+                if(matches){
+                    var option=select.find("option[value!='']").first();
+                    var groupIndex=parseInt(matches[2]);
+                    var fieldIndex=parseInt(matches[3]);
+                    var args={
+                        fieldName:matches[1],
+                        index:groupIndex===1&&fieldIndex===1?'':"<"+groupIndex+","+fieldIndex+">",
+                        filter:jQuery.isNumeric(option.val())?' filter="url_to_link2"':''
+                    };
+                    var html=template.replace(/\$#(\w+)#/g,function(match,match1){
+                        if(args.hasOwnProperty(match1)){return args[match1];}
+                        return '';
+                    });
+                    jQuery(this.parentNode).append(html);
+                    found=true;
+                    return;
+                }
             });
+            if(found){return;}
+            // radiobutton_list_field
             jQuery(this).find("label.mf-radio-field").first().each(function(){
                 var $this=jQuery(this);
-                if($this.parents("div.mf-field-ui").find("div.mf2tk-field-input-optional").length){return;}
                 var name=$this.find("input[type='radio']")[0].name;
                 var matches=name.match(/^magicfields\[(\w+)\]\[(\d+)\]\[(\d+)\]$/);
                 if(!matches){return;}
@@ -222,10 +254,12 @@ function mf2tkInsertHowToUse(root){
                     return '';
                 });
                 jQuery(this.parentNode.parentNode).append(html);
+                found=true;
             });
+             if(found){return;}
+            // datepicker_field
             jQuery(this).find("input.datepicker_mf[type='text']").parent().each(function(){
                 var $this=jQuery(this);
-                if($this.parents("div.mf-field-ui").find("div.mf2tk-field-input-optional").length){return;}
                 var name=$this.find("input[type='hidden']")[0].name;
                 var matches=name.match(/^magicfields\[(\w+)\]\[(\d+)\]\[(\d+)\]$/);
                 if(!matches){return;}
@@ -244,10 +278,12 @@ function mf2tkInsertHowToUse(root){
                     return '';
                 });
                 jQuery(this.parentNode).append(html);
+                found=true;
             });
+            if(found){return;}
+            // multiline_field
             jQuery(this).find("div.multiline_custom_field").each(function(){
                 var $this=jQuery(this);
-                if($this.parents("div.mf-field-ui").find("div.mf2tk-field-input-optional").length){return;}
                 var name=$this.find("textarea.mf_editor")[0].name;
                 var matches=name.match(/^magicfields\[(\w+)\]\[(\d+)\]\[(\d+)\]$/);
                 if(!matches){return;}
@@ -264,10 +300,12 @@ function mf2tkInsertHowToUse(root){
                     return '';
                 });
                 jQuery(this.parentNode).append(html);
+                found=true;
             });
+            if(found){return;}
+            // markdown_editor_field
             jQuery(this).find("div.markItUp").each(function(){
                 var $this=jQuery(this);
-                if($this.parents("div.mf-field-ui").find("div.mf2tk-field-input-optional").length){return;}
                 var name=$this.find("textarea.markdowntextboxinterface")[0].name;
                 var matches=name.match(/^magicfields\[(\w+)\]\[(\d+)\]\[(\d+)\]$/);
                 if(!matches){return;}
@@ -284,10 +322,12 @@ function mf2tkInsertHowToUse(root){
                     return '';
                 });
                 jQuery(this.parentNode).append(html);
+                found=true;
             });
+            if(found){return;}
+            // checkbox_field
             jQuery(this).find("input.checkbox_mf[type='checkbox']").each(function(){
                 var $this=jQuery(this);
-                if($this.parents("div.mf-field-ui").find("div.mf2tk-field-input-optional").length){return;}
                 var matches=this.name.match(/^magicfields\[(\w+)\]\[(\d+)\]\[(\d+)\]$/);
                 var groupIndex=parseInt(matches[2]);
                 var fieldIndex=parseInt(matches[3]);
@@ -302,10 +342,12 @@ function mf2tkInsertHowToUse(root){
                     return '';
                 });
                 jQuery(this.parentNode.parentNode).append(html);
+                found=true;
             });
+            if(found){return;}
+            // color_picker_field
             jQuery(this).find("input.clrpckr").each(function(){
                 var $this=jQuery(this);
-                if($this.parents("div.mf-field-ui").find("div.mf2tk-field-input-optional").length){return;}
                 var matches=this.name.match(/^magicfields\[(\w+)\]\[(\d+)\]\[(\d+)\]$/);
                 var groupIndex=parseInt(matches[2]);
                 var fieldIndex=parseInt(matches[3]);
@@ -321,10 +363,12 @@ function mf2tkInsertHowToUse(root){
                     return '';
                 });
                 jQuery(this.parentNode).append(html);
+                found=true;
             });
+            if(found){return;}
+            // audio_field
             jQuery(this).find("div.image_input.audio_frame").each(function(){
                 var $this=jQuery(this);
-                if($this.parents("div.mf-field-ui").find("div.mf2tk-field-input-optional").length){return;}
                 var name=$this.find("input[type='hidden']")[0].name;
                 var matches=name.match(/^magicfields\[(\w+)\]\[(\d+)\]\[(\d+)\]$/);
                 if(!matches){return;}
@@ -340,10 +384,12 @@ function mf2tkInsertHowToUse(root){
                     return '';
                 });
                 jQuery(this.parentNode).append(html);
+                found=true;
             });
+            if(found){return;}
+            // slider_field
             jQuery(this).find("div.mf_slider_field").parent().each(function(){
                 var $this=jQuery(this);
-                if($this.parents("div.mf-field-ui").find("div.mf2tk-field-input-optional").length){return;}
                 var name=$this.find("input[type='hidden']")[0].name;
                 var matches=name.match(/^magicfields\[(\w+)\]\[(\d+)\]\[(\d+)\]$/);
                 if(!matches){return;}
@@ -366,6 +412,8 @@ function mf2tkInsertHowToUse(root){
 jQuery(document).ready(function(){
     mf2tkInsertHowToUse(document.body);
     if(typeof mf2tkDisableHowToUse==="undefined"||!mf2tkDisableHowToUse){
+        // template is a template for the HTML to be inserted for each taxonomy field to implement the how to use feature
+        // it is parameterized by $#parameter# placeholders which will be appropriately replaced
         var template=
        '<div style="clear:both;"></div>\
         <div class="mf2tk-field-input-optional">\
@@ -378,24 +426,27 @@ jQuery(document).ready(function(){
                     <strong>Text</strong> mode\
             </div>\
         </div>';
-        
-        jQuery("div#postbox-container-1").find("div.postbox[id^='tagsdiv-']").each(function(){
+        // taxonomy fields are in "div#postbox-container-1"
+        var postboxContainer=jQuery("div#postbox-container-1");
+        postboxContainer.find("div.postbox[id^='tagsdiv-']").each(function(){
             var args={
                 fieldName:this.id.substr(8),
                 separator:' separator=", "'
             };
+            // fill in template and insert
             var html=template.replace(/\$#(\w+)#/g,function(match,match1){
                 if(args.hasOwnProperty(match1)){return args[match1];}
                 return '';
             });
             jQuery(this).append(html);            
         });
-        jQuery("div#postbox-container-1").find("div.postbox[id$='div']").each(function(){
+        postboxContainer.find("div.postbox[id$='div']").each(function(){
             if(this.id==="submitdiv"){return;}
             var args={
                 fieldName:this.id.substr(0,this.id.length-3),
                 separator:' separator=", "'
             };
+            // fill in template and insert
             var html=template.replace(/\$#(\w+)#/g,function(match,match1){
                 if(args.hasOwnProperty(match1)){return args[match1];}
                 return '';
@@ -403,8 +454,11 @@ jQuery(document).ready(function(){
             jQuery(this).append(html);            
         });
     }
+    // mfField are the containers for Magic Fields and taxonomy fields
+    var mfField=jQuery("div.mf-field-ui,div#postbox-container-1 div.mf2tk-field-input-optional");
+    // wire up Magic Fields and taxonomy fields to their handlers
     // Show/Hide panes
-    jQuery("button.mf2tk-field_value_pane_button").click(function(event){
+    mfField.find("button.mf2tk-field_value_pane_button").click(function(){
         if(jQuery(this).text()=="Open"){
             jQuery(this).text("Hide");
             jQuery("div.mf2tk-field_value_pane",this.parentNode).css("display","block");
@@ -414,11 +468,12 @@ jQuery(document).ready(function(){
         }
         return false;
     });
-    jQuery("button.mf2tk-how-to-use").click(function(){
+    // select the text in the corresponding input element
+    mfField.find("button.mf2tk-how-to-use").click(function(){
         jQuery(this.parentNode).find("input.mf2tk-how-to-use, textarea.mf2tk-how-to-use")[0].select();
         return false;
     });
-    jQuery("button.mf2tk-refresh-table-shortcode").click(function(){
+    mfField.find("button.mf2tk-refresh-table-shortcode").click(function(){
         var inputId="input"+this.id.substr(6);
         var fields="";
         var filters="";
@@ -459,8 +514,8 @@ jQuery(document).ready(function(){
         jQuery("input#"+inputId).val("field="+fields+"|filter="+filters);
         return false;
     });
-    jQuery("div.mf2tk-dragable-field").draggable({cursor:"crosshair",revert:true});
-    jQuery("div.mf2tk-dragable-field-after").droppable({accept:"div.mf2tk-dragable-field",tolerance:"touch",
+    mfField.find("div.mf2tk-dragable-field").draggable({cursor:"crosshair",revert:true});
+    mfField.find("div.mf2tk-dragable-field-after").droppable({accept:"div.mf2tk-dragable-field",tolerance:"touch",
         hoverClass:"mf2tk-hover",drop:function(e,u){
             jQuery(this.parentNode).after(u.draggable);
     }});
@@ -502,9 +557,10 @@ jQuery(document).ready(function($) {
                 jQuery(this.parentNode).find("input.mf2tk-how-to-use, textarea.mf2tk-how-to-use")[0].select();
                 return false;
             });
-            duplicate.find('button.mf2tk-media-library-button').click(mf2tk_media_library_button_click);
-            duplicate.find('button.mf2tk-alt_media_admin-refresh').click(mf2tk_alt_media_admin_refresh_click);
-            duplicate.find('button.mf2tk-alt_embed_admin-refresh').click(mf2tk_alt_embed_admin_refresh_click);
+            duplicate.find('button.mf2tk-media-library-button').click(mf2tk_globals.mf2tk_media_library_button_click);
+            duplicate.find('button.mf2tk-alt_media_admin-refresh').click(mf2tk_globals.mf2tk_alt_media_admin_refresh_click);
+            duplicate.find('button.mf2tk-alt_embed_admin-refresh').click(mf2tk_globals.mf2tk_alt_embed_admin_refresh_click);
+            duplicate.find("div.mf2tk-field-input-optional.mf2tk-caption-field input").change(mf2tk_globals.caption_field_change);
             return false;
         }
         window.setTimeout(check,1000);

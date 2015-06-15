@@ -119,7 +119,8 @@ div.mf2tk-field_value_pane{
 div.mf2tk-field-input-main div.mf2tk-field_value_pane input[type="text"],
 div.mf2tk-field-input-main div.mf2tk-field_value_pane input[type="url"],
 div.mf2tk-field-input-optional div.mf2tk-field_value_pane input[type="text"],
-div.mf2tk-field-input-optional div.mf2tk-field_value_pane input[type="url"]{
+div.mf2tk-field-input-optional div.mf2tk-field_value_pane input[type="url"],
+div.mf2tk-field-input-optional div.mf2tk-field_value_pane textarea{
     width:97%;
 }
 
@@ -253,4 +254,3 @@ button#mf2tk-save-search-result-template-button:hover,button#mf2tk-search-result
 button#mf2tk-save-search-result-template-button{
     margin-top:5px;
 }
-
