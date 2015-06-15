@@ -1,9 +1,13 @@
 <?php
-    #error_log( '##### magic-fields-2-alt-media-template.php:$field=' . print_r( $field, true ) );
-    #error_log( '##### magic-fields-2-alt-media-template.php:$mf_post_values=' . print_r( $mf_post_values, true ) );
+
+    # included by display_field() of alt_audio_field/alt_audio_field.php and display_field() of 
+    # alt_video_field/alt_video_field.php to implement common funtionality
+
     $index = $group_index === 1 && $field_index === 1 ? '' : "<$group_index,$field_index>";
-    $width  = $field['options']['max_width'];
-    $height = $field['options']['max_height'];
+    $opts = $field[ 'options' ];
+    $null = NULL;
+    $width  = mf2tk\get_data_option( 'max_width',  $null, $opts, 320 );
+    $height = mf2tk\get_data_option( 'max_height', $null, $opts, 240 );
     $dimensions = [];
     if ( $media_type === 'video' ) {
         if ( $width  ) { $dimensions['width']  = $width;  }
@@ -12,6 +16,7 @@
     $dimensions['preload'] = 'metadata';
     $attrWidth  = $width  ? " width=\"$width\""   : '';
     $attrHeight = $height ? " height=\"$height\"" : '';
+    
     # setup main field
     $field_id = "mf2tk-$field[name]-$group_index-$field_index";
     $input_value = str_replace( '"', '&quot;', $field['input_value'] );
@@ -21,13 +26,12 @@
     } else {
         $media_shortcode = '';
     }
+    
     # setup fallback field
     $fallback_field_name = $field['name'] . self::$suffix_fallback;
     $fallback_field_id = "mf2tk-$fallback_field_name-$group_index-$field_index";
     $fallback_input_name = "magicfields[$fallback_field_name][$group_index][$field_index]";
-    $fallback_input_value = ( !empty( $mf_post_values[$fallback_field_name][$group_index][$field_index] ) )
-        ? $mf_post_values[$fallback_field_name][$group_index][$field_index] : '';
-    #error_log( '##### magic-fields-2-alt-media-template.php:$fallback_input_value=' . print_r( $fallback_input_value, true ) );
+    $fallback_input_value = mf2tk\get_mf_post_value( $fallback_field_name, $group_index, $field_index, '' );
     if ( $fallback_input_value ) {
         $fallback_media_shortcode = call_user_func( $wp_media_shortcode,
             array_merge( array( 'src' => $fallback_input_value ), $dimensions ) );
@@ -38,19 +42,15 @@
         $fallback_media_button    = 'Open';
         $fallback_media_display   = 'none';
     }
+    
     # setup alternate fallback field
     $alternate_fallback_field_name = $field['name'] . self::$suffix_alternate_fallback;
     $alternate_fallback_field_id = "mf2tk-$alternate_fallback_field_name-$group_index-$field_index";
     $alternate_fallback_input_name = "magicfields[$alternate_fallback_field_name][$group_index][$field_index]";
-    $alternate_fallback_input_value = ( !empty( $mf_post_values[$alternate_fallback_field_name][$group_index][$field_index] ) )
-        ? $mf_post_values[$alternate_fallback_field_name][$group_index][$field_index] : '';
-    #error_log( '##### magic-fields-2-alt-media-template.php:$alternate_fallback_input_value='
-    #    . print_r( $alternate_fallback_input_value, true ) );
+    $alternate_fallback_input_value = mf2tk\get_mf_post_value( $alternate_fallback_field_name, $group_index, $field_index, '' );
     if ( $alternate_fallback_input_value ) {
         $alternate_fallback_media_shortcode = call_user_func( $wp_media_shortcode,
             array_merge( array( 'src' => $alternate_fallback_input_value ), $dimensions ) );
-        #error_log( '##### magic-fields-2-alt-media-template.php:$alternate_fallback_media_shortcode='
-        #    . $alternate_fallback_media_shortcode );
         $alternate_fallback_media_button    = 'Hide';
         $alternate_fallback_media_display   = 'block';
     } else {
@@ -61,21 +61,29 @@
     #set up caption field
     $caption_field_name = $field['name'] . self::$suffix_caption;
     $caption_input_name = sprintf( 'magicfields[%s][%d][%d]', $caption_field_name, $group_index, $field_index );
-    $caption_input_value = ( !empty( $mf_post_values[$caption_field_name][$group_index][$field_index] ) )
-        ? $mf_post_values[$caption_field_name][$group_index][$field_index] : '';
+    $caption_input_value = mf2tk\get_mf_post_value( $caption_field_name, $group_index, $field_index, '' );
     $caption_input_value = str_replace( '"', '&quot;', $caption_input_value );
+    
+    # choose how to use text depending on whether a caption is specified or not
+    $how_to_use_with_caption_style = 'display:' . ( $caption_input_value ? 'list-item;' : 'none;' );
+    $how_to_use_no_caption_style   = 'display:' . ( $caption_input_value ? 'none;'      : 'list-item;' );
+    
     # setup optional poster image field
     $poster_field_name = $field['name'] . self::$suffix_poster;
     $poster_field_id = "mf2tk-$poster_field_name-$group_index-$field_index";
     $poster_input_name = "magicfields[$poster_field_name][$group_index][$field_index]";
-    $poster_input_value = ( !empty( $mf_post_values[$poster_field_name][$group_index][$field_index] ) )
-        ? $mf_post_values[$poster_field_name][$group_index][$field_index] : '';
-    #error_log( '##### magic-fields-2-alt-media-template.php:$poster_input_value=' . print_r( $poster_input_value, true ) );
+    $poster_input_value = mf2tk\get_mf_post_value( $poster_field_name, $group_index, $field_index, '' );
     $poster_input_value = str_replace( '"', '&quot;', $poster_input_value );
     $ucfirst_media_type = ucfirst( $media_type );
+    
+    # setup geometry for no caption image
+    $no_caption_padding = 0;
+    $no_caption_border = 2;
+    $no_caption_width = $width + 2 * ( $no_caption_padding + $no_caption_border );
+    
     # generate and return the HTML
 $html = <<<EOD
-<div class="text_field_mf">
+<div class="media_field_mf">
     <!-- main $media_type field -->
     <div class="mf2tk-field-input-main">
         <h6>Main $ucfirst_media_type</h6>
@@ -125,7 +133,7 @@ $html = <<<EOD
         </div>
     </div>
     <!-- optional caption field -->
-    <div class="mf2tk-field-input-optional">
+    <div class="mf2tk-field-input-optional mf2tk-caption-field">
         <button class="mf2tk-field_value_pane_button">Open</button>
         <h6>Optional Caption for $ucfirst_media_type</h6>
         <div class="mf2tk-field_value_pane" style="display:none;clear:both;">
@@ -150,19 +158,18 @@ $html = <<<EOD
         </div>
     </div>
     <!-- usage instructions -->
-    <div class="mf2tk-field-input-optional">
+    <div class="mf2tk-field-input-optional mf2tk-usage-field">
         <button class="mf2tk-field_value_pane_button">Open</button>
         <h6>How to Use</h6>
         <div class="mf2tk-field_value_pane" style="display:none;clear:both;">
             <ul>
-                <li style="list-style:square inside">Use with the Toolkit's shortcode - (if caption entered):<br>
+                <li class="mf2tk-how-to-use-with-caption" style="list-style:square inside;{$how_to_use_with_caption_style}">Use with the Toolkit's shortcode - (with caption):<br>
                     <input type="text" class="mf2tk-how-to-use" size="50" readonly
                         value='[show_custom_field field="$field[name]$index" filter="url_to_media"]'>
                     - <button class="mf2tk-how-to-use">select,</button> copy and paste this into editor above in
                         <strong>Text</strong> mode
-                <li style="list-style:square inside">Use with the Toolkit's shortcode - (if caption not entered):<br>
-                    <textarea class="mf2tk-how-to-use" rows="4" cols="80" readonly>&lt;div style="width:{$width}px;border:2px solid black;background-color:gray;
-        padding:10px;margin:0 auto;"&gt;
+                <li class="mf2tk-how-to-use-no-caption" style="list-style:square inside;{$how_to_use_no_caption_style}">Use with the Toolkit's shortcode - (no caption):<br>
+                    <textarea class="mf2tk-how-to-use" rows="4" cols="80" readonly>&lt;div style="width:{$no_caption_width}px;border:{$no_caption_border}px solid black;background-color:gray;padding:{$no_caption_padding}px;margin:0 auto;"&gt;
     [show_custom_field field="$field[name]$index" filter="url_to_media"]
 &lt;/div&gt;</textarea><br>
                     - <button class="mf2tk-how-to-use">select,</button> copy and paste this into editor above in
@@ -177,7 +184,7 @@ $html = <<<EOD
 EOD;
 if ( $media_type === 'video' && ( !$height || !$width )
     && preg_match_all( '/<video\s+class="wp-video-shortcode"\s+id="([^"]+)"/', $html, $matches, PREG_PATTERN_ORDER ) ) {
-    $aspect_ratio = array_key_exists( 'aspect_ratio', $field['options'] ) ? $field['options']['aspect_ratio'] : '4:3';
+    $aspect_ratio = mf2tk\get_data_option( 'aspect_ratio', $null, $opts, '4:3' );
     if ( preg_match( '/([\d\.]+):([\d\.]+)/', $aspect_ratio, $matches1 ) ) { $aspect_ratio = $matches1[1] / $matches1[2]; }
     $do_width = !$width ? 'true' : 'false';
     foreach( $matches[1] as $id ) {

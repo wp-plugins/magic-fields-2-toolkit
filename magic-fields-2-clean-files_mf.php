@@ -21,7 +21,7 @@
  * published or draft posts.
  */
 add_action( 'admin_enqueue_scripts', function() {
-    wp_enqueue_style( 'mf2tk-jquery-ui', plugins_url( 'mf2tk-jquery-ui.min.css', __FILE__ ) );
+    wp_enqueue_style( 'mf2tk-jquery-ui', plugins_url( 'css/mf2tk-jquery-ui.min.css', __FILE__ ) );
     wp_enqueue_script( 'jquery-ui-tabs' );
     wp_enqueue_script( 'mf2tk_clean_mf_files', plugins_url( 'js/mf2tk_clean_mf_files.js', __FILE__ ),
         array( 'jquery' ) );

@@ -22,7 +22,8 @@ class alt_image_field extends mf_custom_fields {
                     'label'       =>  __( 'Width', $mf_domain ),
                     'name'        =>  'mf_field[option][max_width]',
                     'default'     =>  '320',
-                    'description' =>  'width in pixels',
+                    'description' =>  'width in pixels - this value can be overridden by specifying a "width" parameter' .
+                                      ' with the "show_custom_field" shortcode',
                     'value'       =>  '320',
                     'div_class'   =>  '',
                     'class'       =>  ''
@@ -34,7 +35,8 @@ class alt_image_field extends mf_custom_fields {
                     'name'        =>  'mf_field[option][max_height]',
                     'default'     =>  '0',
                     'description' =>  'height in pixels - 0 lets the browser set the height to preserve the aspect ratio' .
-                                      ' - recommended',
+                                      ' - recommended - this value can be overridden by specifying a "height" parameter' .
+                                      ' with the "show_custom_field" shortcode',
                     'value'       =>  '0',
                     'div_class'   =>  '',
                     'class'       =>  ''
@@ -52,7 +54,10 @@ class alt_image_field extends mf_custom_fields {
                                         'alignnone'   => 'None',
                                     ),
                     'add_empty'   => false,
-                    'description' => 'alignment is effective only if a caption is specified',
+                    'description' => 'alignment is effective only if a caption is specified ' .
+                                     '- this value can be overridden by specifying an "align" parameter with the ' .
+                                     '"show_custom_field" shortcode ' .
+                                     '- the parameter values are "aligncenter", "alignright" and "alignleft"',
                     'value'       => '',
                     'div_class'   => '',
                     'class'       => ''
@@ -64,7 +69,9 @@ class alt_image_field extends mf_custom_fields {
                     'name'        =>  'mf_field[option][class_name]',
                     'default'     =>  '',
                     'description' =>  'This is the class option of the WordPress caption shortcode' .
-                        ' and is set only if a caption is specified',
+                                      ' and is set only if a caption is specified' .
+                                      ' - this value can be overridden by specifying a "class_name" parameter with the' .
+                                      ' "show_custom_field" shortcode ',
                     'value'       =>  '',
                     'div_class'   =>  '',
                     'class'       =>  ''
@@ -75,7 +82,8 @@ class alt_image_field extends mf_custom_fields {
                     'label'       =>  __( 'Mouseover Popup Width', $mf_domain ),
                     'name'        =>  'mf_field[option][popup_width]',
                     'default'     =>  '320',
-                    'description' =>  'mouseover popup width in pixels',
+                    'description' =>  'mouseover popup width in pixels - this value can be overridden by specifying a ' .
+                                      '"popup_width" parameter with the "show_custom_field" shortcode',
                     'value'       =>  '320',
                     'div_class'   =>  '',
                     'class'       =>  ''
@@ -86,7 +94,8 @@ class alt_image_field extends mf_custom_fields {
                     'label'       =>  __( 'Mouseover Popup Height', $mf_domain ),
                     'name'        =>  'mf_field[option][popup_height]',
                     'default'     =>  '240',
-                    'description' =>  'mouseover popup height in pixels',
+                    'description' =>  'mouseover popup height in pixels - this value can be overridden by specifying a ' .
+                                      '"popup_height" parameter with the "show_custom_field" shortcode',
                     'value'       =>  '240',
                     'div_class'   =>  '',
                     'class'       =>  ''
@@ -97,43 +106,62 @@ class alt_image_field extends mf_custom_fields {
                     'label'       =>  __( 'Mouseover Popup Style', $mf_domain ),
                     'name'        =>  'mf_field[option][popup_style]',
                     'default'     =>  'background-color:white;border:2px solid black;',
-                    'description' =>  'mouseover popup style',
+                    'description' =>  'mouseover popup style - this value can be overridden by specifying a ' .
+                                      '"popup_style" parameter with the "show_custom_field" shortcode',
                     'value'       =>  'background-color:white;border:2px solid black;',
                     'div_class'   =>  '',
                     'class'       =>  ''
-                )
+                ),
+                'popup_classname' => [
+                    'type'        =>  'text',
+                    'id'          =>  'popup_classname',
+                    'label'       =>  __( 'Mouseover Popup Classname', $mf_domain ),
+                    'name'        =>  'mf_field[option][popup_classname]',
+                    'default'     =>  'background-color:white;border:2px solid black;',
+                    'description' =>  'mouseover popup classname - this value can be overridden by specifying a ' .
+                                      '"popup_classname" parameter with the "show_custom_field" shortcode',
+                    'value'       =>  '',
+                    'div_class'   =>  '',
+                    'class'       =>  ''
+                ]
             )
         );
     }
 
     public function display_field( $field, $group_index = 1, $field_index = 1 ) {
-        global $mf_domain, $post, $mf_post_values;
-        #error_log( '##### alt_image_field::display_field():$field=' . print_r( $field, true ) );
+        global $mf_domain, $post;
         # setup main field
         $field_id = "mf2tk-$field[name]-$group_index-$field_index";
         $input_value = str_replace( '"', '&quot;', $field['input_value'] );
-        $width = $field['options']['max_width'];
-        $height = $field['options']['max_height'];
+        $opts = $field[ 'options' ];
+        $null = NULL;
+        $width  = mf2tk\get_data_option( 'max_width',  $null, $opts, 320 );
+        $height = mf2tk\get_data_option( 'max_height', $null, $opts, 240 );
         $attrWidth  = $width  ? " width=\"$width\""   : '';
         $attrHeight = $height ? " height=\"$height\"" : '';
         #set up caption field
         $caption_field_name = $field['name'] . self::$suffix_caption;
         $caption_input_name = sprintf( 'magicfields[%s][%d][%d]', $caption_field_name, $group_index, $field_index );
-        $caption_input_value = ( !empty( $mf_post_values[$caption_field_name][$group_index][$field_index] ) )
-            ? $mf_post_values[$caption_field_name][$group_index][$field_index] : '';
+        $caption_input_value = mf2tk\get_mf_post_value( $caption_field_name, $group_index, $field_index, '' );
+        # choose how to use text depending on whether a caption is specified or not
+        $how_to_use_with_caption_style = 'display:' . ( $caption_input_value ? 'list-item;' : 'none;'      );
+        $how_to_use_no_caption_style   = 'display:' . ( $caption_input_value ? 'none;'      : 'list-item;' );
         #set up link field
         $link_field_name = $field['name'] . self::$suffix_link;
         $link_input_name = sprintf( 'magicfields[%s][%d][%d]', $link_field_name, $group_index, $field_index );
-        $link_input_value = ( !empty( $mf_post_values[$link_field_name][$group_index][$field_index] ) )
-            ? $mf_post_values[$link_field_name][$group_index][$field_index] : '';
+        $link_input_value = mf2tk\get_mf_post_value( $link_field_name, $group_index, $field_index, '' );
         #set up hover field
         $hover_field_name = $field['name'] . self::$suffix_hover;
         $hover_input_name = sprintf( 'magicfields[%s][%d][%d]', $hover_field_name, $group_index, $field_index );
-        $hover_input_value = ( !empty( $mf_post_values[$hover_field_name][$group_index][$field_index] ) )
-            ? $mf_post_values[$hover_field_name][$group_index][$field_index] : '';
+        $hover_input_value = mf2tk\get_mf_post_value( $hover_field_name, $group_index, $field_index, '' );
         $index = $group_index === 1 && $field_index === 1 ? '' : "<$group_index,$field_index>";
+        # setup geometry for no caption image
+        $no_caption_padding = 0;
+        $no_caption_border = 2;
+        $no_caption_width = $width + 2 * ( $no_caption_padding + $no_caption_border );
+        # generate and return the HTML
         $output = <<<EOD
-<div class="text_field_mf">
+<div class="media_field_mf">
     <!-- main audio field -->
     <div class="mf2tk-field-input-main">
         <h6>URL of Image</h6>
@@ -150,7 +178,7 @@ class alt_image_field extends mf_custom_fields {
         </div>
     </div>
     <!-- optional caption field -->
-    <div class="mf2tk-field-input-optional">
+    <div class="mf2tk-field-input-optional mf2tk-caption-field">
         <button class="mf2tk-field_value_pane_button">Open</button>
         <h6>Optional Caption for Image</h6>
         <div class="mf2tk-field_value_pane" style="display:none;clear:both;">
@@ -179,19 +207,18 @@ class alt_image_field extends mf_custom_fields {
         </div>
     </div>
     <!-- usage instructions -->    
-    <div class="mf2tk-field-input-optional">
+    <div class="mf2tk-field-input-optional mf2tk-usage-field">
         <button class="mf2tk-field_value_pane_button">Open</button>
         <h6>How to Use</h6>
         <div class="mf2tk-field_value_pane" style="display:none;clear:both;">
             <ul>
-                <li style="list-style:square inside">Use with the Toolkit's shortcode - (if caption entered):<br>
+                <li class="mf2tk-how-to-use-with-caption" style="list-style:square inside;{$how_to_use_with_caption_style}">Use with the Toolkit's shortcode - (with caption):<br>
                     <input type="text" class="mf2tk-how-to-use" size="50" readonly
                         value='[show_custom_field field="$field[name]$index" filter="url_to_media"]'>
                     - <button class="mf2tk-how-to-use">select,</button> copy and paste this into editor above in
                         <strong>Text</strong> mode
-                <li style="list-style:square inside">Use with the Toolkit's shortcode - (if caption not entered):<br>
-                    <textarea class="mf2tk-how-to-use" rows="4" cols="80" readonly>&lt;div style="width:{$width}px;border:2px solid black;background-color:gray;
-        padding:10px;margin:0 auto;"&gt;
+                <li class="mf2tk-how-to-use-no-caption" style="list-style:square inside;{$how_to_use_no_caption_style}">Use with the Toolkit's shortcode - (no caption):<br>
+                    <textarea class="mf2tk-how-to-use" rows="4" cols="80" readonly>&lt;div style="width:{$no_caption_width}px;border:{$no_caption_border}px solid black;background-color:gray;padding:{$no_caption_padding}px;margin:0 auto;"&gt;
     [show_custom_field field="$field[name]$index" filter="url_to_media"]
 &lt;/div&gt;</textarea><br>
                     - <button class="mf2tk-how-to-use">select,</button> copy and paste this into editor above in
@@ -208,27 +235,34 @@ EOD;
         return $output;
     }
   
-    static function get_image( $field_name, $group_index = 1, $field_index = 1, $post_id = NULL, $atts = array() ) {
+    static function get_image( $field_name, $group_index = 1, $field_index = 1, $post_id = NULL, $atts = [ ] ) {
         global $post;
-        if ( !$post_id ) { $post_id = $post->ID; }
-        $data = get_data2( $field_name, $group_index, $field_index, $post_id );
-        $width  = !empty( $atts['width'] )  ? $atts['width']  : $data['options']['max_width'];
-        $height = !empty( $atts['height'] ) ? $atts['height'] : $data['options']['max_height'];
-        $popup_width  = !empty( $atts['popup_width'] )  ? $atts['popup_width']  : $data['options']['popup_width'];
-        $popup_height = !empty( $atts['popup_height'] ) ? $atts['popup_height'] : $data['options']['popup_height'];
-        $popup_style  = !empty( $atts['popup_style'] )  ? $atts['popup_style']  : $data['options']['popup_style'];
+        if ( $post_id === NULL ) {
+            $post_id = $post->ID;
+        }
+        $data = mf2tk\get_data2( $field_name, $group_index, $field_index, $post_id );
+        $opts = $data[ 'options' ];
+        $width  = mf2tk\get_data_option( 'width',  $atts, $opts, 320, 'max_width'  );
+        $height = mf2tk\get_data_option( 'height', $atts, $opts, 240, 'max_height' );
         # get optional caption
-        $caption = _mf2tk_get_optional_field( $field_name, $group_index, $field_index, $post_id, self::$suffix_caption );
-        $link    = _mf2tk_get_optional_field( $field_name, $group_index, $field_index, $post_id, self::$suffix_link    );
-        $hover   = _mf2tk_get_optional_field( $field_name, $group_index, $field_index, $post_id, self::$suffix_hover   );
+        $caption = mf2tk\get_optional_field( $field_name, $group_index, $field_index, $post_id, self::$suffix_caption );
+        # get optional link
+        $link    = mf2tk\get_optional_field( $field_name, $group_index, $field_index, $post_id, self::$suffix_link    );
+        # get optional mouse-over popup
+        $hover   = mf2tk\get_optional_field( $field_name, $group_index, $field_index, $post_id, self::$suffix_hover   );
         $attrWidth  = $width  ? " width=\"$width\""   : '';
         $attrHeight = $height ? " height=\"$height\"" : '';
-        # if mouseover popup specified let the containing div handle the hover event 
+        # if an optional mouse-over popup has been specified let the containing div handle the mouse-over event 
         if ( $hover ) {
-            $hover = Magic_Fields_2_Toolkit_Dumb_Macros::do_macro( [ 'post' => $post_id ], $hover );
+            $popup_width     = mf2tk\get_data_option( 'popup_width',     $atts, $opts, 320 );
+            $popup_height    = mf2tk\get_data_option( 'popup_height',    $atts, $opts, 240 );
+            $popup_style     = mf2tk\get_data_option( 'popup_style',     $atts, $opts      );
+            $popup_classname = mf2tk\get_data_option( 'popup_classname', $atts, $opts      );
+            $popup_classname = 'mf2tk-overlay' . ( $popup_classname ? ' ' . $popup_classname : '' );
+            $hover = mf2tk\do_macro( [ 'post' => $post_id ], $hover );
             $hover_class = 'mf2tk-hover';
             $overlay = <<<EOD
-<div class="mf2tk-overlay"
+<div class="$popup_classname"
     style="display:none;position:absolute;z-index:10000;text-align:center;width:{$popup_width}px;height:{$popup_height}px;{$popup_style}">
     $hover
 </div>
@@ -243,12 +277,14 @@ EOD;
     $overlay
 </div>
 EOD;
-        # attach optional caption
+        # if an optional caption has been specified wrap image with caption container
         if ( $caption ) {
+            $align      = mf2tk\get_data_option( 'align',      $atts, $opts, 'aligncenter' );
+            $align      = mf2tk\re_align( $align );
+            $class_name = mf2tk\get_data_option( 'class_name', $atts, $opts                );
             if ( !$width ) { $width = 160; }
-            $class_name = array_key_exists( 'class_name', $data['options'] ) ? $data['options']['class_name'] : null;
             if ( !$class_name ) { $class_name = "mf2tk-{$data['type']}-{$field_name}"; }
-            $html = img_caption_shortcode( array( 'width' => $width, 'align' => $data['options']['align'],
+            $html = img_caption_shortcode( array( 'width' => $width, 'align' => $align,
                 'class' => $class_name, 'caption' => $caption ), $html );
             $html = preg_replace_callback( '/<div\s.*?style=".*?(width:\s*\d+px)/', function( $matches ) use ( $width ) {
                 return str_replace( $matches[1], "width:{$width}px;max-width:100%", $matches[0] );  
@@ -257,7 +293,6 @@ EOD;
                 return $matches[1] . ' style="margin:0;max-width:100%">';  
             }, $html, 1 );
         }
-        #error_log( '##### alt_image_field::get_image():$html=' . $html );
         return $html;
     }  
 }

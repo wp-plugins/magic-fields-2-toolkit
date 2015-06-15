@@ -31,18 +31,21 @@ class Magic_Fields_2_Toolkit_Dumb_Shortcodes {
     use Magic_Fields_2_Toolkit_Post_Filter;
 	public static $recursion_separator = '>';
     public function __construct() {
+        
         # wrapper for the individual values of a field
         $wrap_value = function( $value, $field, $type, $filters, $before, $after, $separator, $classes = array(),
-            $group_index = 0, $field_index = 0, $post_id = 0 ) {
+            $group_index = 0, $field_index = 0, $post_id = 0, $atts = [ ] ) {
             if ( $filters !== NULL ) {
                 foreach( explode ( ';', $filters ) as $filter) {
                     if ( function_exists( $filter ) ) {
                         $value = call_user_func( $filter, $value, $field, $type, $classes, $group_index, $field_index,
-                            $post_id );
+                            $post_id, $atts );
                     } else if ( preg_match( '/(\w+?__)(\w+)/', $filter, $matches ) ) {
+                        # this is filter with an __ suffix; the prefix is the name of the function that implements the
+                        # filter; the suffix is passed as the first argument to the function
                         if ( function_exists( $matches[1] ) ) {
                             $value = call_user_func( $matches[1], $matches[2], $value, $field, $type, $classes, $group_index,
-                                $field_index, $post_id );
+                                $field_index, $post_id, $atts );
                         }
                     }
                 }
@@ -50,6 +53,7 @@ class Magic_Fields_2_Toolkit_Dumb_Shortcodes {
             if ( $value === NULL || $value === '' || $value === FALSE ) { return ''; }
             return $before . $value . $after . $separator;
         };
+        
         # wrapper for a field 
         $wrap_field_value = function( $value, $before, $after, $separator, $label, $field, $class, $field_rename, $path ) {
             if ( function_exists( $field_rename ) ) {
@@ -63,6 +67,7 @@ class Magic_Fields_2_Toolkit_Dumb_Shortcodes {
 				. str_replace( '<!--$class-->', $class, str_replace( '<!--$Field-->', $label,
 				str_replace( '<!--$field-->', $field, $after ) ) ) . $separator;
         };
+        
         # wrapper for a group of fields
 		$wrap_group_value = function( $value, $before, $after, $separator, $label, $group, $index, $class, $rename, $path ) {
 			if ( !$label ) { $label = $group; }
@@ -77,9 +82,11 @@ class Magic_Fields_2_Toolkit_Dumb_Shortcodes {
 				. str_replace( '<!--$class-->', $class, str_replace( '<!--$Group-->', $label,
 				str_replace( '<!--$group-->', $group, $after ) ) ) . $separator;
 		};
+        
+        # this implements the "[show_custom_field]" shortcode
         $show_custom_field = function( $post_id, $the_names, $before, $after, $separator, $filter, $field_before,
             $field_after, $field_separator, $field_rename, $group_before, $group_after, $group_separator, $group_rename,
-			$multi_before, $multi_after, $multi_separator, $finals, $path, $parent_ids = array() )
+			$multi_before, $multi_after, $multi_separator, $finals, $path, $parent_ids = [ ], $atts = [ ] )
             use ( &$show_custom_field, $wrap_value, $wrap_field_value, $wrap_group_value ) {
             global $wpdb;
             $content = '';
@@ -127,8 +134,8 @@ class Magic_Fields_2_Toolkit_Dumb_Shortcodes {
                 } else {
                     $the_classes = NULL;
                 }
-				$all_group_names = $wpdb->get_col( 'SELECT name FROM ' . MF_TABLE_CUSTOM_GROUPS . ' WHERE post_type = "'
-					. get_post_type( $post_id ) . '"' );
+				$all_group_names = $wpdb->get_col( $wpdb->prepare(
+                    'SELECT name FROM ' . MF_TABLE_CUSTOM_GROUPS . ' WHERE post_type = %s', get_post_type( $post_id ) ) );
 				if ( $the_field == '*_*' ) {
 					$group_names = $all_group_names;
                 } else if ( substr_compare( $the_field, '__default_', 0, 10 ) === 0 ) {
@@ -151,10 +158,10 @@ class Magic_Fields_2_Toolkit_Dumb_Shortcodes {
 					$not_magic_field = FALSE;
 					if ( substr_compare( $the_field, '_*', -2, 2 ) === 0 ) {
 						$the_group = substr( $the_field, 0, strlen( $the_field ) - 2 );
-						$the_field_data = $wpdb->get_results( 'SELECT cf.name, cf.label, cf.description, cf.type FROM '
-							. MF_TABLE_CUSTOM_FIELDS . ' cf INNER JOIN ' . MF_TABLE_CUSTOM_GROUPS . ' cg WHERE cg.name = "'
-							. $the_group . '" AND cg.post_type = "' . get_post_type( $post_id )
-							. '" AND cf.custom_group_id = cg.id' . ' ORDER BY cf.display_order', OBJECT_K );
+						$the_field_data = $wpdb->get_results( $wpdb->prepare( 'SELECT cf.name, cf.label, cf.description, cf.type FROM '
+							. MF_TABLE_CUSTOM_FIELDS . ' cf INNER JOIN ' . MF_TABLE_CUSTOM_GROUPS
+                            . ' cg WHERE cg.name = %s AND cg.post_type = %s AND cf.custom_group_id = cg.id ORDER BY cf.display_order',
+                            $the_group, get_post_type( $post_id ) ), OBJECT_K );
 						if( !$the_field_data ) { continue; }
                         $the_field_data = array_filter( $the_field_data, function( $data ) {
                             return $data->type !== 'alt_table' && $data->type !== 'alt_template';
@@ -162,9 +169,9 @@ class Magic_Fields_2_Toolkit_Dumb_Shortcodes {
 						$fields = array_map( function( $row ) { return $row->label; }, $the_field_data );
 						if ( array_key_exists( $mf2tk_key_name, $fields ) ) { unset( $fields[$mf2tk_key_name] ); }
 					} else {
-						$the_field_data = $wpdb->get_results( 'SELECT name, label, description, type FROM '
-							. MF_TABLE_CUSTOM_FIELDS . " WHERE name IN ( '$the_field', '$mf2tk_key_name' ) AND post_type = '"
-							. get_post_type( $post_id ) . '\'', OBJECT_K );
+						$the_field_data = $wpdb->get_results( $wpdb->prepare( 'SELECT name, label, description, type FROM '
+							. MF_TABLE_CUSTOM_FIELDS . ' WHERE name IN ( %s, %s ) AND post_type = %s',
+							$the_field, $mf2tk_key_name, get_post_type( $post_id ) ), OBJECT_K );
 						if ( $the_field_data && isset( $the_field_data[$the_field] ) ) {
 							$fields = array( $the_field => $the_field_data[$the_field]->label );
 						} else {
@@ -192,13 +199,13 @@ class Magic_Fields_2_Toolkit_Dumb_Shortcodes {
                             . MF_TABLE_POST_META . " WHERE post_id = %d AND field_name in ( '"
                             . implode( '\', \'', array_keys( $fields ) ) . '\' ) ORDER BY group_count ASC', (int) $post_id ) );
 					} else if ( !is_numeric( $the_group_index ) ) {
-						if ( function_exists( '_get_group_index_for_key' ) ) {
-							$group_indices = array( _get_group_index_for_key( $the_group, $the_field, $the_group_index ) );
+						if ( function_exists( 'mf2tk\get_group_index_for_key' ) ) {
+							$group_indices = [ mf2tk\get_group_index_for_key( $the_group, $the_field, $the_group_index ) ];
 						} else {
-							$group_indices = array( -1 );
+							$group_indices = [ -1 ];
 						}
 					} else {
-						$group_indices = array( $the_group_index );
+						$group_indices = [ $the_group_index ];
 					}
 					$fields1 = $fields;
                     # outer field loop
@@ -206,7 +213,7 @@ class Magic_Fields_2_Toolkit_Dumb_Shortcodes {
 						$skip_field1 = FALSE;
 						$groups_value = '';
 						foreach ( $group_indices as $group_index ) {
-							$mf2tk_key_value = get( $mf2tk_key_name, $group_index, 1, $post_id );
+							$mf2tk_key_value = mf2tk\get( $mf2tk_key_name, $group_index, 1, $post_id );
 							$fields_value = '';
                             # inner field loop
 							foreach ( $fields as $field2 => $label2 ) {
@@ -229,13 +236,15 @@ class Magic_Fields_2_Toolkit_Dumb_Shortcodes {
 											if ( array_key_exists( 1, $names ) ) {
 												$parent_ids1 = $parent_ids;
 												$parent_id = array_pop( $parent_ids1 );
-												$label = $wpdb->get_var( 'SELECT name FROM ' . MF_TABLE_POSTTYPES . ' WHERE type ="'
-													. get_post_type( $parent_id ) . '"' );
+												$label = $wpdb->get_var( $wpdb->prepare(
+                                                    'SELECT name FROM ' . MF_TABLE_POSTTYPES . ' WHERE type = %s',
+													get_post_type( $parent_id ) ) );
 												$field_value .= $show_custom_field( $parent_id, $names[1], $before, $after,
 													$separator, $filter, $field_before, $field_after, $field_separator,
 													$field_rename, $group_before, $group_after, $group_separator, $group_rename,
 													$multi_before, $multi_after, $multi_separator, NULL,
-													$path . self::$recursion_separator . $label, $parent_ids1 ) . $field_separator;
+													$path . self::$recursion_separator . $label, $parent_ids1, $atts )
+                                                    . $field_separator;
 												$recursion = TRUE;
 											} else {
 												$field_value .= $wrap_value( end( $parent_ids ), $field, 'related_type', $filter, $before,
@@ -252,11 +261,11 @@ class Magic_Fields_2_Toolkit_Dumb_Shortcodes {
                                             $label = "Post";
                                         } else if ( $field == '__post_author' ) {
                                             # handle the psuedo field __post_author which may be linkable
-                                            $author = $wpdb->get_results( <<<EOD
+                                            $author = $wpdb->get_results( $wpdb->prepare( <<<EOD
                                                 SELECT u.ID, u.display_name FROM $wpdb->users u, $wpdb->posts p
-                                                    WHERE p.ID = "$post_id" AND u.ID = p.post_author
+                                                    WHERE p.ID = %d AND u.ID = p.post_author
 EOD
-                                                , OBJECT );
+                                                , (integer) $post_id ), OBJECT );
                                             # TODO author id and display name
                                             $url_to_link_available = (boolean) array_intersect(
                                                 [ 'url_to_link', 'url_to_link2' ], explode( ';', $filter ) );
@@ -269,8 +278,9 @@ EOD
 												$field_value .= $wrap_value( $term, $field, 'taxonomy', $filter, $before, $after,
 													$separator );
 											}
-											$column = $wpdb->get_col( 'SELECT name FROM ' . MF_TABLE_CUSTOM_TAXONOMY
-												. ' WHERE type = "' . $field . '"' );
+											$column = $wpdb->get_col( $wpdb->prepare(
+                                                'SELECT name FROM ' . MF_TABLE_CUSTOM_TAXONOMY . ' WHERE type = %s',
+                                                $field ) );
 											if ( array_key_exists( 0, $column ) ) { $label = $column[0]; }
 										} else {
 											$values = get_post_custom_values( $field, $post_id );
@@ -286,20 +296,22 @@ EOD
 								} else {
 									if ( $the_field_index === '*' ) {
 										$field_indices = get_order_field( $field, $group_index, $post_id );
-										if ( !$field_indices ) { $field_indices = array( 1 ); }
+										if ( !$field_indices ) { $field_indices = [ 1 ]; }
 									} else {
-										$field_indices = array( $the_field_index );
+										$field_indices = [ $the_field_index ];
 									}
 									foreach ( $field_indices as $field_index ) {
-										$data = (array) $the_field_data[$field];
+										$data = (array) $the_field_data[ $field ];
                                         if ( in_array( 'tk_use_raw_value', explode( ';', $filter ) ) ) {
-                                            $value = get_data2( $field, $group_index, $field_index, $post_id )['meta_value'];
-                                        } else if ( $data['type'] === 'alt_numeric' ) {
-                                            $value = alt_numeric_field::get_numeric( $field, $group_index, $field_index, $post_id );
+                                            # if the psuedo filter "tk_use_raw_value" is specified return the raw value from database
+                                            $value = mf2tk\get_data2( $field, $group_index, $field_index, $post_id )['meta_value'];
+                                        } else if ( $data[ 'type' ] === 'alt_numeric' ) {
+                                            # alt_numeric is a toolkit field and always should process its raw value
+                                            $value = alt_numeric_field::get_numeric( $field, $group_index, $field_index, $post_id, $atts );
                                         } else {
-                                            $value = get( $field, $group_index, $field_index, $post_id );
+                                            $value = mf2tk\get( $field, $group_index, $field_index, $post_id );
                                         }
-										preg_match( '/\[\*([a-zA-Z0-9_]+,?)+\*\]/', $data['description'], $classes );
+										preg_match( '/\[\*([a-zA-Z0-9_]+,?)+\*\]/', $data[ 'description' ], $classes );
 										if ( $classes ) { $classes = explode( ',', trim( $classes[0], '[]*' ) ); }
 										if ( $the_classes && ( !$classes || !array_intersect( $the_classes, $classes ) ) ) {
 											$skip_field1 = $skip_field2 = TRUE;
@@ -322,7 +334,7 @@ EOD
 																$separator, $filter, $field_before, $field_after, $field_separator,
 																$field_rename, $group_before, $group_after, $group_separator,
 																$group_rename, $multi_before, $multi_after, $multi_separator, NULL,
-																$path . self::$recursion_separator . $label, $parent_ids1 )
+																$path . self::$recursion_separator . $label, $parent_ids1, $atts )
 																. $field_separator;
 															$recursion = TRUE;
 														} else {
@@ -350,7 +362,7 @@ EOD
 												}
 											} else {
 												$field_value .= $wrap_value( $value, $field, $data['type'], $filter, $before, $after,
-													$separator, $classes, $group_index, $field_index, $post_id );
+													$separator, $classes, $group_index, $field_index, $post_id, $atts );
 											}
 										}
 									} # foreach ( $field_indices as $field_index ) { # results in $field_value
@@ -463,7 +475,7 @@ EOD
                 if ( $post_before ) { $rtn .= $post_before; }
                 $rtn .= $show_custom_field( $post_id, $field, $before, $after, $separator, $filter, $field_before, $field_after,
 					$field_separator, $field_rename, $group_before, $group_after, $group_separator, $group_rename, $multi_before,
-					$multi_after, $multi_separator, $final, '' );
+					$multi_after, $multi_separator, $final, '', [ ], $atts );
                 if ( $post_after ) { $rtn .= $post_after; }
                 return $rtn;
             } else {
@@ -476,12 +488,19 @@ EOD
                     if ( $post_before ) { $rtn .= $post_before; }
                     $rtn .= $show_custom_field( $post_id, $field, $before, $after, $separator, $filter, $field_before, $field_after,
                         $field_separator, $field_rename, $group_before, $group_after, $group_separator, $group_rename, $multi_before,
-                        $multi_after, $multi_separator, $final, '' );
+                        $multi_after, $multi_separator, $final, '', [ ], $atts );
                     if ( $post_after ) { $rtn .= $post_after; }
                 }
                 return $rtn;
             }
         } );
+        
+        # The shortcode "mt_show_gallery" displays the selected images in a standard WordPress gallery.
+        # Since, the standard WordPress gallery only works with images in its Media Library only images
+        # in fields of type image_media_field and alt_image_field are selected. Images in fields of type
+        # image_field are ignored since they are stored in a proprietary non-WordPress standard way.
+        # The filter tk_filter_by_type__image_media__alt_image() is used to accomplish this.
+        
         add_shortcode( 'mt_show_gallery', function( $atts ) use ( &$show_custom_field ) {
             global $post;
             extract( shortcode_atts( array(
@@ -495,7 +514,7 @@ EOD
                 # single numeric post id
                 $rtn = $show_custom_field( $post_id, $field, '', '', ',',
                     'tk_use_raw_value;tk_filter_by_type__image_media__alt_image',
-                    '', '', ',', '', '', '', '', '', NULL, NULL, NULL, NULL, '' );
+                    '', '', ',', '', '', '', '', '', NULL, NULL, NULL, NULL, '', [ ], $atts );
             } else {
                 # handle multiple posts
                 # first get list of post ids
@@ -505,7 +524,7 @@ EOD
                     # do each post accumulating the output in $rtn
                     $rtn .= ',' . $show_custom_field( $post_id, $field, '', '', ',',
                         'tk_use_raw_value;tk_filter_by_type__image_media__alt_image',
-                        '', '', ',', '', '', '', '', '', NULL, NULL, NULL, NULL, '' );
+                        '', '', ',', '', '', '', '', '', NULL, NULL, NULL, NULL, '', [ ], $atts );
                 }
             }
             $upload_base_url = wp_upload_dir()['baseurl'];
@@ -515,8 +534,8 @@ EOD
                 if ( is_numeric( $v ) ) { return $v; }
                 if ( strpos( $v, $upload_base_url ) !== 0 ) { return false; }
                 $path = substr( $v, $upload_base_url_length + 1 );
-                $post_id = $wpdb->get_col(
-                    "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '_wp_attached_file' AND meta_value = '$path'" );
+                $post_id = $wpdb->get_col( $wpdb->prepare(
+                    "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '_wp_attached_file' AND meta_value = %s", $path ) );
                 if ( $post_id ) { return $post_id[0]; }
                 return false;
             }, explode( ',', $rtn ) ) );
@@ -531,15 +550,18 @@ EOD
         } );
         remove_filter( 'the_content', 'wpautop' );
         add_action( 'wp_enqueue_scripts', function( ) {
-            wp_enqueue_script( 'mf2tk_alt_media', plugins_url( 'magic-fields-2-toolkit/js/mf2tk_alt_media.js' ),
-                array( 'jquery' ) );
+            # remove bottom margin from mediaelement when inside a caption container
+            wp_add_inline_style( 'wp-mediaelement',
+                'figure.wp-caption div.mejs-container,figure.wp-caption div.wp-video,figure.wp-caption iframe{margin:0;}' );
+            wp_enqueue_script( 'mf2tk_alt_media', plugins_url( 'js/mf2tk_alt_media.js', __FILE__ ), [ 'jquery' ] );
         } );
     }
 }   
 
 new Magic_Fields_2_Toolkit_Dumb_Shortcodes();
 
-# url_to_link() is a filter that wraps a linkable value with an <a> html element
+# url_to_link() is a filter that wraps a linkable value with an <a> html element. This function has been superseded by
+# url_to_link2() and exists only for compatibility with older code.
 
 function url_to_link( $value, $field, $type ) {
     global $wpdb;
@@ -548,7 +570,8 @@ function url_to_link( $value, $field, $type ) {
     } else if ( ( $type === 'image' || $type === 'image_media' ) && is_string( $value ) && strpos( $value, 'http' ) === 0 ) {
         $value = '<a href="' . $value . '">' . $value . '</a>';
     } else if ( $type === 'author' ) {
-        $author = $wpdb->get_results( "SELECT u.display_name, u.user_url FROM $wpdb->users u WHERE u.ID = '$value'", OBJECT );
+        $author = $wpdb->get_results( $wpdb->prepare(
+            "SELECT u.display_name, u.user_url FROM $wpdb->users u WHERE u.ID = %s", $value ), OBJECT );
         if ( $author[0]->user_url ) {
             $value = '<a href="' . $author[0]->user_url . '">' . $author[0]->display_name . '</a>';
         } else {
@@ -558,7 +581,9 @@ function url_to_link( $value, $field, $type ) {
     return $value;
 }
 
-function url_to_link2( $value, $field, $type, $classes, $group_index, $field_index, $post_id ) {
+# url_to_link2() is a filter that wraps a linkable value with an <a> html element.
+
+function url_to_link2( $value, $field, $type, $classes, $group_index, $field_index, $post_id, $atts ) {
     global $wpdb;
     if ( ( $type === 'related_type' || $type === 'alt_related_type' ) && is_numeric( $value ) ) {
         $value = '<a href="' . get_permalink( $value ) . '">' . get_the_title ( $value ) . '</a>';
@@ -568,7 +593,8 @@ function url_to_link2( $value, $field, $type, $classes, $group_index, $field_ind
     } else if ( $type === 'image_media' && is_string( $value ) && strpos( $value, 'http' ) === 0 ) {
         $value = '<a href="' . $value . '">' . substr( $value, strrpos( $value, '/' ) + 1 ) . '</a>';
     } else if ( $type === 'author' ) {
-        $author = $wpdb->get_results( "SELECT u.display_name, u.user_url FROM $wpdb->users u WHERE u.ID = '$value'", OBJECT );
+        $author = $wpdb->get_results( $wpdb->prepare(
+            "SELECT u.display_name, u.user_url FROM $wpdb->users u WHERE u.ID = %s", $value ), OBJECT );
         if ( $author[0]->user_url ) {
             $value = '<a href="' . $author[0]->user_url . '">' . $author[0]->display_name . '</a>';
         } else {
@@ -578,7 +604,7 @@ function url_to_link2( $value, $field, $type, $classes, $group_index, $field_ind
         && is_string( $value ) && strpos( $value, 'http' ) === 0 ) {
         $value = '<a href="' . $value . '">' . substr( $value, strrpos( $value, '/' ) + 1 ) . '</a>';
     } else if ( $type === 'alt_url' ) {
-        $value = alt_url_field::get_url( $field, $group_index, $field_index, $post_id );
+        $value = alt_url_field::get_url( $field, $group_index, $field_index, $post_id, $atts );
     }
     return $value;
 }
@@ -598,6 +624,9 @@ function tk_value_as_color( $value, $field, $type ) {
     return $value;
 }
 
+# The function tk_value_as_audio() returns the HTML to play the audio media. This function does not use the
+# WordPress "[audio]" shortcode instead it directly uses the HTML5 audio element.
+
 function tk_value_as_audio( $value, $field, $type, $classes, $group_index, $field_index, $post_id ) {
     if ( $value && ( $type === 'audio' || $type === 'alt_audio' ) ) {
         $mime_type = array(
@@ -609,7 +638,7 @@ function tk_value_as_audio( $value, $field, $type, $classes, $group_index, $fiel
             $type = strtolower( pathinfo( $value, PATHINFO_EXTENSION ) );
             $srcs = [ $type => $value ];
         } else {
-            $srcs = _mf2tk_get_media_srcs( $field, $group_index, $field_index, $post_id, 'alt_audio_field' );
+            $srcs = mf2tk\get_media_srcs( $field, $group_index, $field_index, $post_id, 'alt_audio_field' );
         }
         if ( count( $srcs ) ) {
             $value = '<audio controls>';
@@ -627,6 +656,11 @@ function tk_value_as_audio( $value, $field, $type, $classes, $group_index, $fiel
     return $value;
 }
 
+# The function tk_value_as_image__() is invoked on filters with names beginning with "tk_value_as_image__"
+# e.g., "tk_value_as_image__w320", "tk_value_as_image__h240". The suffix is a "w" or "h" followed by a size.
+# The suffix of the filter is passed in the $parm argument. The return value is the HTML for an image with
+# the specified width or height.
+
 function tk_value_as_image__( $parm, $value, $field, $type ) {
     if ( $type === 'image' || $type === 'image_media' || $type === 'alt_image' ) {
         $height = '';
@@ -640,6 +674,12 @@ function tk_value_as_image__( $parm, $value, $field, $type ) {
      }
     return $value;
 }
+
+# The function tk_value_as_video__() is invoked on filters with names beginning with "tk_value_as_video__"
+# e.g., "tk_value_as_video__w320", "tk_value_as_video__h240". The suffix is a "w" or "h" followed by a size.
+# The suffix of the filter is passed in the $parm argument. The return value is the HTML for a video element
+# with the specified width or height. This function does not use the WordPress "[video]" shortcode instead it
+# directly uses the HTML5 video element and hence will not work with Flash (flv) videos.
 
 function tk_value_as_video__( $parm, $value, $field, $type, $classes, $group_index, $field_index, $post_id ) {
     static $i = 0;
@@ -657,7 +697,7 @@ function tk_value_as_video__( $parm, $value, $field, $type, $classes, $group_ind
         }
         ++$i;
         $id = "tk_video-$i";
-        $srcs = _mf2tk_get_media_srcs( $field, $group_index, $field_index, $post_id, 'alt_video_field' );
+        $srcs = mf2tk\get_media_srcs( $field, $group_index, $field_index, $post_id, 'alt_video_field' );
         if ( count( $srcs ) === 1 ) {
             $url = reset( $srcs );
             $type = key( $srcs );
@@ -678,18 +718,21 @@ function tk_value_as_video__( $parm, $value, $field, $type, $classes, $group_ind
     return $value;
 }
 
-# filter for alt media fields
+# url_to_media() is the filter for alt media fields. It returns the HTML for displaying the media according
+# to parameters specified for the field, e.g., width, height, caption, autoplay, ... url_to_media() uses the
+# standard WordPress "[video]", "[audio]" and "[embed]" shortcodes to display the media. alt_image is defined
+# by the toolkit to behave like the other media elements.
 
-function url_to_media( $value, $field, $type, $classes, $group_index, $field_index, $post_id ) {
+function url_to_media( $value, $field, $type, $classes, $group_index, $field_index, $post_id, $atts ) {
     if ( !$post_id || !$group_index || !$field_index ) { return $value; }
     if ( $type === 'alt_embed' ) {
-        $value = alt_embed_field::get_embed( $field, $group_index, $field_index, $post_id );
+        $value = alt_embed_field::get_embed( $field, $group_index, $field_index, $post_id, $atts );
     } else if ( $type === 'alt_video' ) {
-        $value = alt_video_field::get_video( $field, $group_index, $field_index, $post_id );
+        $value = alt_video_field::get_video( $field, $group_index, $field_index, $post_id, $atts );
     } else if ( $type === 'alt_audio' ) {
-        $value = alt_audio_field::get_audio( $field, $group_index, $field_index, $post_id );
+        $value = alt_audio_field::get_audio( $field, $group_index, $field_index, $post_id, $atts );
     } else if ( $type === 'alt_image' ) {
-        $value = alt_image_field::get_image( $field, $group_index, $field_index, $post_id );
+        $value = alt_image_field::get_image( $field, $group_index, $field_index, $post_id, $atts );
     }
     return $value;
 }
@@ -700,6 +743,11 @@ function media_url_to_link( $value, $field, $type ) {
     }
     return $value;
 }
+
+# The function tk_filter_by_type__() is invoked on filters with names beginning with "tk_filter_by_type__"
+# e.g., "tk_filter_by_type__image_media__alt_image". The suffix is a "__" separated list of field types.
+# The suffix of the filter is passed in the $parm argument. The return value is the input value if the 
+# field type is in the list of field types and '' otherwise.
 
 function tk_filter_by_type__( $parm, $value, $field, $type, $classes, $group_index, $field_index, $post_id ) {
     $types = explode( '__', $parm );

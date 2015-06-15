@@ -121,7 +121,8 @@ table.mf2tk-alt_table td{padding:7px 10px 3px 10px;}
 ]
 &lt/table&gt;
 &lt/div&gt;
-<!-- Edit above to your liking --></textarea>
+<!-- Edit above to your liking -->
+</textarea>
 - To display a table of all Magic Fields <button class="mf2tk-how-to-use">select,</button> copy and paste this into editor
 above in <strong>Text</strong> mode
         </div>

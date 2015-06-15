@@ -4,13 +4,13 @@ Donate link:
 Tags: shortcodes, templates, custom fields, post copier
 Requires at least: 3.6
 Tested up to: 4.2
-Stable tag: 0.5.8.2
+Stable tag: 0.5.8.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 A toolkit for the Magic Fields 2 plugin for CMS web design by non programmers.
 
 == Description ==
-The primary purpose of this [toolkit](https://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4-2/) is to transform the [Magic Fields 2](https://wordpress.org/plugins/magic-fields-2/) plugin into something that can be used by a non programmer to do CMS web design.
+The primary purpose of this [toolkit](https://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4-2/) is to transform the [Magic Fields 2](https://wordpress.org/plugins/magic-fields-2/) plugin into something that can be used by a non programmer to do media oriented CMS web design.
 With this toolkit you can design your page content using only HTML, CSS and the [toolkit's shortcodes](http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4-2/#shortcode).
 Using the [toolkit's content templates](http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4-2/#macros) you can define a reusable template for page contents which can be used to create multiple pages using the page's custom fields to instantiate the template.
 Another purpose of this toolkit is to simplify the use of media (images, audio, video and embeds) by providing configurable shortcodes for generating HTML wrappers for these media elements.
@@ -72,6 +72,12 @@ Version 0.4.6 has a new default content macro for sortable tables. However, the 
 == Screenshots ==
 
 == Changelog ==
+= 0.5.8.3 =
+* alt_image_field, alt_video_field, alt_audio_field, alt_embed_field and alt_numeric parameters e.g., width, height, ... can now be overridden by using corresponding show_custom_field parameters
+* alt_image_field, alt_video_field, alt_audio_field and alt_embed_field now have a simplified how to use interface
+* fix css alignment problems with media elements, in particular removed the bottom margin from media elements to reduce the space between media and caption
+* rewrite code to improve speed, stability, security and software quality - use namespaces to reduce global pollution, gracefully handle missing parameters, use $wpdb->prepare(), ...
+
 = 0.5.8.2 =
 * fix the really annoying bug where the should be optional mouseover overlay had to be specified
 
@@ -339,3 +345,9 @@ added fields for embed, audio and video
 
 = 0.5.8.2 =
 * fix the really annoying bug where the should be optional mouseover overlay had to be specified
+
+= 0.5.8.3 =
+* alt_image_field, alt_video_field, alt_audio_field, alt_embed_field and alt_numeric parameters e.g., width, height, ... can now be overridden by using corresponding show_custom_field parameters
+* alt_image_field, alt_video_field, alt_audio_field and alt_embed_field now have a simplified how to use interface
+* fix css alignment problems with media elements, in particular removed the bottom margin from media elements to reduce the space between media and caption
+* rewrite code to improve speed, stability, security and software quality - use namespaces to reduce global pollution, gracefully handle missing parameters, use $wpdb->prepare(), ...
