@@ -179,6 +179,7 @@ EOD;
                 $align      = mf2tk\re_align( $align );
                 if ( !$max_width  ) { $max_width = 240;                                    }
                 if ( !$class_name ) { $class_name = "mf2tk-{$data['type']}-{$field_name}"; }
+                $class_name .= ' mf2tk-alt-embed';
                 $html = img_caption_shortcode( array( 'width' => $max_width, 'align' => $align,
                     'class' => $class_name, 'caption' => $caption ),
                     "<div style=\"width:{$max_width}px;display:inline-block;padding:0px;margin:0px;\">$html</div>" );

@@ -31,8 +31,41 @@ button#button-mf2tk-alt-template-close,button#button-mf2tk-shortcode-tester-clos
     margin:6px 6px 0 0;
 }
 
+div.mf2tk-field-input-optional{
+    border:2px solid black;
+    padding:5px 20px;
+    margin:10px 50px;
+}
+
 div.mf2tk-field-input-optional select#mf2tk-alt_template-select{
     margin:10px 0;
+}
+
+div.mf2tk-field-input-optional h6{
+    display:inline;
+}
+div.mf2tk-field-input-optional button.mf2tk-how-to-use{
+    font-size:10px;
+    font-weight:bold;
+    padding:0px 5px;
+    border:2px solid black;
+    border-radius:5px;
+    background-color:LightGray;
+}
+
+div.mf2tk-field-input-optional button.mf2tk-field_value_pane_button{
+    font-size:10px;
+    font-weight:bold;
+    padding:0px 5px;
+    float:right;
+    border:2px solid black;
+    border-radius:5px;
+    background-color:LightGray;
+}
+
+div.mf2tk-field-input-optional div.mf2tk-field_value_pane input[type="text"],
+div.mf2tk-field-input-optional div.mf2tk-field_value_pane textarea{
+    width:97%;
 }
 
 button.mf2tk-shortcode-tester-button{

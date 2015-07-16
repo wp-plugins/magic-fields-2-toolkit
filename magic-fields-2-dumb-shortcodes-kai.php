@@ -24,6 +24,8 @@
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+namespace {
+
 include_once( dirname( __FILE__ ) . '/magic-fields-2-group-key.php' );
 include_once( dirname( __FILE__ ) . '/magic-fields-2-post-filter.php' );
 
@@ -37,15 +39,17 @@ class Magic_Fields_2_Toolkit_Dumb_Shortcodes {
             $group_index = 0, $field_index = 0, $post_id = 0, $atts = [ ] ) {
             if ( $filters !== NULL ) {
                 foreach( explode ( ';', $filters ) as $filter) {
-                    if ( function_exists( $filter ) ) {
-                        $value = call_user_func( $filter, $value, $field, $type, $classes, $group_index, $field_index,
-                            $post_id, $atts );
+                    # filters should now be in the namespace mf2tk but for compatibility with older code also check
+                    # the global namespace. N.B. global filters are now deprecated
+                    if ( ( $mf2tk = function_exists( 'mf2tk\\' . $filter ) ) || function_exists( $filter ) ) {
+                        $value = call_user_func( ( $mf2tk ? 'mf2tk\\' : '' ) . $filter, $value, $field, $type, $classes,
+                            $group_index, $field_index, $post_id, $atts );
                     } else if ( preg_match( '/(\w+?__)(\w+)/', $filter, $matches ) ) {
                         # this is filter with an __ suffix; the prefix is the name of the function that implements the
                         # filter; the suffix is passed as the first argument to the function
-                        if ( function_exists( $matches[1] ) ) {
-                            $value = call_user_func( $matches[1], $matches[2], $value, $field, $type, $classes, $group_index,
-                                $field_index, $post_id, $atts );
+                        if ( ( $mf2tk = function_exists( 'mf2tk\\' . $matches[1] ) ) || function_exists( $matches[1] ) ) {
+                            $value = call_user_func( ( $mf2tk ? 'mf2tk\\' : '' ) . $matches[1], $matches[2], $value, $field,
+                                $type, $classes, $group_index, $field_index, $post_id, $atts );
                         }
                     }
                 }
@@ -440,8 +444,10 @@ EOD
             }
             return $content;
         };
+        
+        $options = mf2tk\get_tags( );
 
-        add_shortcode( 'show_custom_field', function( $atts ) use ( &$show_custom_field ) {
+        $show_custom_field_wrapper = function( $atts ) use ( &$show_custom_field ) {
             global $post;
             extract( shortcode_atts( array(
                 'field' => 'something',
@@ -493,7 +499,14 @@ EOD
                 }
                 return $rtn;
             }
-        } );
+        };
+        
+        if ( !empty( $options[ 'show_custom_field' ] ) ) {
+            add_shortcode( $options['show_custom_field'], $show_custom_field_wrapper );
+        }
+        if ( !empty( $options[ 'show_custom_field_alias' ] ) ) {
+            add_shortcode( $options[ 'show_custom_field_alias' ], $show_custom_field_wrapper );
+        }
         
         # The shortcode "mt_show_gallery" displays the selected images in a standard WordPress gallery.
         # Since, the standard WordPress gallery only works with images in its Media Library only images
@@ -501,7 +514,7 @@ EOD
         # image_field are ignored since they are stored in a proprietary non-WordPress standard way.
         # The filter tk_filter_by_type__image_media__alt_image() is used to accomplish this.
         
-        add_shortcode( 'mt_show_gallery', function( $atts ) use ( &$show_custom_field ) {
+        $mt_show_gallery = function( $atts ) use ( &$show_custom_field ) {
             global $post;
             extract( shortcode_atts( array(
                 'field'   => 'something',
@@ -547,18 +560,62 @@ EOD
             }
             $gallery .= ']';
             return do_shortcode( $gallery );
-        } );
+        };
+        
+        if ( !empty( $options[ 'mt_show_gallery' ] ) ) {
+            add_shortcode( $options[ 'mt_show_gallery' ], $mt_show_gallery );
+        }
+        if ( !empty( $options[ 'mt_show_gallery_alias' ] ) ) {
+            add_shortcode( $options[ 'mt_show_gallery_alias' ], $mt_show_gallery );
+        }
+
+        # The [mt_show_tabs] shows each enclosed [show_macro] in its own tab. This shortcode has the form:
+        # [mt_show_tabs class="..."][show_macro macro="..." title="..."][/show_macro]
+        # [show_macro macro="..." title="..."][/show_macro][/mt_show_tabs]
+        # N.B. requires jQuery UI
+
+        $mt_show_tabs = function( $atts, $macro ) {
+            error_log( 'mt_show_tabs:$macro=' . $macro );
+            static $tab_id = 0;
+            $first_tab_id = $tab_id;
+            $titles = [ ];
+            $macro = preg_replace_callback( '#[show_macro.*?title=("|\')([^\1]*)\1.*?[/show_macro]#',
+                function( $matches ) use ( &$tab_id, &$titles ) {
+                    $titles[] = $matches[2];
+                    return '<div id="mf2tk-tab-' . $tab_id++ . '">' . do_shortcode( $matches[0] ) . '</div>';
+            }, $macro );
+            $head = '';
+            for ( $i = $first_tab_id; $i < $tab_id; $i++ ) {
+                $head += "<li><a href=\"#mf2tk-tab-{$i}\">" . $titles[ $i - $first_tab_id ] . '</a></li>';
+            }
+            return $head . $macro;
+        };
+       
+        #if ( !empty( $options[ 'mt_show_tabs' ] ) ) {
+        #    add_shortcode( $options[ 'mt_show_tabs' ], $mt_show_tabs );
+        #}
+        #if ( !empty( $options[ 'mt_show_tabs_alias' ] ) ) {
+        #    add_shortcode( $options[ 'mt_show_tabs_alias' ], $mt_show_tabs );
+        #}
+
         remove_filter( 'the_content', 'wpautop' );
         add_action( 'wp_enqueue_scripts', function( ) {
+            wp_enqueue_style( 'mf2tk_media', plugins_url( 'css/mf2tk_media.css', __FILE__ ) );
             # remove bottom margin from mediaelement when inside a caption container
-            wp_add_inline_style( 'wp-mediaelement',
-                'figure.wp-caption div.mejs-container,figure.wp-caption div.wp-video,figure.wp-caption iframe{margin:0;}' );
+            #wp_add_inline_style( 'wp-mediaelement',
+            #    'figure.wp-caption div.mejs-container,figure.wp-caption div.wp-video,figure.wp-caption iframe{margin:0;}' );
             wp_enqueue_script( 'mf2tk_alt_media', plugins_url( 'js/mf2tk_alt_media.js', __FILE__ ), [ 'jquery' ] );
         } );
     }
 }   
 
 new Magic_Fields_2_Toolkit_Dumb_Shortcodes();
+
+}   # namespace {
+
+namespace mf2tk {
+
+# filters show be defined in the namespace mf2tk. global filters are deprecated but are still resolved for now
 
 # url_to_link() is a filter that wraps a linkable value with an <a> html element. This function has been superseded by
 # url_to_link2() and exists only for compatibility with older code.
@@ -604,7 +661,7 @@ function url_to_link2( $value, $field, $type, $classes, $group_index, $field_ind
         && is_string( $value ) && strpos( $value, 'http' ) === 0 ) {
         $value = '<a href="' . $value . '">' . substr( $value, strrpos( $value, '/' ) + 1 ) . '</a>';
     } else if ( $type === 'alt_url' ) {
-        $value = alt_url_field::get_url( $field, $group_index, $field_index, $post_id, $atts );
+        $value = \alt_url_field::get_url( $field, $group_index, $field_index, $post_id, $atts );
     }
     return $value;
 }
@@ -638,7 +695,7 @@ function tk_value_as_audio( $value, $field, $type, $classes, $group_index, $fiel
             $type = strtolower( pathinfo( $value, PATHINFO_EXTENSION ) );
             $srcs = [ $type => $value ];
         } else {
-            $srcs = mf2tk\get_media_srcs( $field, $group_index, $field_index, $post_id, 'alt_audio_field' );
+            $srcs = get_media_srcs( $field, $group_index, $field_index, $post_id, 'alt_audio_field' );
         }
         if ( count( $srcs ) ) {
             $value = '<audio controls>';
@@ -697,7 +754,7 @@ function tk_value_as_video__( $parm, $value, $field, $type, $classes, $group_ind
         }
         ++$i;
         $id = "tk_video-$i";
-        $srcs = mf2tk\get_media_srcs( $field, $group_index, $field_index, $post_id, 'alt_video_field' );
+        $srcs = get_media_srcs( $field, $group_index, $field_index, $post_id, 'alt_video_field' );
         if ( count( $srcs ) === 1 ) {
             $url = reset( $srcs );
             $type = key( $srcs );
@@ -726,13 +783,13 @@ function tk_value_as_video__( $parm, $value, $field, $type, $classes, $group_ind
 function url_to_media( $value, $field, $type, $classes, $group_index, $field_index, $post_id, $atts ) {
     if ( !$post_id || !$group_index || !$field_index ) { return $value; }
     if ( $type === 'alt_embed' ) {
-        $value = alt_embed_field::get_embed( $field, $group_index, $field_index, $post_id, $atts );
+        $value = \alt_embed_field::get_embed( $field, $group_index, $field_index, $post_id, $atts );
     } else if ( $type === 'alt_video' ) {
-        $value = alt_video_field::get_video( $field, $group_index, $field_index, $post_id, $atts );
+        $value = \alt_video_field::get_video( $field, $group_index, $field_index, $post_id, $atts );
     } else if ( $type === 'alt_audio' ) {
-        $value = alt_audio_field::get_audio( $field, $group_index, $field_index, $post_id, $atts );
+        $value = \alt_audio_field::get_audio( $field, $group_index, $field_index, $post_id, $atts );
     } else if ( $type === 'alt_image' ) {
-        $value = alt_image_field::get_image( $field, $group_index, $field_index, $post_id, $atts );
+        $value = \alt_image_field::get_image( $field, $group_index, $field_index, $post_id, $atts );
     }
     return $value;
 }
@@ -751,7 +808,9 @@ function media_url_to_link( $value, $field, $type ) {
 
 function tk_filter_by_type__( $parm, $value, $field, $type, $classes, $group_index, $field_index, $post_id ) {
     $types = explode( '__', $parm );
-    if ( in_array( $type, $types) ) { return $value; }
+    if ( in_array( $type, $types) ) {
+        return $value;
+    }
     return '';
 }
 
@@ -762,5 +821,8 @@ function tk_field_name( $value, $field ) {
 function tk_field_type( $value, $field, $type ) {
     return $type;
 }
+
+}   # namespace mf2tk {
+
 
 ?>

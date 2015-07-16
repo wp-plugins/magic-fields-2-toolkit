@@ -284,6 +284,7 @@ EOD;
             $class_name = mf2tk\get_data_option( 'class_name', $atts, $opts                );
             if ( !$width ) { $width = 160; }
             if ( !$class_name ) { $class_name = "mf2tk-{$data['type']}-{$field_name}"; }
+            $class_name .= ' mf2tk-alt-image';
             $html = img_caption_shortcode( array( 'width' => $width, 'align' => $align,
                 'class' => $class_name, 'caption' => $caption ), $html );
             $html = preg_replace_callback( '/<div\s.*?style=".*?(width:\s*\d+px)/', function( $matches ) use ( $width ) {

@@ -519,6 +519,7 @@ jQuery(document).ready(function(){
         hoverClass:"mf2tk-hover",drop:function(e,u){
             jQuery(this.parentNode).after(u.draggable);
     }});
+
 });
 
 // adapted from magic-fields-2/js/mf_field_base.js

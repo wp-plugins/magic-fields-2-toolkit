@@ -34,7 +34,7 @@ and activated.</div>
         add_action( 'admin_enqueue_scripts', function( $hook ) {
             global $wp_scripts;
             if ( $hook !== 'post.php' && $hook !== 'post-new.php' ) { return; }
-            wp_enqueue_style( 'admin', plugins_url( 'css/admin.css', __FILE__ ) );
+            wp_enqueue_style( 'mf2tk_admin', plugins_url( 'css/mf2tk_admin.css', __FILE__ ) );
             wp_enqueue_script( 'mf2tk_admin', plugins_url( 'js/mf2tk_admin.js', __FILE__ ), [ 'jquery' ] );
             wp_enqueue_script( 'mf2tk_alt_media', plugins_url( 'js/mf2tk_alt_media.js', __FILE__ ), [ 'jquery' ] );
             $options = get_option( 'magic_fields_2_toolkit_enabled', [ ] );
@@ -400,6 +400,18 @@ namespace mf2tk {
   
 # helper functions
 
+function get_tags( ) {
+    return get_option( 'magic_fields_2_toolkit_tags', [ 
+        'show_custom_field'       => 'show_custom_field',
+        'show_custom_field_alias' => 'mt_field',
+        'show_macro'              => 'show_macro',
+        'show_macro_alias'        => 'mt_template',
+        'mt_show_gallery'         => 'mt_show_gallery',
+        'mt_show_gallery_alias'   => 'mt_gallery',
+        'mt_show_tabs'            => 'mt_tabs'
+    ] );
+}
+
 # copied from magic-fields-2\mf_front_end.php and modified to fix this problem:
 # If you use the same field name in two different custom post types get_data is apparently returning the options of the first
 # entry in the wp_mf_custom_fields table with a matching field name ignoring the post type.
@@ -436,7 +448,7 @@ function get_data2( $field_name, $group_index = 1, $field_index = 1, $post_id ) 
 # get_data_option() searches the shortcode parameters $atts, then the field options get_data2()['options'] for $option.
 # If $option is not found then $default is returned. 
  
-function get_data_option( $option, &$atts, &$opts, $default = "", $opts_name = NULL ) {
+function get_data_option( $option, $atts, $opts, $default = "", $opts_name = NULL ) {
     if ( is_array( $atts ) && array_key_exists( $option, $atts ) ) {
         return $atts[ $option ];
     }
