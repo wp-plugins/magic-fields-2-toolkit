@@ -79,6 +79,7 @@ body.settings_page_magic-fields-2-toolkit-page table.form-table td{
 }
 
 body.settings_page_magic-fields-2-toolkit-page table.form-table th{
+    width:300px;
     text-align:right;
 }
 

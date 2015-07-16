@@ -75,7 +75,20 @@
     $poster_input_value = mf2tk\get_mf_post_value( $poster_field_name, $group_index, $field_index, '' );
     $poster_input_value = str_replace( '"', '&quot;', $poster_input_value );
     $ucfirst_media_type = ucfirst( $media_type );
-    
+
+    if ( $media_type === 'audio' ) {
+        #set up the link field; video cannot have a link field since clicks play/stop the video
+        $link_field_name = $field['name'] . self::$suffix_link;
+        $link_input_name = sprintf( 'magicfields[%s][%d][%d]', $link_field_name, $group_index, $field_index );
+        $link_input_value = mf2tk\get_mf_post_value( $link_field_name, $group_index, $field_index, '' );
+    }
+
+    #set up hover field
+    $hover_field_name = $field['name'] . self::$suffix_hover;
+    $hover_input_name = sprintf( 'magicfields[%s][%d][%d]', $hover_field_name, $group_index, $field_index );
+    $hover_input_value = mf2tk\get_mf_post_value( $hover_field_name, $group_index, $field_index, '' );
+    $index = $group_index === 1 && $field_index === 1 ? '' : "<$group_index,$field_index>";
+
     # setup geometry for no caption image
     $no_caption_padding = 0;
     $no_caption_border = 2;
@@ -157,6 +170,34 @@ $html = <<<EOD
             </div>
         </div>
     </div>
+EOD;
+if ( $media_type === 'audio' ) {
+    $html .= <<<EOD
+    <!-- optional link field -->
+    <div class="mf2tk-field-input-optional">
+        <button class="mf2tk-field_value_pane_button">Open</button>
+        <h6>Optional Link for Poster Image</h6>
+        <div class="mf2tk-field_value_pane" style="display:none;clear:both;">
+            <input type="url" name="$link_input_name" maxlength="2048" placeholder="optional link for image"
+                value="$link_input_value">
+            <button class="mf2tk-test-load-button" style="float:right;" onclick="event.preventDefault();
+                window.open(this.parentNode.querySelector('input[type=\'url\']').value,'_blank');">Test Load</button>
+        </div>
+    </div>
+EOD;
+}
+$show_custom_field_tag = mf2tk\get_tags( )[ 'show_custom_field' ];
+$popup_for = $media_type === 'audio' ? 'Poster Image' : 'Video';
+$html .= <<<EOD
+    <!-- optional hover field -->
+    <div class="mf2tk-field-input-optional">
+        <button class="mf2tk-field_value_pane_button">Open</button>
+        <h6>Optional Mouseover Popup for $popup_for</h6>
+        <div class="mf2tk-field_value_pane" style="display:none;clear:both;">
+            <textarea name="$hover_input_name" rows="8" cols="80"
+                placeholder="Enter post content fragment with show_custom_field and/or show_macro shortcodes. This will be displayed as a popup when the mouse is over the image. Although this could be plain HTML, using a reusable content template is probably more convenient.">$hover_input_value</textarea>
+        </div>
+    </div>
     <!-- usage instructions -->
     <div class="mf2tk-field-input-optional mf2tk-usage-field">
         <button class="mf2tk-field_value_pane_button">Open</button>
@@ -165,12 +206,12 @@ $html = <<<EOD
             <ul>
                 <li class="mf2tk-how-to-use-with-caption" style="list-style:square inside;{$how_to_use_with_caption_style}">Use with the Toolkit's shortcode - (with caption):<br>
                     <input type="text" class="mf2tk-how-to-use" size="50" readonly
-                        value='[show_custom_field field="$field[name]$index" filter="url_to_media"]'>
+                        value='[$show_custom_field_tag field="$field[name]$index" filter="url_to_media"]'>
                     - <button class="mf2tk-how-to-use">select,</button> copy and paste this into editor above in
                         <strong>Text</strong> mode
                 <li class="mf2tk-how-to-use-no-caption" style="list-style:square inside;{$how_to_use_no_caption_style}">Use with the Toolkit's shortcode - (no caption):<br>
                     <textarea class="mf2tk-how-to-use" rows="4" cols="80" readonly>&lt;div style="width:{$no_caption_width}px;border:{$no_caption_border}px solid black;background-color:gray;padding:{$no_caption_padding}px;margin:0 auto;"&gt;
-    [show_custom_field field="$field[name]$index" filter="url_to_media"]
+    [$show_custom_field_tag field="$field[name]$index" filter="url_to_media"]
 &lt;/div&gt;</textarea><br>
                     - <button class="mf2tk-how-to-use">select,</button> copy and paste this into editor above in
                         <strong>Text</strong> mode

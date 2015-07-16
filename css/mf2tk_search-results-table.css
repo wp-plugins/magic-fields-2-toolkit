@@ -25,3 +25,7 @@ table.scpbcfw-result-table th {
     color:black;
     text-align:center;
 }
+
+div.scpbcfw-search-result-container{
+    overflow-x:scroll;
+}

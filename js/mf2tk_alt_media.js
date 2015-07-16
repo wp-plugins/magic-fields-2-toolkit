@@ -52,7 +52,7 @@ function mf2tkResizeVideo(id,aspectRatio,doWidth){
     }else if(container.find("div.me-cannotplay").length){
       var done=true;
     }
-    container.parents("div.wp-video").css("margin","0");   // remove the bottom margin since it puts too much space between caption
+    //container.parents("div.wp-video").css("margin","0");   // remove the bottom margin since it puts too much space between caption
     if(!done){window.setTimeout(f,1000);}
   };
   f();
@@ -61,7 +61,7 @@ function mf2tkResizeVideo(id,aspectRatio,doWidth){
 jQuery(document).ready(function(){
     // this is the mouse-over alt_image_field popup handler 
     jQuery("div.mf2tk-hover").hover(
-        function(){
+        function(e){
             // center the overlay element over the mouse-overed element and show it
             var jqThis=jQuery(this);
             var overlay=jqThis.find("div.mf2tk-overlay");
@@ -80,7 +80,7 @@ jQuery(document).ready(function(){
             }else{
             }
             overlay[0].style.left=x+"px";
-            overlay[0].style.top=position.top+"px";
+            overlay[0].style.top=(position.top+20)+"px";
             overlay.show();
         },
         function(){

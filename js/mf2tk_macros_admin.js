@@ -56,15 +56,43 @@ jQuery(document).ready(function(){
         var select=this;
         // get the macro definition
         var template=mf2tk_globals.mf2tk_alt_template.templates[select.value].content;
-        // find parameters in macro defintion
+        // find template variables in the template definition
         var matches=template.match(/\$#(\w+)#/g);
         var parms={};
         if(matches){matches.forEach(function(v){parms[v]=true;});}
+        // find assigned template variables
+        var assigneds=[];
+        var assigned;
+        // find assignments using HTML comments
+        var assignedRe=/(<|&lt;)!--\s*(\$#\w+#)\s*=/g;
+        while((assigned=assignedRe.exec(template))!==null){
+            assigneds.push(assigned[2]);
+        }
+        // find iterator assignments
+        assignedRe=/\s(iterator|it)=("|&quot;)(\w+):/g;
+        while((assigned=assignedRe.exec(template))!==null){
+            assigneds.push("$#"+assigned[3]+"#");
+        }
+        // find assignments using shortcode attributes
+        var shortcodes=template.match(new RegExp("\\[("+mf2tk_globals.mf2tk_alt_template.shortcode+"|"
+            +mf2tk_globals.mf2tk_alt_template.shortcode_alias+")\\s.*?\\]","g"));
+        if(shortcodes){
+            shortcodes.forEach(function(shortcode){
+                assignedRe=/\s(\w+)=("|&quot;)/g;
+                while((assigned=assignedRe.exec(shortcode))!==null){
+                    assigneds.push("$#"+assigned[1]+"#");
+                }
+            });
+        }
         // get the macro slug
-        var macro='[show_macro macro="'+select.value+'"';
-        // add the parameters
-        for(parm in parms){macro+=" "+parm.slice(2,-1)+'=""';}
-        macro+="][/show_macro]";
+        var macro='['+mf2tk_globals.mf2tk_alt_template.shortcode+' '+mf2tk_globals.mf2tk_alt_template.name+'="'
+          +select.value+'"';
+        // add the parameters for free template variables
+        for(parm in parms){
+            if(assigneds.indexOf(parm)!==-1){continue;}
+            macro+=" "+parm.slice(2,-1)+'=""';
+        }
+        macro+="][/"+mf2tk_globals.mf2tk_alt_template.shortcode+"]";
         // update the "how to use" input element
         var parent=select.parentNode.parentNode.parentNode;
         parent.querySelector("input#mf2tk-alt_template-post_name").value=macro;
@@ -113,7 +141,7 @@ jQuery(document).ready(function(){
         var source=jQuery("div#mf2tk-shortcode-tester div#mf2tk-shortcode-tester-area-source textarea").val();
         jQuery("div#mf2tk-shortcode-tester div#mf2tk-shortcode-tester-area-result textarea").val("Evaluating..., please wait...");
         // Use AJAX to request the server to evaluate the post content fragment
-        jQuery.post(ajaxurl,{action:'mf2tk_eval_post_content',post_id:post_id,post_content:source},function(r){
+        jQuery.post(ajaxurl,{action:'tpcti_eval_post_content',post_id:post_id,post_content:source},function(r){
             jQuery("div#mf2tk-shortcode-tester div#mf2tk-shortcode-tester-area-result textarea").val(r.trim());
         });
     });

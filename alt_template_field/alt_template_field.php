@@ -30,23 +30,9 @@ class alt_template_field extends mf_custom_fields {
     }
     
     public function display_field( $field, $group_index = 1, $field_index = 1 ) {
-        global $mf_domain;
-        $output  = '<div class="mf2tk-field-input-optional">';
-        $output .= '<h6>How to Use</h6><div class="mf2tk-field_value_pane" style="clear:both;">';
-        $output .= '<select id="mf2tk-alt_template-select">';
-        $output .= '</select>';
-        $output .= "<input id='mf2tk-alt_template-post_name' type='text' class='mf2tk-how-to-use'
-            value='' readonly><br>";
-        $output .= <<<EOD
-- To display this content template <button class="mf2tk-how-to-use">select,</button> copy and paste this into editor
-above in <strong>Text</strong> mode.<br>
+        return <<<EOD
+<div class="mf2tk-field-input-optional">This field has been superseded by the "Insert Template" button.</div>';
 EOD;
-        $output .= '</div></div>';
-        $output .= '<div class="mf2tk-field-input-optional">';
-        $output .= '<button class="mf2tk-field_value_pane_button">Open</button><h6>Template Definition</h6>';
-        $output .= '<div class="mf2tk-field_value_pane" style="display:none;clear:both;">';
-        $output .= "<textarea id='mf2tk-alt_template-post_content' rows='8' readonly></textarea></div></div>";
-        return $output;
     }
 }
 

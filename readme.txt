@@ -4,16 +4,16 @@ Donate link:
 Tags: shortcodes, templates, custom fields, post copier
 Requires at least: 3.6
 Tested up to: 4.2
-Stable tag: 0.5.8.3
+Stable tag: 1.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
-A toolkit for the Magic Fields 2 plugin for CMS web design by non programmers.
+A toolkit for the Magic Fields 2 plugin for media oriented CMS web design by non programmers.
 
 == Description ==
-The primary purpose of this [toolkit](https://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4-2/) is to transform the [Magic Fields 2](https://wordpress.org/plugins/magic-fields-2/) plugin into something that can be used by a non programmer to do media oriented CMS web design.
+This [toolkit](https://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4-2/) transforms the [Magic Fields 2](https://wordpress.org/plugins/magic-fields-2/) plugin into something that can be used by a non programmer to do media oriented CMS web design.
 With this toolkit you can design your page content using only HTML, CSS and the [toolkit's shortcodes](http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4-2/#shortcode).
 Using the [toolkit's content templates](http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4-2/#macros) you can define a reusable template for page contents which can be used to create multiple pages using the page's custom fields to instantiate the template.
-Another purpose of this toolkit is to simplify the use of media (images, audio, video and embeds) by providing configurable shortcodes for generating HTML wrappers for these media elements.
+This toolkit also simplifies the use of media (images, audio, video and embeds) by providing [configurable shortcodes](https://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4-2/#alt_media) for generating HTML wrappers for these media elements.
 
 The current features are:
 
@@ -72,6 +72,15 @@ Version 0.4.6 has a new default content macro for sortable tables. However, the 
 == Screenshots ==
 
 == Changelog ==
+= 1.0 =
+* The post content template interpreter has been redesigned and rewritten.
+* Video and audio media now support mouse-over popups and clickable links where applicable.
+* Css for media elements and the search widget improved to be compatible with more themes.
+* Added a sync button to synchronize Magic Fields 2 fields with the current toolkit fields to fix the annoying bug where the toolkit stops working after you upgrade Magic Fields 2;
+* Filters moved to the namespace mf2tk to reduce global namespace pollution.
+* All shortcodes are now rename-able for consistency and conflict resolution.
+* Some code rewritten to improve software quality.
+
 = 0.5.8.3 =
 * alt_image_field, alt_video_field, alt_audio_field, alt_embed_field and alt_numeric parameters e.g., width, height, ... can now be overridden by using corresponding show_custom_field parameters
 * alt_image_field, alt_video_field, alt_audio_field and alt_embed_field now have a simplified how to use interface
@@ -351,3 +360,12 @@ added fields for embed, audio and video
 * alt_image_field, alt_video_field, alt_audio_field and alt_embed_field now have a simplified how to use interface
 * fix css alignment problems with media elements, in particular removed the bottom margin from media elements to reduce the space between media and caption
 * rewrite code to improve speed, stability, security and software quality - use namespaces to reduce global pollution, gracefully handle missing parameters, use $wpdb->prepare(), ...
+
+= 1.0 =
+* The post content template interpreter has been redesigned and rewritten.
+* Video and audio media now support mouse-over popups and clickable links where applicable.
+* Css for media elements and the search widget improved to be compatible with more themes.
+* Added a sync button to synchronize Magic Fields 2 fields with the current toolkit fields to fix the annoying bug where the toolkit stops working after you upgrade Magic Fields 2;
+* Filters moved to the namespace mf2tk to reduce global namespace pollution.
+* All shortcodes are now rename-able for consistency and conflict resolution.
+* Some code rewritten to improve software quality.
