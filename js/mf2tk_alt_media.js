@@ -91,5 +91,7 @@ jQuery(document).ready(function(){
     jQuery("div.mf2tk-hover div.mf2tk-overlay").click(function(e){
         jQuery(this.parentNode).find("a")[0].click();
     });
+    // change the output of the shortcode mt_tabs into tabs
+    jQuery("div.mf2tk-mt_tabs-jquery_pre_tabs").tabs({active:0});
 });
 
