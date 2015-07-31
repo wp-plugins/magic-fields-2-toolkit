@@ -2,12 +2,12 @@
 
 /*
  * Description:   A Tiny Post Content Template Interpreter and a Shortcode Tester
- * Documentation: http://magicfields17.wordpress.com/magic-fields-2-toolkit-0-4/#macros
+ * Documentation: http://tpcti.wordpress.com/
  * Author:        Magenta Cuda
  * License:       GPL2
  */
 
-/*  Copyright 2013  Magenta Cuda  (email:magenta.cuda@yahoo.com)
+/*  Copyright 2013  Magenta Cuda
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License, version 2, as 
@@ -104,8 +104,17 @@ EOD
                     'post_title'   => 'A Post Content Template Example',
                     'post_status'  => 'publish',
                     'post_content' => <<<'EOD'
-<!-- $#alpha# = "Hello World"; -->
-<h1>$#alpha#</h1>
+<!-- This is a useless but tutorial post content template that works in any post since it does not use any custom fields. -->
+[mt_template it="alpha:'1';'2'"]
+<!-- $#beta# = "2"; -->
+#if( $#alpha# = "1" )#
+<span>Hello</span>
+#else#
+#if( $#alpha# = $#beta# )#
+<span> World</span>
+#endif#
+#endif#
+[/mt_template]
 EOD
                 ] );
 			}   # if ( !$wpdb->get_var( <<<EOD

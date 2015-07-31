@@ -4,7 +4,7 @@ Donate link:
 Tags: shortcodes, templates, custom fields, post copier
 Requires at least: 3.6
 Tested up to: 4.2
-Stable tag: 1.0
+Stable tag: 1.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 A toolkit for the Magic Fields 2 plugin for media oriented CMS web design by non programmers.
@@ -72,6 +72,12 @@ Version 0.4.6 has a new default content macro for sortable tables. However, the 
 == Screenshots ==
 
 == Changelog ==
+= 1.1 =
+* Fixes for WordPress 4.3
+* Added a mt_show_tabs shortcode for displaying a list of [show_macro] shortcodes in jQuery UI tabs
+* mt_show_gallery shortcode for alt_images fields now support mouse-over popups and clickable links
+* Code for shortcode [mt_field] rewritten to improve software quality
+
 = 1.0 =
 * The post content template interpreter has been redesigned and rewritten.
 * Video and audio media now support mouse-over popups and clickable links where applicable.
@@ -369,3 +375,9 @@ added fields for embed, audio and video
 * Filters moved to the namespace mf2tk to reduce global namespace pollution.
 * All shortcodes are now rename-able for consistency and conflict resolution.
 * Some code rewritten to improve software quality.
+
+= 1.1 =
+* Fixes for WordPress 4.3
+* Added a mt_show_tabs shortcode for displaying a list of [show_macro] shortcodes in jQuery UI tabs
+* mt_show_gallery shortcode for alt_images fields now support mouse-over popups and clickable links
+* Code for shortcode [mt_field] rewritten to improve software quality
